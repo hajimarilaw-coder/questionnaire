@@ -747,7 +747,46 @@
     <strong>※</strong> 印の項目は必須入力です。入力後「送信・データ保存」ボタンを押してください。
   </div>
 
-  <form id="mainForm">
+  <form id="mainForm" autocomplete="off">
+
+    <!-- ======================== 0. 依頼者情報（氏名・生年月日） ======================== -->
+    <div class="section" data-section="0" style="border-top:3px solid var(--gold);">
+      <div class="section-header" style="background:var(--gold);color:var(--navy);">
+        <div class="section-num" style="background:var(--navy);color:var(--gold-light);">★</div>
+        <div class="section-title">ご依頼者様の基本情報</div>
+      </div>
+      <div class="section-body">
+        <div class="section-note">※ はじめにお名前と生年月日をご入力ください。</div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">お名前（フルネーム）<span class="req">※必須</span></label>
+            <input type="text" name="client_name" id="client_name_input" placeholder="例：山田 太郎" oninput="updateClientName(this.value)">
+          </div>
+          <div class="field-group">
+            <label class="field-label">フリガナ</label>
+            <input type="text" name="client_name_kana" placeholder="例：ヤマダ タロウ">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">生年月日<span class="req">※必須</span></label>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <div class="radio-group" style="margin-right:8px;">
+                <label class="radio-item"><input type="radio" name="client_dob_era" value="昭和"> 昭和</label>
+                <label class="radio-item"><input type="radio" name="client_dob_era" value="平成"> 平成</label>
+                <label class="radio-item"><input type="radio" name="client_dob_era" value="令和"> 令和</label>
+              </div>
+              <input type="text" name="client_dob_year" placeholder="年" style="width:65px">
+              <span style="font-size:13px;color:var(--text-muted)">年</span>
+              <input type="text" name="client_dob_month" placeholder="月" style="width:55px">
+              <span style="font-size:13px;color:var(--text-muted)">月</span>
+              <input type="text" name="client_dob_day" placeholder="日" style="width:55px">
+              <span style="font-size:13px;color:var(--text-muted)">日</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- ======================== 1. 職歴 ======================== -->
     <div class="section" data-section="1">
@@ -1224,15 +1263,16 @@
             <label class="radio-item"><input type="radio" name="gamble" value="有り" onclick="toggleDetail('gamble-detail', this, '有り')"> 有り</label>
           </div>
           <div id="gamble-detail" class="cond-panel">
-            <div class="field-group"><label class="field-label">ギャンブルの種類</label><div class="check-group"><label class="check-item"><input type="checkbox" name="gamble_type[]" value="競馬"> 競馬</label><label class="check-item"><input type="checkbox" name="gamble_type[]" value="競艇"> 競艇</label><label class="check-item"><input type="checkbox" name="gamble_type[]" value="パチンコ/スロット"> パチンコ/スロット</label><label class="check-item"><input type="checkbox" name="gamble_type[]" value="その他"> その他</label></div></div>
-            <div class="field-row">
-              <div class="field-group"><label class="field-label">していた時期（開始）</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="gamble_from_year" placeholder="年" style="width:70px"><span style="font-size:13px;">年</span><input type="text" name="gamble_from_month" placeholder="月" style="width:50px"><span style="font-size:13px;">月頃</span></div></div>
-              <div class="field-group"><label class="field-label">していた時期（終了）</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="gamble_to_year" placeholder="年" style="width:70px"><span style="font-size:13px;">年</span><input type="text" name="gamble_to_month" placeholder="月" style="width:50px"><span style="font-size:13px;">月頃</span></div></div>
+            <div class="field-group">
+              <label class="field-label">ギャンブルの種類（該当するものをすべて選択）</label>
+              <div class="check-group" style="margin-top:6px;">
+                <label class="check-item"><input type="checkbox" name="gamble_type[]" value="競馬" onchange="toggleGambleDetail()"> 競馬</label>
+                <label class="check-item"><input type="checkbox" name="gamble_type[]" value="競艇" onchange="toggleGambleDetail()"> 競艇</label>
+                <label class="check-item"><input type="checkbox" name="gamble_type[]" value="パチンコ/スロット" onchange="toggleGambleDetail()"> パチンコ/スロット</label>
+                <label class="check-item"><input type="checkbox" name="gamble_type[]" value="その他" onchange="toggleGambleDetail()"> その他</label>
+              </div>
             </div>
-            <div class="field-row">
-              <div class="field-group"><label class="field-label">していた回数（平均・月）</label><div class="inline-unit"><input type="number" name="gamble_freq" style="width:80px"><span>回くらい</span></div></div>
-              <div class="field-group"><label class="field-label">使った金額（1回あたり）</label><div class="inline-unit"><input type="number" name="gamble_min" style="width:90px"><span>円〜</span><input type="number" name="gamble_max" style="width:90px"><span>円くらい</span></div></div>
-            </div>
+            <div id="gamble-details-wrap"></div>
           </div>
         </div>
 
@@ -1345,8 +1385,9 @@
             <div class="repeat-block-title">保険 1</div>
             <div class="field-row">
               <div class="field-group"><label class="field-label">保険会社名</label><input type="text" name="ins_company[]"></div>
-              <div class="field-group"><label class="field-label">解約返戻金</label><div class="radio-group"><label class="radio-item"><input type="radio" name="ins_refund_yn_1" value="有"> 有</label><label class="radio-item"><input type="radio" name="ins_refund_yn_1" value="無"> 無</label></div><div class="inline-unit" style="margin-top:6px;"><input type="number" name="ins_refund[]" placeholder="（有の場合）" ><span>円</span></div></div>
+              <div class="field-group"><label class="field-label">証券番号</label><input type="text" name="ins_policy_no[]" placeholder="例：12-3456789"></div>
             </div>
+            <div class="field-group"><label class="field-label">解約返戻金</label><div class="radio-group"><label class="radio-item"><input type="radio" name="ins_refund_yn_1" value="有"> 有</label><label class="radio-item"><input type="radio" name="ins_refund_yn_1" value="無"> 無</label></div><div class="inline-unit" style="margin-top:6px;"><input type="number" name="ins_refund[]" placeholder="（有の場合）"><span>円</span></div></div>
           </div>
         </div>
         <button type="button" class="add-btn" onclick="addInsurance()">＋ 保険を追加</button>
@@ -1919,6 +1960,9 @@ function initFromUrl() {
 
     if(clientName) {
       document.querySelector('.site-header h1').textContent = clientName + ' 様　質問シート';
+      // セットアップで入力した氏名をフォームの氏名欄にもプリセット
+      const nameInput = document.querySelector('input[name="client_name"]');
+      if(nameInput) nameInput.value = clientName;
     }
     buildHistoryBlocks(creditors);
 
@@ -1956,6 +2000,64 @@ function togglePayHolder(detailEl) {
   const otherPanel = detailEl.querySelector('.pay-holder-other');
   if(otherPanel) otherPanel.classList.toggle('active', val === 'その他');
 }
+
+function toggleGambleDetail() {
+  const checked = [...document.querySelectorAll('input[name="gamble_type[]"]:checked')].map(el => el.value);
+  const wrap = document.getElementById('gamble-details-wrap');
+  // 既存ブロックを保持しつつ、チェック外は削除・新規は追加
+  const existing = {};
+  wrap.querySelectorAll('.gamble-type-block').forEach(b => {
+    existing[b.dataset.type] = b;
+  });
+  // 削除：チェックが外れたもの
+  Object.keys(existing).forEach(t => {
+    if(!checked.includes(t)) existing[t].remove();
+  });
+  // 追加：新しくチェックされたもの
+  checked.forEach(t => {
+    if(existing[t]) return;
+    const block = document.createElement('div');
+    block.className = 'gamble-type-block repeat-block';
+    block.dataset.type = t;
+    block.style.marginTop = '12px';
+    const safeName = t.replace(/\//g, '_');
+    block.innerHTML =
+      '<div class="repeat-block-title" style="color:var(--navy);font-weight:600;">【' + t + '】の詳細</div>' +
+      '<div class="field-row">' +
+        '<div class="field-group"><label class="field-label">していた時期（開始）</label>' +
+        '<div style="display:flex;gap:6px;align-items:center;">' +
+        '<input type="text" name="gamble_' + safeName + '_from_year" placeholder="年" style="width:70px">' +
+        '<span style="font-size:13px;">年</span>' +
+        '<input type="text" name="gamble_' + safeName + '_from_month" placeholder="月" style="width:50px">' +
+        '<span style="font-size:13px;">月頃</span></div></div>' +
+        '<div class="field-group"><label class="field-label">していた時期（終了）</label>' +
+        '<div style="display:flex;gap:6px;align-items:center;">' +
+        '<input type="text" name="gamble_' + safeName + '_to_year" placeholder="年" style="width:70px">' +
+        '<span style="font-size:13px;">年</span>' +
+        '<input type="text" name="gamble_' + safeName + '_to_month" placeholder="月" style="width:50px">' +
+        '<span style="font-size:13px;">月頃</span></div></div>' +
+      '</div>' +
+      '<div class="field-row">' +
+        '<div class="field-group"><label class="field-label">していた回数（平均・月）</label>' +
+        '<div class="inline-unit"><input type="number" name="gamble_' + safeName + '_freq" style="width:80px"><span>回くらい</span></div></div>' +
+        '<div class="field-group"><label class="field-label">使った金額（1回あたり）</label>' +
+        '<div class="inline-unit"><input type="number" name="gamble_' + safeName + '_min" style="width:90px"><span>円〜</span>' +
+        '<input type="number" name="gamble_' + safeName + '_max" style="width:90px"><span>円くらい</span></div></div>' +
+      '</div>';
+    wrap.appendChild(block);
+  });
+}
+
+function updateClientName(val) {
+  // 依頼者が自分の名前を入力したらヘッダーに反映
+  const h1 = document.querySelector('.site-header h1');
+  if(val.trim()) {
+    h1.textContent = val.trim() + ' 様　質問シート';
+  } else {
+    h1.textContent = 'ご依頼者様 質問シート';
+  }
+}
+
 // ---- Helpers ----
 function toggleDetail(id, radio, activeVal) {
   document.getElementById(id).classList.toggle('active', radio.value === activeVal);
@@ -2201,9 +2303,11 @@ function sendToGoogle(data) {
 // JSONデータを人間が読めるテキストに変換
 function dataToReadableText(data) {
   const labelMap = {
+    client_name:'依頼者氏名', client_name_kana:'フリガナ',
+    client_dob_era:'生年月日（元号）', client_dob_year:'生年月日（年）', client_dob_month:'生年月日（月）', client_dob_day:'生年月日（日）',
     career_from_year:'就業開始年', career_from_month:'就業開始月',
     career_to_year:'就業終了年', career_to_month:'就業終了月',
-    career_company:'勤務先', career_job:'職種', career_income:'手取月収（万円）',
+    career_company:'勤務先', career_job:'職種', career_income:'手取月収（万円）', career_type_1:'雇用形態（自営）', career_type_2:'雇用形態（法人代表者）', career_type_3:'雇用形態（勤め）', career_type_4:'雇用形態（パート・バイト）', career_type_5:'雇用形態（無職）', career_type_6:'雇用形態（その他）', career_type_other:'雇用形態（その他内容）',
     edu_era:'元号', edu_year:'卒業年', edu_month:'卒業月', edu_day:'卒業日',
     edu_level:'学校種別', edu_result:'卒業/中退',
     family_name_father:'父：氏名', family_dob_father:'父：生年月日', family_job_father:'父：職業', family_income_father:'父：月収', family_live_father:'父：同居/別居',
@@ -2215,7 +2319,7 @@ function dataToReadableText(data) {
     mother_death_year:'母：死亡年', mother_death_month:'母：死亡月', mother_death_day:'母：死亡日',
     mother_estate:'母：財産の有無', mother_inherit:'母：相続状況',
     marry_year:'結婚年', marry_month:'結婚月', divorce_year:'離婚年', divorce_month:'離婚月', ex_name:'相手方氏名',
-    divorce_agreement:'離婚後の取り決め', divorce_party:'取り決め相手',
+    divorce_agreement:'離婚後の取り決め', divorce_type:'取り決めの種類', divorce_party:'取り決め相手',
     divorce_zaisan_amount:'財産分与金額', divorce_isharyo_amount:'慰謝料金額',
     divorce_yoikuhi_monthly:'養育費（月額）', divorce_yoikuhi_age:'養育費（何歳まで）', divorce_yoikuhi_child:'養育費対象の子',
     housing_type:'住居種別', rent_contractor:'賃貸契約者', rent_other_name:'賃貸契約者氏名', rent_other_rel:'賃貸契約者続柄',
@@ -2227,14 +2331,18 @@ function dataToReadableText(data) {
     lawsuit:'訴訟等', lawsuit_type:'訴訟等の種類',
     past_bankruptcy:'過去の破産', bankrupt_court:'申立裁判所', bankrupt_branch:'支部', bankrupt_year:'申立年', bankrupt_month:'申立月', menseki:'免責決定', menseki_year:'免責年', menseki_month:'免責月',
     bar:'水商売の有無', bar_where:'水商売の行先', bar_from_year:'水商売開始年', bar_from_month:'水商売開始月', bar_to_year:'水商売終了年', bar_to_month:'水商売終了月', bar_freq:'水商売の頻度（回/月）', bar_min:'水商売の最低使用額', bar_max:'水商売の最高使用額',
-    gamble:'ギャンブルの有無', gamble_from_year:'ギャンブル開始年', gamble_from_month:'ギャンブル開始月', gamble_to_year:'ギャンブル終了年', gamble_to_month:'ギャンブル終了月', gamble_freq:'ギャンブルの頻度（回/月）', gamble_min:'ギャンブルの最低使用額', gamble_max:'ギャンブルの最高使用額',
+    gamble:'ギャンブルの有無', gamble_type:'ギャンブルの種類',
+    gamble_競馬_from_year:'競馬：開始年', gamble_競馬_from_month:'競馬：開始月', gamble_競馬_to_year:'競馬：終了年', gamble_競馬_to_month:'競馬：終了月', gamble_競馬_freq:'競馬：頻度（回/月）', gamble_競馬_min:'競馬：最低使用額', gamble_競馬_max:'競馬：最高使用額',
+    gamble_競艇_from_year:'競艇：開始年', gamble_競艇_from_month:'競艇：開始月', gamble_競艇_to_year:'競艇：終了年', gamble_競艇_to_month:'競艇：終了月', gamble_競艇_freq:'競艇：頻度（回/月）', gamble_競艇_min:'競艇：最低使用額', gamble_競艇_max:'競艇：最高使用額',
+    'gamble_パチンコ_スロット_from_year':'パチンコ/スロット：開始年', 'gamble_パチンコ_スロット_from_month':'パチンコ/スロット：開始月', 'gamble_パチンコ_スロット_to_year':'パチンコ/スロット：終了年', 'gamble_パチンコ_スロット_to_month':'パチンコ/スロット：終了月', 'gamble_パチンコ_スロット_freq':'パチンコ/スロット：頻度（回/月）', 'gamble_パチンコ_スロット_min':'パチンコ/スロット：最低使用額', 'gamble_パチンコ_スロット_max':'パチンコ/スロット：最高使用額',
+    gamble_その他_from_year:'ギャンブル（その他）：開始年', gamble_その他_from_month:'ギャンブル（その他）：開始月', gamble_その他_to_year:'ギャンブル（その他）：終了年', gamble_その他_to_month:'ギャンブル（その他）：終了月', gamble_その他_freq:'ギャンブル（その他）：頻度（回/月）', gamble_その他_min:'ギャンブル（その他）：最低使用額', gamble_その他_max:'ギャンブル（その他）：最高使用額',
     invest:'投資の有無', invest_from_year:'投資開始年', invest_from_month:'投資開始月', invest_to_year:'投資終了年', invest_to_month:'投資終了月', invest_total:'投資合計額', invest_loss:'投資損失額',
     travel:'海外旅行の有無', travel_dest:'旅行先', travel_year:'旅行年', travel_month:'旅行月', travel_cost:'旅行費用',
     convert:'換金の有無', convert_item:'換金品名', convert_buy_price:'換金品購入金額', convert_buy_year:'購入年', convert_buy_month:'購入月', convert_sell_year:'換金年', convert_sell_month:'換金月', convert_sell_price:'換金額',
     bigbuy:'高額購入の有無', bigbuy_item:'高額購入品名', bigbuy_price:'高額購入金額', bigbuy_year:'高額購入年', bigbuy_month:'高額購入月', bigbuy_sell:'高額品売却額',
     past_sell:'財産売却の有無', sell_item:'売却品名', sell_buy_price:'売却品購入金額', sell_buy_year:'売却品購入年', sell_buy_month:'売却品購入月', sell_year:'売却年', sell_month:'売却月', sell_price:'売却額',
     past_gain:'財産取得の有無', gain_item:'取得財産の内容', gain_amount:'取得金額', gain_year:'取得年', gain_month:'取得月', gain_use:'取得財産の使途',
-    ins_company:'保険会社名', ins_refund:'解約返戻金額',
+    ins_company:'保険会社名', ins_policy_no:'証券番号', ins_refund:'解約返戻金額',
     ins_refund_yn_1:'保険①：解約返戻金の有無', ins_refund_yn_2:'保険②：解約返戻金の有無', ins_refund_yn_3:'保険③：解約返戻金の有無', ins_refund_yn_4:'保険④：解約返戻金の有無',
     bank_name:'銀行名', bank_branch:'支店名', bank_balance:'預金残高', bank_date:'記帳日',
     pay_rent:'家賃の支払方法', pay_rent_bank:'家賃：引落口座', pay_rent_holder:'家賃：口座名義人', pay_rent_holder_other:'家賃：口座名義人（その他）', pay_rent_sonota:'家賃：その他の内容', pay_rent_sonota_free:'家賃：その他詳細',
@@ -2244,8 +2352,38 @@ function dataToReadableText(data) {
     pay_ins1:'保険料①の支払方法', pay_ins1_bank:'保険料①：引落口座', pay_ins1_holder:'保険料①：口座名義人', pay_ins1_holder_other:'保険料①：口座名義人（その他）', pay_ins1_sonota:'保険料①：その他の内容',
     hist_era:'借入元号', hist_year:'借入年', hist_month:'借入月', hist_content:'借入の経緯', hist_income:'当時の手取り収入', hist_repay:'当時の返済額',
     asset_kind:'財産種別', asset_name:'財産名', asset_address:'不動産の所在地', asset_vehicle_model:'車種・メーカー', asset_first_reg_year:'初年度登録年', asset_first_reg_month:'初年度登録月', asset_other_name:'その他財産名', asset_buy_price:'購入金額', asset_buy_year:'購入年', asset_buy_month:'購入月', asset_value:'現在の評価額',
+    // 支払方法・その他系
+    pay_rent_note:'家賃：メモ', pay_elec_note:'電気代：メモ', pay_gas_note:'ガス代：メモ', pay_water_note:'水道代：メモ', pay_ins1_note:'保険料①：メモ',
+    pay_rent_sonota_free:'家賃：その他詳細', pay_elec_sonota_free:'電気代：その他詳細', pay_gas_sonota_free:'ガス代：その他詳細', pay_water_sonota_free:'水道代：その他詳細', pay_ins1_sonota_free:'保険料①：その他詳細',
+    // 過去の財産詳細
+    ex_name:'相手方氏名（婚姻歴）',
+    rent_other_name:'賃貸契約者氏名', rent_other_rel:'賃貸契約者続柄',
+    house_owner_name:'家屋所有者氏名', house_owner_rel:'家屋所有者との関係',
+    fee_provider_name:'費用提供者氏名', fee_provider_rel:'費用提供者続柄',
+    // 追加
+    ins_policy_no:'証券番号',
+    menseki_year:'免責決定年', menseki_month:'免責決定月',
+    bankrupt_court:'申立裁判所', bankrupt_branch:'支部',
+    hist_era:'借入時の元号', hist_year:'借入年', hist_month:'借入月', hist_content:'借入の経緯詳細', hist_income:'当時の手取り収入', hist_repay:'当時の月々の返済額',
   };
-  let lines = ['【質問シート回答内容】', '送信日時：' + new Date().toLocaleString('ja-JP'), ''];
+  // 依頼者名・生年月日を先頭に追加
+  const clientNameVal = (document.querySelector('input[name="client_name"]') || {}).value || '';
+  const clientKanaVal = (document.querySelector('input[name="client_name_kana"]') || {}).value || '';
+  const dobEra  = (document.querySelector('input[name="client_dob_era"]:checked') || {}).value || '';
+  const dobYear = (document.querySelector('input[name="client_dob_year"]') || {}).value || '';
+  const dobMonth= (document.querySelector('input[name="client_dob_month"]') || {}).value || '';
+  const dobDay  = (document.querySelector('input[name="client_dob_day"]') || {}).value || '';
+  const dobStr  = [dobEra, dobYear ? dobYear+'年' : '', dobMonth ? dobMonth+'月' : '', dobDay ? dobDay+'日' : ''].filter(Boolean).join('');
+  let lines = [
+    '【質問シート回答内容】',
+    '━━━━━━━━━━━━━━━━━━',
+    '依頼者氏名　：' + (clientNameVal || '（未入力）'),
+    'フリガナ　　：' + (clientKanaVal || '（未入力）'),
+    '生年月日　　：' + (dobStr || '（未入力）'),
+    '送信日時　　：' + new Date().toLocaleString('ja-JP'),
+    '━━━━━━━━━━━━━━━━━━',
+    ''
+  ];
   for(const [key, val] of Object.entries(data)) {
     if(!val || (Array.isArray(val) && val.every(v => !v))) continue;
     const label = labelMap[key] || key;
