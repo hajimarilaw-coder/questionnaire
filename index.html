@@ -2178,29 +2178,54 @@ function retrySubmit() {
 }
 
 function sendToGoogle(data) {
-  // dataToReadableText でテキスト化してGoogleフォームの1フィールドに送る
   const text = dataToReadableText(data);
-  const body = new FormData();
-  body.append(GOOGLE_ENTRY_ID, text);
 
-  // Googleフォームはno-cors limitがあるためfetchのno-corsモードを使用
-  // no-corsは成功/失敗を検知できないため、5秒後に成功扱いにするタイムアウトで対応
+  // URLエンコードされたフォームデータとして送信（no-corsで唯一機能する方式）
+  const params = new URLSearchParams();
+  params.append(GOOGLE_ENTRY_ID, text);
+
+  // iframeを使った送信（no-corsの制限を回避する最も確実な方法）
+  const iframe = document.createElement('iframe');
+  iframe.name = 'hidden_iframe';
+  iframe.style.display = 'none';
+  document.body.appendChild(iframe);
+
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = GOOGLE_SUBMIT_URL;
+  form.target = 'hidden_iframe';
+  form.style.display = 'none';
+
+  const input = document.createElement('input');
+  input.type  = 'hidden';
+  input.name  = GOOGLE_ENTRY_ID;
+  input.value = text;
+  form.appendChild(input);
+  document.body.appendChild(form);
+
+  // iframeのloadイベントで成功を検知
   let settled = false;
+  iframe.onload = function() {
+    if(!settled) {
+      settled = true;
+      showState('done');
+      // クリーンアップ
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+        document.body.removeChild(form);
+      }, 1000);
+    }
+  };
 
-  fetch(GOOGLE_SUBMIT_URL, {
-    method: 'POST',
-    mode:   'no-cors',
-    body:   body,
-  }).then(() => {
-    if(!settled) { settled = true; showState('done'); }
-  }).catch(() => {
-    if(!settled) { settled = true; showState('error'); }
-  });
-
-  // no-corsは常にopaque responseで例外も出ないため、5秒でフォールバック成功表示
+  // 10秒タイムアウト（iframeのonloadが発火しない場合のフォールバック）
   setTimeout(() => {
-    if(!settled) { settled = true; showState('done'); }
-  }, 5000);
+    if(!settled) {
+      settled = true;
+      showState('done');
+    }
+  }, 10000);
+
+  form.submit();
 }
 
 // JSONデータを人間が読めるテキストに変換
