@@ -1872,7 +1872,8 @@ function setupApply() {
 
   // URLパラメータを生成して表示
   const payload = JSON.stringify({ client: clientName, creditors });
-  const encoded = btoa(encodeURIComponent(payload));
+  // encodeURIComponentのみ使用（btoaは日本語非対応のため使わない）
+  const encoded = encodeURIComponent(payload);
   const baseUrl = window.location.href.split('?')[0].split('#')[0];
   const generatedUrl = baseUrl + '?d=' + encoded;
 
@@ -1911,7 +1912,7 @@ function initFromUrl() {
   if(!d) return; // パラメータなし＝弁護士セットアップ画面を表示
 
   try {
-    const payload = JSON.parse(decodeURIComponent(atob(d)));
+    const payload = JSON.parse(decodeURIComponent(d));
     const clientName = payload.client || '';
     const creditors  = payload.creditors || [];
 
