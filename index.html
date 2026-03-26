@@ -1797,57 +1797,58 @@ function setupAddCreditor() {
 function buildHistoryBlocks(creditors) {
   const histList = document.getElementById('history-list');
   histList.innerHTML = '';
-  creditors.forEach((c, i) => {
+  creditors.forEach(function(c, i) {
     const period = [c.era, c.year ? c.year+'年' : '', c.mon ? c.mon+'月' : ''].filter(Boolean).join('');
     const placeholder = c.note
       ? c.name + 'からの借り入れについて、' + c.note + 'など、借りた理由・きっかけ・当時の手取り収入・当時の返済額を詳しくご記入ください。'
       : c.name + 'からの借り入れについて、借りた理由・きっかけ・当時の手取り収入額・当時の返済額をできる限り詳しくご記入ください。';
     const block = document.createElement('div');
     block.className = 'history-creditor-block';
-    block.innerHTML = `
-      <div class="history-creditor-header">
-        <span class="history-creditor-tag">借入先 ` + '${i+1}' + `</span>
-        <span class="history-creditor-name">` + '${c.name}' + `</span>
-        ` + '${period ? `<span class="history-creditor-period">${period}〜</span>` : ""}' + `
-      </div>
-      <div class="history-creditor-body">
-        <div class="history-creditor-note">
-          ✏️ <strong>` + '${c.name}' + `</strong>について以下の点を詳しくご記入ください：<br>
-          　① 借りた理由・きっかけ（生活費不足の場合はその原因も）<br>
-          　② 当時の手取り収入（勤務先・月額）<br>
-          　③ 当時の毎月の返済額<br>
-          　④ クレジットカードの場合は主な用途・購入内容
-        </div>
-        <div class="field-group">
-          <label class="field-label">借り始めた時期</label>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <input type="text" name="hist_era[]" value="` + '${c.era}' + `" placeholder="元号（例：H・R）" style="width:90px">
-            <input type="text" name="hist_year[]" value="` + '${c.year}' + `" placeholder="年" style="width:60px">
-            <span style="font-size:13px;color:var(--text-muted)">年</span>
-            <input type="text" name="hist_month[]" value="` + '${c.mon}' + `" placeholder="月" style="width:50px">
-            <span style="font-size:13px;color:var(--text-muted)">月頃</span>
-          </div>
-        </div>
-        <div class="field-group">
-          <label class="field-label">借りた理由・きっかけ・当時の状況（できるだけ詳しく）</label>
-          <textarea name="hist_content[]" placeholder="` + '${placeholder}' + `" style="min-height:140px"></textarea>
-        </div>
-        <div class="field-row">
-          <div class="field-group">
-            <label class="field-label">当時の手取り収入（月額）</label>
-            <div class="inline-unit">
-              <input type="text" name="hist_income[]" placeholder="例：手取り約18万円（〇〇株式会社勤務）">
-            </div>
-          </div>
-          <div class="field-group">
-            <label class="field-label">当時の ` + '${c.name}' + ` への月々の返済額</label>
-            <div class="inline-unit">
-              <input type="number" name="hist_repay[]" style="width:110px">
-              <span>円 / 月</span>
-            </div>
-          </div>
-        </div>
-      </div>`;
+    const periodHtml = period ? '<span class="history-creditor-period">' + period + '〜</span>' : '';
+    block.innerHTML =
+      '<div class="history-creditor-header">' +
+        '<span class="history-creditor-tag">借入先 ' + (i+1) + '</span>' +
+        '<span class="history-creditor-name">' + c.name + '</span>' +
+        periodHtml +
+      '</div>' +
+      '<div class="history-creditor-body">' +
+        '<div class="history-creditor-note">' +
+          '✏️ <strong>' + c.name + '</strong>について以下の点を詳しくご記入ください：<br>' +
+          '　① 借りた理由・きっかけ（生活費不足の場合はその原因も）<br>' +
+          '　② 当時の手取り収入（勤務先・月額）<br>' +
+          '　③ 当時の毎月の返済額<br>' +
+          '　④ クレジットカードの場合は主な用途・購入内容' +
+        '</div>' +
+        '<div class="field-group">' +
+          '<label class="field-label">借り始めた時期</label>' +
+          '<div style="display:flex;gap:8px;align-items:center;">' +
+            '<input type="text" name="hist_era[]" value="' + c.era + '" placeholder="元号（例：H・R）" style="width:90px">' +
+            '<input type="text" name="hist_year[]" value="' + c.year + '" placeholder="年" style="width:60px">' +
+            '<span style="font-size:13px;color:var(--text-muted)">年</span>' +
+            '<input type="text" name="hist_month[]" value="' + c.mon + '" placeholder="月" style="width:50px">' +
+            '<span style="font-size:13px;color:var(--text-muted)">月頃</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="field-group">' +
+          '<label class="field-label">借りた理由・きっかけ・当時の状況（できるだけ詳しく）</label>' +
+          '<textarea name="hist_content[]" placeholder="' + placeholder + '" style="min-height:140px"></textarea>' +
+        '</div>' +
+        '<div class="field-row">' +
+          '<div class="field-group">' +
+            '<label class="field-label">当時の手取り収入（月額）</label>' +
+            '<div class="inline-unit">' +
+              '<input type="text" name="hist_income[]" placeholder="例：手取り約18万円（〇〇株式会社勤務）">' +
+            '</div>' +
+          '</div>' +
+          '<div class="field-group">' +
+            '<label class="field-label">当時の ' + c.name + ' への月々の返済額</label>' +
+            '<div class="inline-unit">' +
+              '<input type="number" name="hist_repay[]" style="width:110px">' +
+              '<span>円 / 月</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
     histList.appendChild(block);
   });
 }
