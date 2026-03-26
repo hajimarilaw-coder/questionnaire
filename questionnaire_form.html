@@ -1,0 +1,2284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ご依頼者様 質問シート入力フォーム</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600&family=Noto+Sans+JP:wght@300;400;500&display=swap');
+
+  :root {
+    --navy: #1a2744;
+    --navy-mid: #2c3e6b;
+    --navy-light: #3d5291;
+    --gold: #b8952a;
+    --gold-light: #d4af4a;
+    --cream: #f8f5ef;
+    --cream-dark: #ede9e0;
+    --text: #1e1e1e;
+    --text-muted: #5a5a5a;
+    --border: #c8bfa8;
+    --border-light: #e0d9cc;
+    --white: #ffffff;
+    --red: #b03030;
+    --section-bg: #f2eee6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* Header */
+  .site-header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 28px 40px;
+    border-bottom: 3px solid var(--gold);
+  }
+  .site-header h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+  }
+  .site-header p {
+    font-size: 12px;
+    color: #aab3cc;
+    margin-top: 6px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    background: var(--navy-mid);
+    padding: 14px 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .progress-bar-outer {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    background: var(--gold-light);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+  .progress-text {
+    color: #aab3cc;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  /* Layout */
+  .container {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  .intro-box {
+    background: var(--white);
+    border: 1px solid var(--border-light);
+    border-left: 4px solid var(--gold);
+    border-radius: 4px;
+    padding: 20px 24px;
+    margin-bottom: 36px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 36px;
+    background: var(--white);
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .section-header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-num {
+    background: var(--gold);
+    color: var(--navy);
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 600;
+    font-size: 13px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+  }
+  .section-body {
+    padding: 24px 22px;
+  }
+  .section-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--section-bg);
+    border-left: 3px solid var(--gold);
+    padding: 8px 12px;
+    margin-bottom: 18px;
+    border-radius: 0 3px 3px 0;
+    line-height: 1.7;
+  }
+
+  /* Form elements */
+  label.field-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--navy);
+    margin-bottom: 5px;
+    letter-spacing: 0.03em;
+  }
+  label.field-label .req {
+    color: var(--red);
+    font-size: 11px;
+    margin-left: 4px;
+    font-weight: 400;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  select,
+  textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 9px 12px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--white);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--navy-light);
+    box-shadow: 0 0 0 3px rgba(61,82,145,0.12);
+  }
+  textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.7;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .field-row.three {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .field-group {
+    margin-bottom: 16px;
+  }
+
+  /* Checkbox / Radio */
+  .check-group, .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .check-item, .radio-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .check-item input, .radio-item input {
+    width: 16px; height: 16px;
+    accent-color: var(--navy);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* Repeat entry block */
+  .repeat-block {
+    border: 1px solid var(--border-light);
+    border-radius: 5px;
+    padding: 16px 16px 12px;
+    margin-bottom: 14px;
+    background: var(--section-bg);
+    position: relative;
+  }
+  .repeat-block-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+  }
+  .add-btn, .remove-btn {
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    padding: 7px 16px;
+    transition: background 0.2s, opacity 0.2s;
+  }
+  .add-btn {
+    background: var(--navy);
+    color: var(--white);
+    margin-top: 4px;
+  }
+  .add-btn:hover { background: var(--navy-light); }
+  .remove-btn {
+    background: #c0392b;
+    color: var(--white);
+    font-size: 12px;
+    padding: 5px 12px;
+    position: absolute;
+    top: 10px; right: 10px;
+  }
+  .remove-btn:hover { opacity: 0.8; }
+
+  /* Conditional panel */
+  .cond-panel {
+    display: none;
+    margin-top: 14px;
+    border: 1px solid var(--border-light);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 5px 5px 0;
+    padding: 16px 16px 12px;
+    background: #fdf9f3;
+  }
+  .cond-panel.active { display: block; }
+
+  /* Divider */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border-light);
+    margin: 20px 0;
+  }
+
+  /* Submit */
+  .submit-area {
+    text-align: center;
+    padding: 40px 0 20px;
+  }
+  .submit-btn {
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 5px;
+    padding: 16px 60px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 15px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    border-bottom: 3px solid var(--gold);
+  }
+  .submit-btn:hover { background: var(--navy-light); transform: translateY(-1px); }
+  .submit-note { font-size: 12px; color: var(--text-muted); margin-top: 12px; }
+
+  /* Success overlay */
+  #success-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,39,68,0.92);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+  }
+  #success-overlay.active { display: flex; }
+  .success-box {
+    background: var(--white);
+    border-radius: 8px;
+    padding: 32px 24px 28px;
+    max-width: 520px;
+    width: 92%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .success-btn-row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .copy-text-btn {
+    display: inline-block;
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    padding: 12px 32px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    width: 100%;
+  }
+  .copy-text-btn:active { opacity: 0.8; }
+  .success-copy-ok {
+    color: #2e7d32;
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 6px;
+    display: none;
+  }
+  .success-send-note {
+    background: #f0f5ff;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--navy);
+    line-height: 1.8;
+    text-align: left;
+  }
+  .success-send-note strong { color: var(--navy); }
+  .success-icon {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: var(--navy);
+    border: 3px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 26px;
+  }
+  .success-box h2 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 18px;
+    color: var(--navy);
+    margin-bottom: 12px;
+  }
+  .success-box p { font-size: 13px; color: var(--text-muted); line-height: 1.8; }
+  .download-btn {
+    display: inline-block;
+    margin-top: 24px;
+    background: var(--gold);
+    color: var(--navy);
+    border: none;
+    border-radius: 4px;
+    padding: 12px 32px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+
+  /* Small utility */
+  .half { width: 50%; }
+  .inline-unit { display: flex; align-items: center; gap: 6px; }
+  .inline-unit span { white-space: nowrap; font-size: 13px; color: var(--text-muted); }
+
+  @media (max-width: 600px) {
+    .field-row, .field-row.three { grid-template-columns: 1fr; }
+    .container { padding: 24px 14px 60px; }
+    .site-header { padding: 20px 16px; }
+  }
+
+  /* ===== Setup Screen ===== */
+  #setup-screen {
+    background: linear-gradient(135deg, #1a2744 0%, #2c3e6b 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 48px 16px 80px;
+  }
+  .setup-wrap {
+    background: var(--white);
+    border-radius: 10px;
+    max-width: 760px;
+    width: 100%;
+    padding: 44px 48px 40px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+    border-top: 4px solid var(--gold);
+  }
+  .setup-badge {
+    display: inline-block;
+    background: var(--navy);
+    color: var(--gold-light);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    border: 1px solid var(--gold);
+  }
+  .setup-title {
+    font-family: "Noto Serif JP", serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--navy);
+    margin-bottom: 10px;
+    letter-spacing: 0.06em;
+  }
+  .setup-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 28px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .setup-client-row {
+    margin-bottom: 24px;
+  }
+  .setup-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+  .setup-creditors-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--navy);
+    margin-bottom: 10px;
+    padding: 8px 0 6px;
+    border-bottom: 2px solid var(--navy);
+    letter-spacing: 0.04em;
+  }
+  .setup-creditor-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .setup-creditor-num {
+    background: var(--navy);
+    color: var(--gold-light);
+    font-size: 12px;
+    font-weight: 600;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .setup-creditor-name {
+    flex: 2;
+    min-width: 140px;
+  }
+  .setup-creditor-era, .setup-creditor-year, .setup-creditor-month {
+    flex-shrink: 0;
+  }
+  .setup-creditor-note { min-width: 80px; }
+  .setup-unit {
+    font-size: 13px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .setup-creditor-row input {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 7px 10px;
+    font-family: "Noto Sans JP", sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--white);
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .setup-creditor-row input:focus { border-color: var(--navy-light); box-shadow: 0 0 0 3px rgba(61,82,145,0.12); }
+  .setup-add-btn {
+    background: none;
+    border: 1px dashed var(--navy-light);
+    color: var(--navy-light);
+    border-radius: 4px;
+    padding: 7px 16px;
+    font-family: "Noto Sans JP", sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 28px;
+    transition: background 0.2s;
+  }
+  .setup-add-btn:hover { background: #f0f3fa; }
+  .setup-actions { text-align: center; margin-bottom: 16px; }
+  .setup-go-btn {
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    padding: 16px 44px;
+    font-family: "Noto Serif JP", serif;
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    border-bottom: 3px solid var(--gold);
+    transition: background 0.2s, transform 0.15s;
+  }
+  .setup-go-btn:hover { background: var(--navy-light); transform: translateY(-1px); }
+  .setup-caution {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  /* History creditor blocks */
+  .history-creditor-block {
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .history-creditor-header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .history-creditor-tag {
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.05em;
+  }
+  .history-creditor-name {
+    font-family: "Noto Serif JP", serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .history-creditor-period {
+    font-size: 12px;
+    color: #aab3cc;
+    margin-left: auto;
+  }
+  .history-creditor-body {
+    padding: 18px 18px 14px;
+    background: #fdfcf9;
+  }
+  .history-creditor-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--section-bg);
+    border-left: 3px solid var(--gold);
+    padding: 7px 11px;
+    margin-bottom: 14px;
+    border-radius: 0 3px 3px 0;
+    line-height: 1.7;
+  }
+  /* main form hidden until setup done */
+  #main-form-area { display: none; }
+  #main-form-area.active { display: block; }
+
+  /* URL panel */
+  .url-panel-inner {
+    background: #f0f5ff;
+    border: 2px solid var(--navy-light);
+    border-radius: 8px;
+    padding: 24px;
+    margin-top: 8px;
+  }
+  .url-panel-title {
+    font-family: "Noto Serif JP", serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--navy);
+    margin-bottom: 8px;
+    letter-spacing: 0.04em;
+  }
+  .url-panel-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    line-height: 1.7;
+  }
+  .url-box-wrap {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .url-box {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--text);
+    background: var(--white);
+    font-family: monospace;
+    outline: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .url-copy-btn {
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-family: "Noto Sans JP", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .url-copy-btn:hover { background: var(--navy-light); }
+  .copy-success {
+    color: #2e7d32;
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 8px;
+  }
+  .url-panel-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-light);
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>ご依頼者様 質問シート</h1>
+  <p>自己破産・個人再生手続き　依頼者情報入力フォーム</p>
+</header>
+
+<!-- ===== 弁護士セットアップ画面 ===== -->
+<div id="setup-screen">
+  <div class="setup-wrap">
+    <div class="setup-badge">弁護士記入欄</div>
+    <h2 class="setup-title">フォーム送付前の準備</h2>
+    <p class="setup-desc">
+      依頼者に送付する前に、借入先と借入時期を入力してください。<br>
+      入力した内容をもとに⑲「負債が増えた経緯」の記載欄が自動生成されます。
+    </p>
+
+    <div class="setup-client-row">
+      <div class="setup-field">
+        <label class="setup-label">依頼者氏名</label>
+        <input type="text" id="setup-client-name" placeholder="例：山田 太郎">
+      </div>
+    </div>
+
+    <div class="setup-creditors-label">
+      借入先リスト（古い順に入力してください）
+    </div>
+    <div id="setup-creditor-list">
+      <div class="setup-creditor-row">
+        <span class="setup-creditor-num">1</span>
+        <input type="text" class="setup-creditor-name" placeholder="借入先名（例：A社・〇〇カード）">
+        <input type="text" class="setup-creditor-era" placeholder="元号（例：H・R）" style="width:100px">
+        <input type="text" class="setup-creditor-year" placeholder="年" style="width:60px">
+        <span class="setup-unit">年</span>
+        <input type="text" class="setup-creditor-month" placeholder="月" style="width:55px">
+        <span class="setup-unit">月〜</span>
+        <input type="text" class="setup-creditor-note" placeholder="メモ（任意）" style="flex:1">
+      </div>
+    </div>
+    <button type="button" class="setup-add-btn" onclick="setupAddCreditor()">＋ 借入先を追加</button>
+
+    <div class="setup-actions">
+      <button type="button" class="setup-go-btn" onclick="setupApply()">依頼者用URLを生成する　→</button>
+    </div>
+
+    <!-- URL表示パネル（準備後に表示） -->
+    <div id="setup-url-panel" style="display:none;">
+      <div class="url-panel-inner">
+        <div class="url-panel-title">✅ 準備完了　依頼者にこのURLを送ってください</div>
+        <div class="url-panel-desc">下のURLをコピーしてLINEまたはメールで依頼者に送付してください。</div>
+        <div class="url-box-wrap">
+          <input type="text" id="generated-url" class="url-box" readonly>
+          <button type="button" class="url-copy-btn" onclick="copyUrl()">コピー</button>
+        </div>
+        <div id="copy-success" class="copy-success" style="display:none;">✓ コピーしました</div>
+        <div class="url-panel-note">※ このURLを開いた依頼者には、弁護士記入欄は表示されません。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="main-form-area">
+<div class="progress-wrap">
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar"></div></div>
+  <div class="progress-text" id="progressText">0 / 19 セクション</div>
+</div>
+
+<div class="container">
+
+  <div class="intro-box">
+    お手数ですが，ご依頼頂きましたお手続きに必要な事項となりますので，以下の質問のご回答をお願い致します。<br>
+    <strong>※</strong> 印の項目は必須入力です。入力後「送信・データ保存」ボタンを押してください。
+  </div>
+
+  <form id="mainForm">
+
+    <!-- ======================== 1. 職歴 ======================== -->
+    <div class="section" data-section="1">
+      <div class="section-header">
+        <div class="section-num">1</div>
+        <div class="section-title">職歴（過去10年分）</div>
+      </div>
+      <div class="section-body">
+        <div class="section-note">
+          ※ 雇用形態のチェック・職種・手取り収入の記載漏れにご注意ください。<br>
+          ※ 派遣社員の場合は派遣先ではなく契約している派遣会社を記載してください。
+        </div>
+        <div id="career-list">
+          <div class="repeat-block">
+            <div class="repeat-block-title">職歴 1</div>
+            <div class="field-row">
+              <div class="field-group">
+                <label class="field-label">就業開始</label>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <input type="text" name="career_from_year[]" placeholder="年（例：2015）" style="width:110px">
+                  <span style="font-size:13px;color:var(--text-muted)">年</span>
+                  <input type="text" name="career_from_month[]" placeholder="月" style="width:60px">
+                  <span style="font-size:13px;color:var(--text-muted)">月</span>
+                </div>
+              </div>
+              <div class="field-group">
+                <label class="field-label">就業終了</label>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <input type="text" name="career_to_year[]" placeholder="年（空欄＝現在）" style="width:130px">
+                  <span style="font-size:13px;color:var(--text-muted)">年</span>
+                  <input type="text" name="career_to_month[]" placeholder="月" style="width:60px">
+                  <span style="font-size:13px;color:var(--text-muted)">月 ／現在も継続の場合は空欄</span>
+                </div>
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">雇用先（会社名等）</label>
+              <input type="text" name="career_company[]" placeholder="例：株式会社〇〇">
+            </div>
+            <div class="field-row">
+              <div class="field-group">
+                <label class="field-label">雇用形態</label>
+                <div class="check-group">
+                  <label class="check-item"><input type="checkbox" name="career_type_1[]" value="自営"> 自営</label>
+                  <label class="check-item"><input type="checkbox" name="career_type_2[]" value="法人代表者"> 法人代表者</label>
+                  <label class="check-item"><input type="checkbox" name="career_type_3[]" value="勤め"> 勤め</label>
+                  <label class="check-item"><input type="checkbox" name="career_type_4[]" value="パート・バイト"> パート・バイト</label>
+                  <label class="check-item"><input type="checkbox" name="career_type_5[]" value="無職"> 無職</label>
+                  <label class="check-item"><input type="checkbox" name="career_type_6[]" value="その他"> その他：<input type="text" name="career_type_other[]" style="width:80px;margin-left:4px;padding:3px 6px;font-size:12px"></label>
+                </div>
+              </div>
+              <div class="field-group">
+                <label class="field-label">職種</label>
+                <input type="text" name="career_job[]" placeholder="例：営業・事務・製造">
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">手取月収（約）</label>
+              <div class="inline-unit">
+                <input type="number" name="career_income[]" placeholder="" style="width:120px">
+                <span>万円</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="add-btn" onclick="addCareer()">＋ 職歴を追加</button>
+
+        <hr class="divider">
+        <!-- 1-2 最終学歴 -->
+        <div style="font-weight:500;font-size:14px;margin-bottom:12px;color:var(--navy);">1-2　最終学歴</div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">元号</label>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="edu_era" value="昭和"> 昭和</label>
+              <label class="radio-item"><input type="radio" name="edu_era" value="平成"> 平成</label>
+              <label class="radio-item"><input type="radio" name="edu_era" value="令和"> 令和</label>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">卒業（中退）年月日</label>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <input type="text" name="edu_year" placeholder="年" style="width:70px">
+              <span style="font-size:13px;color:var(--text-muted)">年</span>
+              <input type="text" name="edu_month" placeholder="月" style="width:50px">
+              <span style="font-size:13px;color:var(--text-muted)">月</span>
+              <input type="text" name="edu_day" placeholder="日" style="width:50px">
+              <span style="font-size:13px;color:var(--text-muted)">日</span>
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">学校種別</label>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="edu_level" value="中学"> 中学</label>
+              <label class="radio-item"><input type="radio" name="edu_level" value="高校"> 高校</label>
+              <label class="radio-item"><input type="radio" name="edu_level" value="専門学校"> 専門学校</label>
+              <label class="radio-item"><input type="radio" name="edu_level" value="短大"> 短大</label>
+              <label class="radio-item"><input type="radio" name="edu_level" value="大学"> 大学</label>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">卒業 / 中退</label>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="edu_result" value="卒業"> 卒業</label>
+              <label class="radio-item"><input type="radio" name="edu_result" value="中退"> 中退</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== 2. 家族関係 ======================== -->
+    <div class="section" data-section="2">
+      <div class="section-header">
+        <div class="section-num">2</div>
+        <div class="section-title">家族関係</div>
+      </div>
+      <div class="section-body">
+        <div class="section-note">
+          ※ 両親まで記入してください。離婚等により別居の子がいる場合も記入してください。<br>
+          ※ ご両親のうちお亡くなりになっている方は氏名のみ記入し、詳細は「3」にてご記載ください。
+        </div>
+        <div id="family-list">
+          <!-- 固定行：父・母・夫妻 -->
+          <div class="repeat-block">
+            <div class="repeat-block-title">父</div>
+            <div class="field-row three">
+              <div class="field-group"><label class="field-label">氏名</label><input type="text" name="family_name_father" placeholder="（亡くなっている場合も記入）"></div>
+              <div class="field-group"><label class="field-label">生年月日</label><input type="date" name="family_dob_father"></div>
+              <div class="field-group"><label class="field-label">職業</label><input type="text" name="family_job_father"></div>
+            </div>
+            <div class="field-row">
+              <div class="field-group"><label class="field-label">月収（約）</label><div class="inline-unit"><input type="number" name="family_income_father" style="width:100px"><span>万円</span></div></div>
+              <div class="field-group"><label class="field-label">同居 / 別居</label><div class="radio-group"><label class="radio-item"><input type="radio" name="family_live_father" value="同居"> 同居</label><label class="radio-item"><input type="radio" name="family_live_father" value="別居"> 別居</label></div></div>
+            </div>
+          </div>
+          <div class="repeat-block">
+            <div class="repeat-block-title">母</div>
+            <div class="field-row three">
+              <div class="field-group"><label class="field-label">氏名</label><input type="text" name="family_name_mother"></div>
+              <div class="field-group"><label class="field-label">生年月日</label><input type="date" name="family_dob_mother"></div>
+              <div class="field-group"><label class="field-label">職業</label><input type="text" name="family_job_mother"></div>
+            </div>
+            <div class="field-row">
+              <div class="field-group"><label class="field-label">月収（約）</label><div class="inline-unit"><input type="number" name="family_income_mother" style="width:100px"><span>万円</span></div></div>
+              <div class="field-group"><label class="field-label">同居 / 別居</label><div class="radio-group"><label class="radio-item"><input type="radio" name="family_live_mother" value="同居"> 同居</label><label class="radio-item"><input type="radio" name="family_live_mother" value="別居"> 別居</label></div></div>
+            </div>
+          </div>
+          <div class="repeat-block">
+            <div class="repeat-block-title">夫・妻</div>
+            <div class="field-row three">
+              <div class="field-group"><label class="field-label">氏名</label><input type="text" name="family_name_spouse"></div>
+              <div class="field-group"><label class="field-label">生年月日</label><input type="date" name="family_dob_spouse"></div>
+              <div class="field-group"><label class="field-label">職業</label><input type="text" name="family_job_spouse"></div>
+            </div>
+            <div class="field-row">
+              <div class="field-group"><label class="field-label">月収（約）</label><div class="inline-unit"><input type="number" name="family_income_spouse" style="width:100px"><span>万円</span></div></div>
+              <div class="field-group"><label class="field-label">同居 / 別居</label><div class="radio-group"><label class="radio-item"><input type="radio" name="family_live_spouse" value="同居"> 同居</label><label class="radio-item"><input type="radio" name="family_live_spouse" value="別居"> 別居</label></div></div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="add-btn" onclick="addFamily()">＋ 子どもを追加</button>
+      </div>
+    </div>
+
+    <!-- ======================== 3. 両親の状況 ======================== -->
+    <div class="section" data-section="3">
+      <div class="section-header">
+        <div class="section-num">3</div>
+        <div class="section-title">ご両親の状況</div>
+      </div>
+      <div class="section-body">
+        <div class="field-group">
+          <label class="field-label">ご両親はご健在ですか？</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="parents_status" value="両親とも健在" onclick="toggleParents()"> 両親とも健在</label>
+            <label class="radio-item"><input type="radio" name="parents_status" value="父が亡くなっている" onclick="toggleParents()"> 父が亡くなっている</label>
+            <label class="radio-item"><input type="radio" name="parents_status" value="母が亡くなっている" onclick="toggleParents()"> 母が亡くなっている</label>
+            <label class="radio-item"><input type="radio" name="parents_status" value="両親とも亡くなっている" onclick="toggleParents()"> 両親とも亡くなっている</label>
+          </div>
+        </div>
+        <div id="father-deceased" class="cond-panel">
+          <div style="font-weight:500;margin-bottom:10px;font-size:13px;">父について</div>
+          <div class="field-group"><label class="field-label">お亡くなりになった時期</label><div style="display:flex;gap:8px;align-items:center;"><input type="text" name="father_death_year" placeholder="年" style="width:70px"><span style="font-size:13px;color:var(--text-muted)">年</span><input type="text" name="father_death_month" placeholder="月" style="width:50px"><span style="font-size:13px;color:var(--text-muted)">月</span><input type="text" name="father_death_day" placeholder="日" style="width:50px"><span style="font-size:13px;color:var(--text-muted)">日</span></div></div>
+          <div class="field-group"><label class="field-label">財産の有無</label><div class="radio-group"><label class="radio-item"><input type="radio" name="father_estate" value="無し"> 無し</label><label class="radio-item"><input type="radio" name="father_estate" value="有り"> 有り（→内容を選択）</label></div><div class="check-group" style="margin-top:8px;"><label class="check-item"><input type="checkbox" name="father_estate_type[]" value="不動産"> 不動産</label><label class="check-item"><input type="checkbox" name="father_estate_type[]" value="高額な預貯金"> 高額な預貯金</label><label class="check-item"><input type="checkbox" name="father_estate_type[]" value="有価証券"> 有価証券</label><label class="check-item"><input type="checkbox" name="father_estate_type[]" value="車等"> 車等</label></div></div>
+          <div class="field-group"><label class="field-label">相続状況</label><div class="radio-group"><label class="radio-item"><input type="radio" name="father_inherit" value="相続放棄した"> 相続放棄した</label><label class="radio-item"><input type="radio" name="father_inherit" value="遺産分割協議をした"> 遺産分割協議をした</label><label class="radio-item"><input type="radio" name="father_inherit" value="何もしてない"> 何もしてない</label></div></div>
+        </div>
+        <div id="mother-deceased" class="cond-panel">
+          <div style="font-weight:500;margin-bottom:10px;font-size:13px;">母について</div>
+          <div class="field-group"><label class="field-label">お亡くなりになった時期</label><div style="display:flex;gap:8px;align-items:center;"><input type="text" name="mother_death_year" placeholder="年" style="width:70px"><span style="font-size:13px;color:var(--text-muted)">年</span><input type="text" name="mother_death_month" placeholder="月" style="width:50px"><span style="font-size:13px;color:var(--text-muted)">月</span><input type="text" name="mother_death_day" placeholder="日" style="width:50px"><span style="font-size:13px;color:var(--text-muted)">日</span></div></div>
+          <div class="field-group"><label class="field-label">財産の有無</label><div class="radio-group"><label class="radio-item"><input type="radio" name="mother_estate" value="無し"> 無し</label><label class="radio-item"><input type="radio" name="mother_estate" value="有り"> 有り（→内容を選択）</label></div><div class="check-group" style="margin-top:8px;"><label class="check-item"><input type="checkbox" name="mother_estate_type[]" value="不動産"> 不動産</label><label class="check-item"><input type="checkbox" name="mother_estate_type[]" value="高額な預貯金"> 高額な預貯金</label><label class="check-item"><input type="checkbox" name="mother_estate_type[]" value="有価証券"> 有価証券</label><label class="check-item"><input type="checkbox" name="mother_estate_type[]" value="車等"> 車等</label></div></div>
+          <div class="field-group"><label class="field-label">相続状況</label><div class="radio-group"><label class="radio-item"><input type="radio" name="mother_inherit" value="相続放棄した"> 相続放棄した</label><label class="radio-item"><input type="radio" name="mother_inherit" value="遺産分割協議をした"> 遺産分割協議をした</label><label class="radio-item"><input type="radio" name="mother_inherit" value="何もしてない"> 何もしてない</label></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== 4. 結婚・離婚歴 ======================== -->
+    <div class="section" data-section="4">
+      <div class="section-header">
+        <div class="section-num">4</div>
+        <div class="section-title">結婚歴・離婚歴</div>
+      </div>
+      <div class="section-body">
+        <div class="section-note">※ 旧姓でご記入ください。</div>
+        <div id="marriage-list">
+          <div class="repeat-block">
+            <div class="repeat-block-title">婚姻歴 1</div>
+            <div class="field-row">
+              <div class="field-group"><label class="field-label">結婚年月</label><div style="display:flex;gap:8px;align-items:center;"><input type="text" name="marry_year[]" placeholder="年" style="width:70px"><span style="font-size:13px;color:var(--text-muted)">年</span><input type="text" name="marry_month[]" placeholder="月" style="width:50px"><span style="font-size:13px;color:var(--text-muted)">月</span></div></div>
+              <div class="field-group"><label class="field-label">離婚年月（婚姻継続中は空欄）</label><div style="display:flex;gap:8px;align-items:center;"><input type="text" name="divorce_year[]" placeholder="年" style="width:70px"><span style="font-size:13px;color:var(--text-muted)">年</span><input type="text" name="divorce_month[]" placeholder="月" style="width:50px"><span style="font-size:13px;color:var(--text-muted)">月</span></div></div>
+            </div>
+            <div class="field-group"><label class="field-label">相手方の氏名</label><input type="text" name="ex_name[]" placeholder="旧姓で記入"></div>
+          </div>
+        </div>
+        <button type="button" class="add-btn" onclick="addMarriage()">＋ 婚姻歴を追加</button>
+
+        <div class="cond-panel active" style="margin-top:18px;">
+          <div style="font-weight:500;margin-bottom:10px;font-size:13px;">⇒ 離婚歴がある場合：財産分与・慰謝料・養育費の取り決め</div>
+          <div class="radio-group" style="margin-bottom:10px;">
+            <label class="radio-item"><input type="radio" name="divorce_agreement" value="無し" onclick="toggleDivorceDetail(this)"> 無し</label>
+            <label class="radio-item"><input type="radio" name="divorce_agreement" value="有り" onclick="toggleDivorceDetail(this)"> 有り</label>
+          </div>
+          <div id="divorce-detail" class="cond-panel">
+            <div class="field-group"><label class="field-label">相手の氏名</label><input type="text" name="divorce_party"></div>
+            <div class="field-group">
+              <label class="field-label">取り決めの種類（該当するものをすべて選択）</label>
+              <div class="check-group" style="margin-top:6px;">
+                <label class="check-item"><input type="checkbox" name="divorce_type[]" value="財産分与" onchange="toggleDivorceTypes()"> 財産分与</label>
+                <label class="check-item"><input type="checkbox" name="divorce_type[]" value="慰謝料" onchange="toggleDivorceTypes()"> 慰謝料</label>
+                <label class="check-item"><input type="checkbox" name="divorce_type[]" value="養育費" onchange="toggleDivorceTypes()"> 養育費</label>
+              </div>
+            </div>
+            <!-- 財産分与 -->
+            <div id="div-zaisan" class="cond-panel" style="margin-top:8px;">
+              <div style="font-size:12px;font-weight:500;color:var(--navy);margin-bottom:8px;">財産分与</div>
+              <div class="field-group"><label class="field-label">取り決めた金額</label><div class="inline-unit"><input type="number" name="divorce_zaisan_amount"><span>円</span></div></div>
+            </div>
+            <!-- 慰謝料 -->
+            <div id="div-isharyo" class="cond-panel" style="margin-top:8px;">
+              <div style="font-size:12px;font-weight:500;color:var(--navy);margin-bottom:8px;">慰謝料</div>
+              <div class="field-group"><label class="field-label">取り決めた金額</label><div class="inline-unit"><input type="number" name="divorce_isharyo_amount"><span>円</span></div></div>
+            </div>
+            <!-- 養育費 -->
+            <div id="div-yoikuhi" class="cond-panel" style="margin-top:8px;">
+              <div style="font-size:12px;font-weight:500;color:var(--navy);margin-bottom:8px;">養育費</div>
+              <div class="field-row three">
+                <div class="field-group"><label class="field-label">毎月の金額</label><div class="inline-unit"><input type="number" name="divorce_yoikuhi_monthly"><span>円 / 月</span></div></div>
+                <div class="field-group"><label class="field-label">何歳まで</label><div class="inline-unit"><input type="number" name="divorce_yoikuhi_age" style="width:80px"><span>歳まで</span></div></div>
+                <div class="field-group"><label class="field-label">対象の子（氏名）</label><input type="text" name="divorce_yoikuhi_child" placeholder="例：山田 花子"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== 5. 現在の住居 ======================== -->
+    <div class="section" data-section="5">
+      <div class="section-header">
+        <div class="section-num">5</div>
+        <div class="section-title">現在の住居</div>
+      </div>
+      <div class="section-body">
+        <div class="field-group">
+          <label class="field-label">住居の種別</label>
+          <div class="radio-group" style="flex-direction:column;align-items:flex-start;gap:12px;">
+            <label class="radio-item"><input type="radio" name="housing_type" value="賃貸住宅" onclick="toggleHousing()"> 賃貸住宅</label>
+            <label class="radio-item"><input type="radio" name="housing_type" value="ご自身所有の家屋" onclick="toggleHousing()"> ご自身所有の家屋</label>
+            <label class="radio-item"><input type="radio" name="housing_type" value="ご自身以外の所有家屋" onclick="toggleHousing()"> ご自身以外の所有家屋</label>
+          </div>
+        </div>
+        <div id="housing-rental" class="cond-panel">
+          <div class="field-group"><label class="field-label">賃貸契約者</label><div class="radio-group"><label class="radio-item"><input type="radio" name="rent_contractor" value="ご自身"> ご自身</label><label class="radio-item"><input type="radio" name="rent_contractor" value="配偶者"> 配偶者</label><label class="radio-item"><input type="radio" name="rent_contractor" value="社宅・寮（会社名義）"> 社宅・寮（会社名義）</label><label class="radio-item"><input type="radio" name="rent_contractor" value="その他"> その他</label></div></div>
+          <div class="field-row"><div class="field-group"><label class="field-label">その他の場合：氏名</label><input type="text" name="rent_other_name"></div><div class="field-group"><label class="field-label">続柄</label><input type="text" name="rent_other_rel"></div></div>
+        </div>
+        <div id="housing-other" class="cond-panel">
+          <div class="field-row"><div class="field-group"><label class="field-label">所有者氏名</label><input type="text" name="house_owner_name"></div><div class="field-group"><label class="field-label">ご依頼者との関係</label><input type="text" name="house_owner_rel"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== 6. 費用の調達方法 ======================== -->
+    <div class="section" data-section="6">
+      <div class="section-header">
+        <div class="section-num">6</div>
+        <div class="section-title">手続き費用の調達方法</div>
+      </div>
+      <div class="section-body">
+        <div class="field-group">
+          <div class="radio-group" style="flex-direction:column;gap:10px;">
+            <label class="radio-item"><input type="radio" name="fee_source" value="ご自身の収入" onclick="toggleFeeDetail()"> ご自身の収入</label>
+            <label class="radio-item"><input type="radio" name="fee_source" value="援助・借入" onclick="toggleFeeDetail()"> 他の方からの援助・借入</label>
+          </div>
+        </div>
+        <div id="fee-detail" class="cond-panel">
+          <div class="field-row">
+            <div class="field-group"><label class="field-label">氏名</label><input type="text" name="fee_provider_name"></div>
+            <div class="field-group"><label class="field-label">関係</label><input type="text" name="fee_provider_rel"></div>
+          </div>
+          <div class="field-group"><label class="field-label">援助 / 借入</label><div class="radio-group"><label class="radio-item"><input type="radio" name="fee_type" value="援助"> 援助</label><label class="radio-item"><input type="radio" name="fee_type" value="借入"> 借入</label></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== 7. 税金等の滞納 ======================== -->
+    <div class="section" data-section="7">
+      <div class="section-header">
+        <div class="section-num">7</div>
+        <div class="section-title">税金・国民健康保険・国民年金の滞納</div>
+      </div>
+      <div class="section-body">
+        <div class="field-group">
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="tax_arrears" value="滞納なし" onclick="toggleTax()"> 滞納なし</label>
+            <label class="radio-item"><input type="radio" name="tax_arrears" value="滞納あり" onclick="toggleTax()"> 滞納あり</label>
+          </div>
+        </div>
+        <div id="tax-detail" class="cond-panel">
+          <div id="tax-list">
+            <div class="repeat-block">
+              <div class="repeat-block-title">滞納 1</div>
+              <div class="field-row">
+                <div class="field-group"><label class="field-label">税金等の種類</label><input type="text" name="tax_type[]" placeholder="例：住民税"></div>
+                <div class="field-group"><label class="field-label">滞納金額</label><div class="inline-unit"><input type="number" name="tax_amount[]"><span>円</span></div></div>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="add-btn" onclick="addTax()">＋ 追加</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== 8. 個人からの借入 ======================== -->
+    <div class="section" data-section="8">
+      <div class="section-header">
+        <div class="section-num">8</div>
+        <div class="section-title">親族・知人・友人など個人からの借入</div>
+      </div>
+      <div class="section-body">
+        <div class="field-group">
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="personal_loan" value="無い" onclick="togglePersonalLoan()"> 無い</label>
+            <label class="radio-item"><input type="radio" name="personal_loan" value="有る" onclick="togglePersonalLoan()"> 有る</label>
+          </div>
+        </div>
+        <div id="personal-loan-detail" class="cond-panel">
+          <div id="ploan-list">
+            <div class="repeat-block">
+              <div class="repeat-block-title">借入 1</div>
+              <div class="field-row three">
+                <div class="field-group"><label class="field-label">相手の氏名</label><input type="text" name="ploan_name[]"></div>
+                <div class="field-group"><label class="field-label">関係</label><input type="text" name="ploan_rel[]"></div>
+                <div class="field-group"><label class="field-label">金額</label><div class="inline-unit"><input type="number" name="ploan_amount[]"><span>円</span></div></div>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="add-btn" onclick="addPLoan()">＋ 追加</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== 9. 毎月の約定返済額 ======================== -->
+    <div class="section" data-section="9">
+      <div class="section-header">
+        <div class="section-num">9</div>
+        <div class="section-title">ご相談前の毎月の約定返済額</div>
+      </div>
+      <div class="section-body">
+        <div class="field-group">
+          <label class="field-label">当事務所にご相談前に毎月業者等に返済していた合計額（月の返済額）</label>
+          <div class="inline-unit" style="margin-top:6px;">
+            <span>月 約</span>
+            <input type="number" name="monthly_repayment" style="width:120px">
+            <span>万円</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== 10. 訴訟・差押 ======================== -->
+    <div class="section" data-section="10">
+      <div class="section-header">
+        <div class="section-num">10</div>
+        <div class="section-title">訴訟・支払督促・差押えの有無</div>
+      </div>
+      <div class="section-body">
+        <div class="section-note">裁判所から訴状・支払督促・差押命令などの書類が届いていませんか？</div>
+        <div class="field-group">
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="lawsuit" value="起こされていない" onclick="toggleLawsuit()"> 起こされていない（届いていない）</label>
+            <label class="radio-item"><input type="radio" name="lawsuit" value="起こされている" onclick="toggleLawsuit()"> 起こされている（届いている）</label>
+          </div>
+        </div>
+        <div id="lawsuit-detail" class="cond-panel">
+          <div class="field-group"><label class="field-label">内容（該当するものを選択）</label>
+            <div class="check-group">
+              <label class="check-item"><input type="checkbox" name="lawsuit_type[]" value="訴訟"> 訴訟</label>
+              <label class="check-item"><input type="checkbox" name="lawsuit_type[]" value="支払督促"> 支払督促</label>
+              <label class="check-item"><input type="checkbox" name="lawsuit_type[]" value="差押"> 差押</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== 11. 過去の破産 ======================== -->
+    <div class="section" data-section="11">
+      <div class="section-header">
+        <div class="section-num">11</div>
+        <div class="section-title">過去の破産手続き</div>
+      </div>
+      <div class="section-body">
+        <div class="field-group">
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="past_bankruptcy" value="無い" onclick="togglePastBankruptcy()"> 無い</label>
+            <label class="radio-item"><input type="radio" name="past_bankruptcy" value="有る" onclick="togglePastBankruptcy()"> 有る</label>
+          </div>
+        </div>
+        <div id="past-bankruptcy-detail" class="cond-panel">
+          <div class="field-row">
+            <div class="field-group"><label class="field-label">手続きをした地方裁判所</label><div class="inline-unit"><input type="text" name="bankrupt_court"><span>地方裁判所</span><input type="text" name="bankrupt_branch" style="width:80px"><span>支部</span></div></div>
+          </div>
+          <div class="field-row">
+            <div class="field-group"><label class="field-label">申立て時期</label><div style="display:flex;gap:8px;align-items:center;"><input type="text" name="bankrupt_year" placeholder="年" style="width:70px"><span style="font-size:13px;color:var(--text-muted)">年</span><input type="text" name="bankrupt_month" placeholder="月" style="width:50px"><span style="font-size:13px;color:var(--text-muted)">月頃</span></div></div>
+          </div>
+          <div class="field-group"><label class="field-label">免責決定</label>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="menseki" value="受けた" onclick="toggleMenseki()"> 受けた</label>
+              <label class="radio-item"><input type="radio" name="menseki" value="免責不許可となった"> 免責不許可となった</label>
+            </div>
+          </div>
+          <div id="menseki-date" class="cond-panel">
+            <div style="display:flex;gap:8px;align-items:center;"><input type="text" name="menseki_year" placeholder="年" style="width:70px"><span style="font-size:13px;color:var(--text-muted)">年</span><input type="text" name="menseki_month" placeholder="月" style="width:50px"><span style="font-size:13px;color:var(--text-muted)">月頃</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== 12. 借入理由・生活状況 ======================== -->
+    <div class="section" data-section="12">
+      <div class="section-header">
+        <div class="section-num">12</div>
+        <div class="section-title">借入理由・過去の生活状況</div>
+      </div>
+      <div class="section-body">
+
+        <!-- 12-1 水商売 -->
+        <div class="field-group" style="margin-bottom:20px;">
+          <label class="field-label" style="font-size:14px;margin-bottom:8px;">（1）バー・スナック・風俗・キャバクラなどに行ったことがありますか？</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="bar" value="無し" onclick="toggleDetail('bar-detail', this, '有り')"> 無し</label>
+            <label class="radio-item"><input type="radio" name="bar" value="有り" onclick="toggleDetail('bar-detail', this, '有り')"> 有り</label>
+          </div>
+          <div id="bar-detail" class="cond-panel">
+            <div class="field-group"><label class="field-label">どこに行っていましたか？</label><input type="text" name="bar_where"></div>
+            <div class="field-row">
+              <div class="field-group"><label class="field-label">行っていた時期（開始）</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="bar_from_year" placeholder="年" style="width:70px"><span style="font-size:13px;color:var(--text-muted)">年</span><input type="text" name="bar_from_month" placeholder="月" style="width:50px"><span style="font-size:13px;color:var(--text-muted)">月頃</span></div></div>
+              <div class="field-group"><label class="field-label">行っていた時期（終了）</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="bar_to_year" placeholder="年" style="width:70px"><span style="font-size:13px;color:var(--text-muted)">年</span><input type="text" name="bar_to_month" placeholder="月" style="width:50px"><span style="font-size:13px;color:var(--text-muted)">月頃</span></div></div>
+            </div>
+            <div class="field-row">
+              <div class="field-group"><label class="field-label">行った回数（平均・月）</label><div class="inline-unit"><input type="number" name="bar_freq" style="width:80px"><span>回くらい</span></div></div>
+              <div class="field-group"><label class="field-label">使った金額（1回あたり）</label><div class="inline-unit"><input type="number" name="bar_min" style="width:90px"><span>円〜</span><input type="number" name="bar_max" style="width:90px"><span>円くらい</span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 12-2 ギャンブル -->
+        <div class="field-group" style="margin-bottom:20px;">
+          <label class="field-label" style="font-size:14px;margin-bottom:8px;">（2）ギャンブルをしたことはありますか？</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="gamble" value="無し" onclick="toggleDetail('gamble-detail', this, '有り')"> 無し</label>
+            <label class="radio-item"><input type="radio" name="gamble" value="有り" onclick="toggleDetail('gamble-detail', this, '有り')"> 有り</label>
+          </div>
+          <div id="gamble-detail" class="cond-panel">
+            <div class="field-group"><label class="field-label">ギャンブルの種類</label><div class="check-group"><label class="check-item"><input type="checkbox" name="gamble_type[]" value="競馬"> 競馬</label><label class="check-item"><input type="checkbox" name="gamble_type[]" value="競艇"> 競艇</label><label class="check-item"><input type="checkbox" name="gamble_type[]" value="パチンコ/スロット"> パチンコ/スロット</label><label class="check-item"><input type="checkbox" name="gamble_type[]" value="その他"> その他</label></div></div>
+            <div class="field-row">
+              <div class="field-group"><label class="field-label">していた時期（開始）</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="gamble_from_year" placeholder="年" style="width:70px"><span style="font-size:13px;">年</span><input type="text" name="gamble_from_month" placeholder="月" style="width:50px"><span style="font-size:13px;">月頃</span></div></div>
+              <div class="field-group"><label class="field-label">していた時期（終了）</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="gamble_to_year" placeholder="年" style="width:70px"><span style="font-size:13px;">年</span><input type="text" name="gamble_to_month" placeholder="月" style="width:50px"><span style="font-size:13px;">月頃</span></div></div>
+            </div>
+            <div class="field-row">
+              <div class="field-group"><label class="field-label">していた回数（平均・月）</label><div class="inline-unit"><input type="number" name="gamble_freq" style="width:80px"><span>回くらい</span></div></div>
+              <div class="field-group"><label class="field-label">使った金額（1回あたり）</label><div class="inline-unit"><input type="number" name="gamble_min" style="width:90px"><span>円〜</span><input type="number" name="gamble_max" style="width:90px"><span>円くらい</span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 12-3 投資 -->
+        <div class="field-group" style="margin-bottom:20px;">
+          <label class="field-label" style="font-size:14px;margin-bottom:8px;">（3）投資などをしたことはありますか？</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="invest" value="無し" onclick="toggleDetail('invest-detail', this, '有り')"> 無し</label>
+            <label class="radio-item"><input type="radio" name="invest" value="有り" onclick="toggleDetail('invest-detail', this, '有り')"> 有り</label>
+          </div>
+          <div id="invest-detail" class="cond-panel">
+            <div class="field-group"><label class="field-label">投資等の種類</label><div class="check-group"><label class="check-item"><input type="checkbox" name="invest_type[]" value="株式"> 株式</label><label class="check-item"><input type="checkbox" name="invest_type[]" value="FX取引"> FX取引</label><label class="check-item"><input type="checkbox" name="invest_type[]" value="マンション投資"> マンション投資</label><label class="check-item"><input type="checkbox" name="invest_type[]" value="先物取引"> 先物取引</label><label class="check-item"><input type="checkbox" name="invest_type[]" value="その他"> その他：<input type="text" name="invest_type_other" style="width:100px;margin-left:4px;padding:3px 6px;font-size:12px"></label></div></div>
+            <div class="field-row">
+              <div class="field-group"><label class="field-label">していた時期（開始）</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="invest_from_year" placeholder="年" style="width:70px"><span style="font-size:13px;">年</span><input type="text" name="invest_from_month" placeholder="月" style="width:50px"><span style="font-size:13px;">月頃</span></div></div>
+              <div class="field-group"><label class="field-label">していた時期（終了）</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="invest_to_year" placeholder="年" style="width:70px"><span style="font-size:13px;">年</span><input type="text" name="invest_to_month" placeholder="月" style="width:50px"><span style="font-size:13px;">月頃</span></div></div>
+            </div>
+            <div class="field-row">
+              <div class="field-group"><label class="field-label">使った金額（合計）</label><div class="inline-unit"><input type="number" name="invest_total"><span>円くらい</span></div></div>
+              <div class="field-group"><label class="field-label">損失額</label><div class="inline-unit"><input type="number" name="invest_loss"><span>円</span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 12-4 海外旅行 -->
+        <div class="field-group" style="margin-bottom:20px;">
+          <label class="field-label" style="font-size:14px;margin-bottom:8px;">（4）借入期間中に海外旅行に行ったことはありますか？</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="travel" value="無し" onclick="toggleDetail('travel-detail', this, '有り')"> 無し</label>
+            <label class="radio-item"><input type="radio" name="travel" value="有り" onclick="toggleDetail('travel-detail', this, '有り')"> 有り</label>
+          </div>
+          <div id="travel-detail" class="cond-panel">
+            <div id="travel-list">
+              <div class="repeat-block">
+                <div class="repeat-block-title">旅行 1</div>
+                <div class="field-row three">
+                  <div class="field-group"><label class="field-label">行き先</label><input type="text" name="travel_dest[]"></div>
+                  <div class="field-group"><label class="field-label">時期</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="travel_year[]" placeholder="年" style="width:70px"><span style="font-size:13px;">年</span><input type="text" name="travel_month[]" placeholder="月" style="width:50px"><span style="font-size:13px;">月頃</span></div></div>
+                  <div class="field-group"><label class="field-label">旅行に使用した額</label><div class="inline-unit"><input type="number" name="travel_cost[]"><span>円</span></div></div>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="add-btn" onclick="addTravel()">＋ 旅行を追加</button>
+          </div>
+        </div>
+
+        <!-- 12-5 換金 -->
+        <div class="field-group" style="margin-bottom:20px;">
+          <label class="field-label" style="font-size:14px;margin-bottom:8px;">（5）クレジットで購入した商品をすぐにお金に換えた（換金した）ことはありますか？</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="convert" value="無し" onclick="toggleDetail('convert-detail', this, '有り')"> 無し</label>
+            <label class="radio-item"><input type="radio" name="convert" value="有り" onclick="toggleDetail('convert-detail', this, '有り')"> 有り</label>
+          </div>
+          <div id="convert-detail" class="cond-panel">
+            <div id="convert-list">
+              <div class="repeat-block">
+                <div class="repeat-block-title">換金 1</div>
+                <div class="field-row">
+                  <div class="field-group"><label class="field-label">品名</label><input type="text" name="convert_item[]"></div>
+                  <div class="field-group"><label class="field-label">購入金額</label><div class="inline-unit"><input type="number" name="convert_buy_price[]"><span>円</span></div></div>
+                </div>
+                <div class="field-row">
+                  <div class="field-group"><label class="field-label">購入時期</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="convert_buy_year[]" placeholder="年" style="width:70px"><span style="font-size:13px;">年</span><input type="text" name="convert_buy_month[]" placeholder="月" style="width:50px"><span style="font-size:13px;">月頃</span></div></div>
+                  <div class="field-group"><label class="field-label">換金時期</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="convert_sell_year[]" placeholder="年" style="width:70px"><span style="font-size:13px;">年</span><input type="text" name="convert_sell_month[]" placeholder="月" style="width:50px"><span style="font-size:13px;">月頃</span></div></div>
+                </div>
+                <div class="field-group"><label class="field-label">換金額（売却額）</label><div class="inline-unit"><input type="number" name="convert_sell_price[]"><span>円</span></div></div>
+              </div>
+            </div>
+            <button type="button" class="add-btn" onclick="addConvert()">＋ 追加</button>
+          </div>
+        </div>
+
+        <!-- 12-6 高額購入 -->
+        <div class="field-group">
+          <label class="field-label" style="font-size:14px;margin-bottom:8px;">（6）過去2年以内に10万円以上で購入したものはありますか？</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="bigbuy" value="無し" onclick="toggleDetail('bigbuy-detail', this, '有り')"> 無し</label>
+            <label class="radio-item"><input type="radio" name="bigbuy" value="有り" onclick="toggleDetail('bigbuy-detail', this, '有り')"> 有り</label>
+          </div>
+          <div id="bigbuy-detail" class="cond-panel">
+            <div id="bigbuy-list">
+              <div class="repeat-block">
+                <div class="repeat-block-title">購入品 1</div>
+                <div class="field-row">
+                  <div class="field-group"><label class="field-label">品名</label><input type="text" name="bigbuy_item[]"></div>
+                  <div class="field-group"><label class="field-label">購入金額</label><div class="inline-unit"><input type="number" name="bigbuy_price[]"><span>円</span></div></div>
+                </div>
+                <div class="field-row">
+                  <div class="field-group"><label class="field-label">購入時期</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="bigbuy_year[]" placeholder="年" style="width:70px"><span style="font-size:13px;">年</span><input type="text" name="bigbuy_month[]" placeholder="月" style="width:50px"><span style="font-size:13px;">月頃</span></div></div>
+                  <div class="field-group"><label class="field-label">売却金額（売却した場合）</label><div class="inline-unit"><input type="number" name="bigbuy_sell[]"><span>円</span></div></div>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="add-btn" onclick="addBigbuy()">＋ 追加</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================== 13. 保険 ======================== -->
+    <div class="section" data-section="13">
+      <div class="section-header">
+        <div class="section-num">13</div>
+        <div class="section-title">加入している保険</div>
+      </div>
+      <div class="section-body">
+        <div class="section-note">生命保険・火災保険・自動車保険・ペット保険など種類問わず全てご記入ください。賃貸にお住まいの場合、火災保険は必ずご確認ください。</div>
+        <div id="insurance-list">
+          <div class="repeat-block">
+            <div class="repeat-block-title">保険 1</div>
+            <div class="field-row">
+              <div class="field-group"><label class="field-label">保険会社名</label><input type="text" name="ins_company[]"></div>
+              <div class="field-group"><label class="field-label">解約返戻金</label><div class="radio-group"><label class="radio-item"><input type="radio" name="ins_refund_yn_1" value="有"> 有</label><label class="radio-item"><input type="radio" name="ins_refund_yn_1" value="無"> 無</label></div><div class="inline-unit" style="margin-top:6px;"><input type="number" name="ins_refund[]" placeholder="（有の場合）" ><span>円</span></div></div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="add-btn" onclick="addInsurance()">＋ 保険を追加</button>
+      </div>
+    </div>
+
+    <!-- ======================== 14. 銀行口座 ======================== -->
+    <div class="section" data-section="14">
+      <div class="section-header">
+        <div class="section-num">14</div>
+        <div class="section-title">銀行口座・信用金庫の口座</div>
+      </div>
+      <div class="section-body">
+        <div class="section-note">ネット銀行・過去2年以内に解約した口座も含みます。利用のない口座も記帳して残高をご記入ください。</div>
+        <div id="bank-list">
+          <div class="repeat-block">
+            <div class="repeat-block-title">口座 1</div>
+            <div class="field-row three">
+              <div class="field-group"><label class="field-label">銀行名</label><input type="text" name="bank_name[]"></div>
+              <div class="field-group"><label class="field-label">支店名</label><input type="text" name="bank_branch[]"></div>
+              <div class="field-group"><label class="field-label">預金残高</label><div class="inline-unit"><input type="number" name="bank_balance[]"><span>円</span></div></div>
+            </div>
+            <div class="field-group"><label class="field-label">記帳日</label><input type="date" name="bank_date[]" style="width:180px"></div>
+          </div>
+        </div>
+        <button type="button" class="add-btn" onclick="addBank()">＋ 口座を追加</button>
+      </div>
+    </div>
+
+    <!-- ======================== 15. 支払方法 ======================== -->
+    <div class="section" data-section="15">
+      <div class="section-header">
+        <div class="section-num">15</div>
+        <div class="section-title">家賃・光熱費・保険料の支払方法</div>
+      </div>
+      <div class="section-body">
+        <div class="section-note">それぞれ該当するものを選択してください。口座振替の場合は引き落とし先口座と口座名義人もご入力ください。</div>
+        <div id="payment-list">
+          <div class="repeat-block pay-block" style="margin-bottom:14px;">
+            <div class="field-group" style="margin-bottom:8px;"><span style="font-weight:500;font-size:14px;">家賃</span></div>
+            <div class="radio-group" style="margin-bottom:8px;">
+              <label class="radio-item"><input type="radio" name="pay_rent" value="口座振替" onchange="togglePayDetail(this)"> 口座振替</label>
+              <label class="radio-item"><input type="radio" name="pay_rent" value="現金払い" onchange="togglePayDetail(this)"> 現金払い</label>
+              <label class="radio-item"><input type="radio" name="pay_rent" value="その他" onchange="togglePayDetail(this)"> その他</label>
+            </div>
+            <!-- 口座振替 詳細 -->
+            <div class="pay-furikae-detail cond-panel">
+              <div class="field-row">
+                <div class="field-group">
+                  <label class="field-label">引き落とし先口座（銀行名・支店名）</label>
+                  <input type="text" name="pay_rent_bank" placeholder="例：〇〇銀行 △△支店">
+                </div>
+                <div class="field-group">
+                  <label class="field-label">口座名義人</label>
+                  <div class="radio-group" style="flex-wrap:wrap;gap:8px;" onchange="togglePayHolder(this.closest('.pay-furikae-detail'))">
+                    <label class="radio-item"><input type="radio" name="pay_rent_holder" value="本人"> 本人</label>
+                    <label class="radio-item"><input type="radio" name="pay_rent_holder" value="配偶者"> 配偶者</label>
+                    <label class="radio-item"><input type="radio" name="pay_rent_holder" value="親"> 親</label>
+                    <label class="radio-item"><input type="radio" name="pay_rent_holder" value="その他"> その他（同居人含む）</label>
+                  </div>
+                  <div class="pay-holder-other cond-panel" style="margin-top:8px;">
+                    <input type="text" name="pay_rent_holder_other" placeholder="氏名・続柄を入力">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- その他 詳細 -->
+            <div class="pay-sonota-detail cond-panel">
+              <label class="field-label" style="margin-bottom:8px;">その他の内容を選択してください</label>
+              <div class="radio-group" style="flex-wrap:wrap;gap:10px;" onchange="togglePaySonota(this.closest('.pay-sonota-detail'))">
+                <label class="radio-item"><input type="radio" name="pay_rent_sonota" value="給料天引き"> 給料天引き</label>
+                <label class="radio-item"><input type="radio" name="pay_rent_sonota" value="会社負担（社宅等）"> 会社負担（社宅等）</label>
+                <label class="radio-item"><input type="radio" name="pay_rent_sonota" value="その他"> それ以外</label>
+              </div>
+              <div class="pay-sonota-free cond-panel" style="margin-top:8px;">
+                <input type="text" name="pay_rent_sonota_free" placeholder="詳細をご記入ください">
+              </div>
+            </div>
+          </div>
+          <div class="repeat-block pay-block" style="margin-bottom:14px;">
+            <div class="field-group" style="margin-bottom:8px;"><span style="font-weight:500;font-size:14px;">電気代</span></div>
+            <div class="radio-group" style="margin-bottom:8px;">
+              <label class="radio-item"><input type="radio" name="pay_elec" value="口座振替" onchange="togglePayDetail(this)"> 口座振替</label>
+              <label class="radio-item"><input type="radio" name="pay_elec" value="現金払い" onchange="togglePayDetail(this)"> 現金払い</label>
+              <label class="radio-item"><input type="radio" name="pay_elec" value="その他" onchange="togglePayDetail(this)"> その他</label>
+            </div>
+            <!-- 口座振替 詳細 -->
+            <div class="pay-furikae-detail cond-panel">
+              <div class="field-row">
+                <div class="field-group">
+                  <label class="field-label">引き落とし先口座（銀行名・支店名）</label>
+                  <input type="text" name="pay_elec_bank" placeholder="例：〇〇銀行 △△支店">
+                </div>
+                <div class="field-group">
+                  <label class="field-label">口座名義人</label>
+                  <div class="radio-group" style="flex-wrap:wrap;gap:8px;" onchange="togglePayHolder(this.closest('.pay-furikae-detail'))">
+                    <label class="radio-item"><input type="radio" name="pay_elec_holder" value="本人"> 本人</label>
+                    <label class="radio-item"><input type="radio" name="pay_elec_holder" value="配偶者"> 配偶者</label>
+                    <label class="radio-item"><input type="radio" name="pay_elec_holder" value="親"> 親</label>
+                    <label class="radio-item"><input type="radio" name="pay_elec_holder" value="その他"> その他（同居人含む）</label>
+                  </div>
+                  <div class="pay-holder-other cond-panel" style="margin-top:8px;">
+                    <input type="text" name="pay_elec_holder_other" placeholder="氏名・続柄を入力">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- その他 詳細 -->
+            <div class="pay-sonota-detail cond-panel">
+              <label class="field-label" style="margin-bottom:8px;">その他の内容を選択してください</label>
+              <div class="radio-group" style="flex-wrap:wrap;gap:10px;" onchange="togglePaySonota(this.closest('.pay-sonota-detail'))">
+                <label class="radio-item"><input type="radio" name="pay_elec_sonota" value="給料天引き"> 給料天引き</label>
+                <label class="radio-item"><input type="radio" name="pay_elec_sonota" value="会社負担（社宅等）"> 会社負担（社宅等）</label>
+                <label class="radio-item"><input type="radio" name="pay_elec_sonota" value="その他"> それ以外</label>
+              </div>
+              <div class="pay-sonota-free cond-panel" style="margin-top:8px;">
+                <input type="text" name="pay_elec_sonota_free" placeholder="詳細をご記入ください">
+              </div>
+            </div>
+          </div>
+          <div class="repeat-block pay-block" style="margin-bottom:14px;">
+            <div class="field-group" style="margin-bottom:8px;"><span style="font-weight:500;font-size:14px;">ガス代</span></div>
+            <div class="radio-group" style="margin-bottom:8px;">
+              <label class="radio-item"><input type="radio" name="pay_gas" value="口座振替" onchange="togglePayDetail(this)"> 口座振替</label>
+              <label class="radio-item"><input type="radio" name="pay_gas" value="現金払い" onchange="togglePayDetail(this)"> 現金払い</label>
+              <label class="radio-item"><input type="radio" name="pay_gas" value="その他" onchange="togglePayDetail(this)"> その他</label>
+            </div>
+            <!-- 口座振替 詳細 -->
+            <div class="pay-furikae-detail cond-panel">
+              <div class="field-row">
+                <div class="field-group">
+                  <label class="field-label">引き落とし先口座（銀行名・支店名）</label>
+                  <input type="text" name="pay_gas_bank" placeholder="例：〇〇銀行 △△支店">
+                </div>
+                <div class="field-group">
+                  <label class="field-label">口座名義人</label>
+                  <div class="radio-group" style="flex-wrap:wrap;gap:8px;" onchange="togglePayHolder(this.closest('.pay-furikae-detail'))">
+                    <label class="radio-item"><input type="radio" name="pay_gas_holder" value="本人"> 本人</label>
+                    <label class="radio-item"><input type="radio" name="pay_gas_holder" value="配偶者"> 配偶者</label>
+                    <label class="radio-item"><input type="radio" name="pay_gas_holder" value="親"> 親</label>
+                    <label class="radio-item"><input type="radio" name="pay_gas_holder" value="その他"> その他（同居人含む）</label>
+                  </div>
+                  <div class="pay-holder-other cond-panel" style="margin-top:8px;">
+                    <input type="text" name="pay_gas_holder_other" placeholder="氏名・続柄を入力">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- その他 詳細 -->
+            <div class="pay-sonota-detail cond-panel">
+              <label class="field-label" style="margin-bottom:8px;">その他の内容を選択してください</label>
+              <div class="radio-group" style="flex-wrap:wrap;gap:10px;" onchange="togglePaySonota(this.closest('.pay-sonota-detail'))">
+                <label class="radio-item"><input type="radio" name="pay_gas_sonota" value="給料天引き"> 給料天引き</label>
+                <label class="radio-item"><input type="radio" name="pay_gas_sonota" value="会社負担（社宅等）"> 会社負担（社宅等）</label>
+                <label class="radio-item"><input type="radio" name="pay_gas_sonota" value="その他"> それ以外</label>
+              </div>
+              <div class="pay-sonota-free cond-panel" style="margin-top:8px;">
+                <input type="text" name="pay_gas_sonota_free" placeholder="詳細をご記入ください">
+              </div>
+            </div>
+          </div>
+          <div class="repeat-block pay-block" style="margin-bottom:14px;">
+            <div class="field-group" style="margin-bottom:8px;"><span style="font-weight:500;font-size:14px;">水道代</span></div>
+            <div class="radio-group" style="margin-bottom:8px;">
+              <label class="radio-item"><input type="radio" name="pay_water" value="口座振替" onchange="togglePayDetail(this)"> 口座振替</label>
+              <label class="radio-item"><input type="radio" name="pay_water" value="現金払い" onchange="togglePayDetail(this)"> 現金払い</label>
+              <label class="radio-item"><input type="radio" name="pay_water" value="その他" onchange="togglePayDetail(this)"> その他</label>
+            </div>
+            <!-- 口座振替 詳細 -->
+            <div class="pay-furikae-detail cond-panel">
+              <div class="field-row">
+                <div class="field-group">
+                  <label class="field-label">引き落とし先口座（銀行名・支店名）</label>
+                  <input type="text" name="pay_water_bank" placeholder="例：〇〇銀行 △△支店">
+                </div>
+                <div class="field-group">
+                  <label class="field-label">口座名義人</label>
+                  <div class="radio-group" style="flex-wrap:wrap;gap:8px;" onchange="togglePayHolder(this.closest('.pay-furikae-detail'))">
+                    <label class="radio-item"><input type="radio" name="pay_water_holder" value="本人"> 本人</label>
+                    <label class="radio-item"><input type="radio" name="pay_water_holder" value="配偶者"> 配偶者</label>
+                    <label class="radio-item"><input type="radio" name="pay_water_holder" value="親"> 親</label>
+                    <label class="radio-item"><input type="radio" name="pay_water_holder" value="その他"> その他（同居人含む）</label>
+                  </div>
+                  <div class="pay-holder-other cond-panel" style="margin-top:8px;">
+                    <input type="text" name="pay_water_holder_other" placeholder="氏名・続柄を入力">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- その他 詳細 -->
+            <div class="pay-sonota-detail cond-panel">
+              <label class="field-label" style="margin-bottom:8px;">その他の内容を選択してください</label>
+              <div class="radio-group" style="flex-wrap:wrap;gap:10px;" onchange="togglePaySonota(this.closest('.pay-sonota-detail'))">
+                <label class="radio-item"><input type="radio" name="pay_water_sonota" value="給料天引き"> 給料天引き</label>
+                <label class="radio-item"><input type="radio" name="pay_water_sonota" value="会社負担（社宅等）"> 会社負担（社宅等）</label>
+                <label class="radio-item"><input type="radio" name="pay_water_sonota" value="その他"> それ以外</label>
+              </div>
+              <div class="pay-sonota-free cond-panel" style="margin-top:8px;">
+                <input type="text" name="pay_water_sonota_free" placeholder="詳細をご記入ください">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="insurance-pay-list">
+          <div class="repeat-block pay-block" style="margin-bottom:14px;">
+            <div class="field-group" style="margin-bottom:8px;"><span style="font-weight:500;font-size:14px;">保険料①</span></div>
+            <div class="radio-group" style="margin-bottom:8px;">
+              <label class="radio-item"><input type="radio" name="pay_ins1" value="口座振替" onchange="togglePayDetail(this)"> 口座振替</label>
+              <label class="radio-item"><input type="radio" name="pay_ins1" value="現金払い" onchange="togglePayDetail(this)"> 現金払い</label>
+              <label class="radio-item"><input type="radio" name="pay_ins1" value="その他" onchange="togglePayDetail(this)"> その他</label>
+            </div>
+            <!-- 口座振替 詳細 -->
+            <div class="pay-furikae-detail cond-panel">
+              <div class="field-row">
+                <div class="field-group">
+                  <label class="field-label">引き落とし先口座（銀行名・支店名）</label>
+                  <input type="text" name="pay_ins1_bank" placeholder="例：〇〇銀行 △△支店">
+                </div>
+                <div class="field-group">
+                  <label class="field-label">口座名義人</label>
+                  <div class="radio-group" style="flex-wrap:wrap;gap:8px;" onchange="togglePayHolder(this.closest('.pay-furikae-detail'))">
+                    <label class="radio-item"><input type="radio" name="pay_ins1_holder" value="本人"> 本人</label>
+                    <label class="radio-item"><input type="radio" name="pay_ins1_holder" value="配偶者"> 配偶者</label>
+                    <label class="radio-item"><input type="radio" name="pay_ins1_holder" value="親"> 親</label>
+                    <label class="radio-item"><input type="radio" name="pay_ins1_holder" value="その他"> その他（同居人含む）</label>
+                  </div>
+                  <div class="pay-holder-other cond-panel" style="margin-top:8px;">
+                    <input type="text" name="pay_ins1_holder_other" placeholder="氏名・続柄を入力">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- その他 詳細 -->
+            <div class="pay-sonota-detail cond-panel">
+              <label class="field-label" style="margin-bottom:8px;">その他の内容を選択してください</label>
+              <div class="radio-group" style="flex-wrap:wrap;gap:10px;" onchange="togglePaySonota(this.closest('.pay-sonota-detail'))">
+                <label class="radio-item"><input type="radio" name="pay_ins1_sonota" value="給料天引き"> 給料天引き</label>
+                <label class="radio-item"><input type="radio" name="pay_ins1_sonota" value="会社負担（社宅等）"> 会社負担（社宅等）</label>
+                <label class="radio-item"><input type="radio" name="pay_ins1_sonota" value="その他"> それ以外</label>
+              </div>
+              <div class="pay-sonota-free cond-panel" style="margin-top:8px;">
+                <input type="text" name="pay_ins1_sonota_free" placeholder="詳細をご記入ください">
+              </div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="add-btn" onclick="addInsurancePay()">＋ 保険料を追加</button>
+      </div>
+    </div>
+
+    <!-- ======================== 16. 過去2年の財産売却 ======================== -->
+    <div class="section" data-section="16">
+      <div class="section-header">
+        <div class="section-num">16</div>
+        <div class="section-title">過去2年以内に10万円以上で売却した財産</div>
+      </div>
+      <div class="section-body">
+        <div class="section-note">貴金属・時計・物品・車・株など</div>
+        <div class="field-group">
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="past_sell" value="無し" onclick="toggleDetail('past-sell-detail', this, '有り')"> 無し</label>
+            <label class="radio-item"><input type="radio" name="past_sell" value="有り" onclick="toggleDetail('past-sell-detail', this, '有り')"> 有り</label>
+          </div>
+        </div>
+        <div id="past-sell-detail" class="cond-panel">
+          <div id="past-sell-list">
+            <div class="repeat-block">
+              <div class="repeat-block-title">売却品 1</div>
+              <div class="field-row">
+                <div class="field-group"><label class="field-label">品名</label><input type="text" name="sell_item[]"></div>
+                <div class="field-group"><label class="field-label">購入金額</label><div class="inline-unit"><input type="number" name="sell_buy_price[]"><span>円</span></div></div>
+              </div>
+              <div class="field-row">
+                <div class="field-group"><label class="field-label">購入時期</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="sell_buy_year[]" placeholder="年" style="width:70px"><span style="font-size:13px;">年</span><input type="text" name="sell_buy_month[]" placeholder="月" style="width:50px"><span style="font-size:13px;">月頃</span></div></div>
+                <div class="field-group"><label class="field-label">換金（売却）時期</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="sell_year[]" placeholder="年" style="width:70px"><span style="font-size:13px;">年</span><input type="text" name="sell_month[]" placeholder="月" style="width:50px"><span style="font-size:13px;">月頃</span></div></div>
+              </div>
+              <div class="field-group"><label class="field-label">換金額（売却額）</label><div class="inline-unit"><input type="number" name="sell_price[]"><span>円</span></div></div>
+            </div>
+          </div>
+          <button type="button" class="add-btn" onclick="addPastSell()">＋ 追加</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== 17. 過去2年の財産取得 ======================== -->
+    <div class="section" data-section="17">
+      <div class="section-header">
+        <div class="section-num">17</div>
+        <div class="section-title">過去2年以内に10万円以上の財産を得たこと</div>
+      </div>
+      <div class="section-body">
+        <div class="section-note">金品・現金・相続した土地・保険の解約返戻金・退職金など</div>
+        <div class="field-group">
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="past_gain" value="無し" onclick="toggleDetail('past-gain-detail', this, '有り')"> 無し</label>
+            <label class="radio-item"><input type="radio" name="past_gain" value="有り" onclick="toggleDetail('past-gain-detail', this, '有り')"> 有り</label>
+          </div>
+        </div>
+        <div id="past-gain-detail" class="cond-panel">
+          <div id="past-gain-list">
+            <div class="repeat-block">
+              <div class="repeat-block-title">取得財産 1</div>
+              <div class="field-row">
+                <div class="field-group"><label class="field-label">どのような財産か</label><input type="text" name="gain_item[]"></div>
+                <div class="field-group"><label class="field-label">金額</label><div class="inline-unit"><input type="number" name="gain_amount[]"><span>円</span></div></div>
+              </div>
+              <div class="field-row">
+                <div class="field-group"><label class="field-label">取得時期</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="gain_year[]" placeholder="年" style="width:70px"><span style="font-size:13px;">年</span><input type="text" name="gain_month[]" placeholder="月" style="width:50px"><span style="font-size:13px;">月頃</span></div></div>
+                <div class="field-group"><label class="field-label">何に使ったか</label><input type="text" name="gain_use[]"></div>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="add-btn" onclick="addGain()">＋ 追加</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================== 18. 不動産・車・バイク ======================== -->
+    <div class="section" data-section="18">
+      <div class="section-header">
+        <div class="section-num">18</div>
+        <div class="section-title">現在お持ちの不動産・自動車・バイク等</div>
+      </div>
+      <div class="section-body">
+        <div id="asset-list">
+          <div class="repeat-block">
+            <div class="repeat-block-title">財産 1</div>
+            <div class="field-group">
+              <label class="field-label">財産の種類</label>
+              <div class="radio-group" onchange="toggleAssetType(this.closest('.repeat-block'))">
+                <label class="radio-item"><input type="radio" name="asset_kind[]" value="不動産"> 不動産</label>
+                <label class="radio-item"><input type="radio" name="asset_kind[]" value="自動車"> 自動車</label>
+                <label class="radio-item"><input type="radio" name="asset_kind[]" value="バイク"> バイク（原付含む）</label>
+                <label class="radio-item"><input type="radio" name="asset_kind[]" value="その他"> その他</label>
+              </div>
+            </div>
+            <!-- 不動産のみ：住所入力 -->
+            <div class="asset-realestate cond-panel">
+              <div class="field-group"><label class="field-label">種別・所在地（例：土地・東京都〇〇区…）</label><input type="text" name="asset_address[]" placeholder="土地 / 建物の種別および住所"></div>
+            </div>
+            <!-- 自動車・バイク：車種・初年度登録 -->
+            <div class="asset-vehicle cond-panel">
+              <div class="field-row">
+                <div class="field-group"><label class="field-label">車種・メーカー</label><input type="text" name="asset_vehicle_model[]" placeholder="例：トヨタ プリウス"></div>
+                <div class="field-group"><label class="field-label">初年度登録</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="asset_first_reg_year[]" placeholder="年" style="width:70px"><span style="font-size:13px;">年</span><input type="text" name="asset_first_reg_month[]" placeholder="月" style="width:50px"><span style="font-size:13px;">月</span></div></div>
+              </div>
+            </div>
+            <!-- その他：品名 -->
+            <div class="asset-other cond-panel">
+              <div class="field-group"><label class="field-label">品名</label><input type="text" name="asset_other_name[]"></div>
+            </div>
+            <div class="field-row three">
+              <div class="field-group"><label class="field-label">購入金額</label><div class="inline-unit"><input type="number" name="asset_buy_price[]"><span>円</span></div></div>
+              <div class="field-group"><label class="field-label">購入時期</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="asset_buy_year[]" placeholder="年" style="width:70px"><span style="font-size:13px;">年</span><input type="text" name="asset_buy_month[]" placeholder="月" style="width:50px"><span style="font-size:13px;">月頃</span></div></div>
+              <div class="field-group"><label class="field-label">現在の評価額</label><div class="inline-unit"><input type="number" name="asset_value[]"><span>円</span></div></div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="add-btn" onclick="addAsset()">＋ 財産を追加</button>
+      </div>
+    </div>
+
+    <!-- ======================== 19. 負債が増えた経緯 ======================== -->
+    <div class="section" data-section="19">
+      <div class="section-header">
+        <div class="section-num">19</div>
+        <div class="section-title">負債が増えた経緯（借入理由・生活状況の詳細）</div>
+      </div>
+      <div class="section-body">
+        <div class="section-note">
+          ※ 各借入先について、借りた理由・きっかけ・当時の手取り収入・当時の返済額を詳細にご記入ください。<br>
+          ※ 生活費のために借り入れた場合は「なぜ生活費が不足したのか」「当時の勤務先・収入額」「生活状況」もご記入ください。<br>
+          ※ クレジットカード利用の場合は主に何を購入・支出したかをご記入ください。<br>
+          ※ 裁判所が最も重視するのがこの経緯です。全ての借入先について必ず記載してください。
+        </div>
+        <div id="history-list">
+          <div class="history-placeholder">
+            <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;background:var(--section-bg);border-radius:6px;border:1px dashed var(--border);">
+              弁護士が借入先を登録後、ここに各借入先の記入欄が自動表示されます。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div class="submit-area">
+      <button type="button" class="submit-btn" onclick="submitForm()">入力内容を確認・保存する</button>
+      <p class="submit-note">入力内容はJSONファイルとしてダウンロードできます。</p>
+    </div>
+
+  </form>
+</div>
+</div><!-- /#main-form-area -->
+
+<!-- Success Overlay -->
+<div id="success-overlay">
+  <div class="success-box">
+    <!-- 送信中 -->
+    <div id="state-sending">
+      <div class="success-icon" style="background:var(--navy-mid);">⏳</div>
+      <h2>送信中…</h2>
+      <p>データを送信しています。しばらくお待ちください。</p>
+    </div>
+    <!-- 送信成功 -->
+    <div id="state-done" style="display:none;">
+      <div class="success-icon">✓</div>
+      <h2>送信が完了しました</h2>
+      <p>ご入力いただきありがとうございます。<br>担当弁護士にデータが届きました。<br>このページは閉じていただいて構いません。</p>
+    </div>
+    <!-- 送信失敗 -->
+    <div id="state-error" style="display:none;">
+      <div class="success-icon" style="background:#b03030;">!</div>
+      <h2>送信できませんでした</h2>
+      <p>通信エラーが発生しました。<br>お手数ですが、もう一度お試しください。</p>
+      <button class="download-btn" style="margin-top:16px;width:100%;" onclick="retrySubmit()">再送信する</button>
+      <br>
+      <button style="background:none;border:none;margin-top:12px;color:#aaa;font-size:12px;cursor:pointer;width:100%;" onclick="document.getElementById('success-overlay').classList.remove('active')">戻って修正する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// ===== Setup Screen =====
+function setupAddCreditor() {
+  const list = document.getElementById('setup-creditor-list');
+  const rows = list.querySelectorAll('.setup-creditor-row');
+  const num = rows.length + 1;
+  const tpl = rows[0].cloneNode(true);
+  tpl.querySelector('.setup-creditor-num').textContent = num;
+  tpl.querySelectorAll('input').forEach(el => el.value = '');
+  // add remove button
+  const del = document.createElement('button');
+  del.type = 'button';
+  del.textContent = '削除';
+  del.style.cssText = 'background:#c0392b;color:#fff;border:none;border-radius:4px;padding:5px 10px;font-size:12px;cursor:pointer;';
+  del.onclick = function() {
+    tpl.remove();
+    // renumber
+    document.querySelectorAll('#setup-creditor-list .setup-creditor-num').forEach((el,i) => el.textContent = i+1);
+  };
+  tpl.appendChild(del);
+  list.appendChild(tpl);
+}
+
+// ---- 借入先ブロックをhistory-listに描画する共通関数 ----
+function buildHistoryBlocks(creditors) {
+  const histList = document.getElementById('history-list');
+  histList.innerHTML = '';
+  creditors.forEach((c, i) => {
+    const period = [c.era, c.year ? c.year+'年' : '', c.mon ? c.mon+'月' : ''].filter(Boolean).join('');
+    const placeholder = c.note
+      ? c.name + 'からの借り入れについて、' + c.note + 'など、借りた理由・きっかけ・当時の手取り収入・当時の返済額を詳しくご記入ください。'
+      : c.name + 'からの借り入れについて、借りた理由・きっかけ・当時の手取り収入額・当時の返済額をできる限り詳しくご記入ください。';
+    const block = document.createElement('div');
+    block.className = 'history-creditor-block';
+    block.innerHTML = `
+      <div class="history-creditor-header">
+        <span class="history-creditor-tag">借入先 ` + '${i+1}' + `</span>
+        <span class="history-creditor-name">` + '${c.name}' + `</span>
+        ` + '${period ? `<span class="history-creditor-period">${period}〜</span>` : ""}' + `
+      </div>
+      <div class="history-creditor-body">
+        <div class="history-creditor-note">
+          ✏️ <strong>` + '${c.name}' + `</strong>について以下の点を詳しくご記入ください：<br>
+          　① 借りた理由・きっかけ（生活費不足の場合はその原因も）<br>
+          　② 当時の手取り収入（勤務先・月額）<br>
+          　③ 当時の毎月の返済額<br>
+          　④ クレジットカードの場合は主な用途・購入内容
+        </div>
+        <div class="field-group">
+          <label class="field-label">借り始めた時期</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="text" name="hist_era[]" value="` + '${c.era}' + `" placeholder="元号（例：H・R）" style="width:90px">
+            <input type="text" name="hist_year[]" value="` + '${c.year}' + `" placeholder="年" style="width:60px">
+            <span style="font-size:13px;color:var(--text-muted)">年</span>
+            <input type="text" name="hist_month[]" value="` + '${c.mon}' + `" placeholder="月" style="width:50px">
+            <span style="font-size:13px;color:var(--text-muted)">月頃</span>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">借りた理由・きっかけ・当時の状況（できるだけ詳しく）</label>
+          <textarea name="hist_content[]" placeholder="` + '${placeholder}' + `" style="min-height:140px"></textarea>
+        </div>
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label">当時の手取り収入（月額）</label>
+            <div class="inline-unit">
+              <input type="text" name="hist_income[]" placeholder="例：手取り約18万円（〇〇株式会社勤務）">
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">当時の ` + '${c.name}' + ` への月々の返済額</label>
+            <div class="inline-unit">
+              <input type="number" name="hist_repay[]" style="width:110px">
+              <span>円 / 月</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    histList.appendChild(block);
+  });
+}
+
+function setupApply() {
+  const clientName = document.getElementById('setup-client-name').value.trim();
+  const rows = document.querySelectorAll('#setup-creditor-list .setup-creditor-row');
+  const creditors = [];
+  rows.forEach(row => {
+    const name = row.querySelector('.setup-creditor-name').value.trim();
+    const era  = row.querySelector('.setup-creditor-era').value.trim();
+    const year = row.querySelector('.setup-creditor-year').value.trim();
+    const mon  = row.querySelector('.setup-creditor-month').value.trim();
+    const note = row.querySelector('.setup-creditor-note').value.trim();
+    if(name) creditors.push({ name, era, year, mon, note });
+  });
+
+  if(creditors.length === 0) {
+    alert('借入先を1件以上入力してください。');
+    return;
+  }
+
+  // URLパラメータを生成して表示
+  const payload = JSON.stringify({ client: clientName, creditors });
+  const encoded = btoa(encodeURIComponent(payload));
+  const baseUrl = window.location.href.split('?')[0].split('#')[0];
+  const generatedUrl = baseUrl + '?d=' + encoded;
+
+  document.getElementById('generated-url').value = generatedUrl;
+  document.getElementById('setup-url-panel').style.display = 'block';
+  document.getElementById('copy-success').style.display = 'none';
+  document.querySelector('.setup-go-btn').textContent = '✓ URL生成済み（再生成する場合は再度クリック）';
+}
+
+function copyUrl() {
+  const urlInput = document.getElementById('generated-url');
+  urlInput.select();
+  urlInput.setSelectionRange(0, 99999); // スマートフォン対応
+  try {
+    navigator.clipboard.writeText(urlInput.value).then(() => {
+      showCopySuccess();
+    }).catch(() => {
+      document.execCommand('copy');
+      showCopySuccess();
+    });
+  } catch(e) {
+    document.execCommand('copy');
+    showCopySuccess();
+  }
+}
+function showCopySuccess() {
+  const el = document.getElementById('copy-success');
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 3000);
+}
+
+// ページ読み込み時：URLパラメータがあれば依頼者モードで起動
+function initFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const d = params.get('d');
+  if(!d) return; // パラメータなし＝弁護士セットアップ画面を表示
+
+  try {
+    const payload = JSON.parse(decodeURIComponent(atob(d)));
+    const clientName = payload.client || '';
+    const creditors  = payload.creditors || [];
+
+    if(clientName) {
+      document.querySelector('.site-header h1').textContent = clientName + ' 様　質問シート';
+    }
+    buildHistoryBlocks(creditors);
+
+    // 弁護士画面を非表示にして依頼者フォームを表示
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('main-form-area').classList.add('active');
+    updateProgress();
+  } catch(e) {
+    // パラメータが壊れていた場合はセットアップ画面を表示
+    console.warn('URL parameter parse error:', e);
+  }
+}
+
+
+function togglePayDetail(radio) {
+  const block = radio.closest('.pay-block');
+  const furikae = block.querySelector('.pay-furikae-detail');
+  const sonota  = block.querySelector('.pay-sonota-detail');
+  furikae.classList.toggle('active', radio.value === '口座振替');
+  sonota.classList.toggle('active',  radio.value === 'その他');
+  // 非表示になった側の入力をリセット
+  if(radio.value !== '口座振替') {
+    block.querySelector('.pay-holder-other')?.classList.remove('active');
+  }
+  if(radio.value !== 'その他') {
+    block.querySelector('.pay-sonota-free')?.classList.remove('active');
+  }
+}
+function togglePaySonota(detailEl) {
+  const val = detailEl.querySelector('input[type="radio"]:checked')?.value || '';
+  detailEl.querySelector('.pay-sonota-free').classList.toggle('active', val === 'その他');
+}
+function togglePayHolder(detailEl) {
+  const val = detailEl.querySelector('input[type="radio"]:checked')?.value || '';
+  const otherPanel = detailEl.querySelector('.pay-holder-other');
+  if(otherPanel) otherPanel.classList.toggle('active', val === 'その他');
+}
+// ---- Helpers ----
+function toggleDetail(id, radio, activeVal) {
+  document.getElementById(id).classList.toggle('active', radio.value === activeVal);
+}
+function toggleParents() {
+  const val = document.querySelector('input[name="parents_status"]:checked')?.value || '';
+  document.getElementById('father-deceased').classList.toggle('active', val.includes('父') || val === '両親とも亡くなっている');
+  document.getElementById('mother-deceased').classList.toggle('active', val.includes('母') || val === '両親とも亡くなっている');
+}
+function toggleHousing() {
+  const val = document.querySelector('input[name="housing_type"]:checked')?.value || '';
+  document.getElementById('housing-rental').classList.toggle('active', val === '賃貸住宅');
+  document.getElementById('housing-other').classList.toggle('active', val === 'ご自身以外の所有家屋');
+}
+function toggleFeeDetail() {
+  const val = document.querySelector('input[name="fee_source"]:checked')?.value || '';
+  document.getElementById('fee-detail').classList.toggle('active', val === '援助・借入');
+}
+function toggleTax() {
+  const val = document.querySelector('input[name="tax_arrears"]:checked')?.value || '';
+  document.getElementById('tax-detail').classList.toggle('active', val === '滞納あり');
+}
+function togglePersonalLoan() {
+  const val = document.querySelector('input[name="personal_loan"]:checked')?.value || '';
+  document.getElementById('personal-loan-detail').classList.toggle('active', val === '有る');
+}
+function toggleLawsuit() {
+  const val = document.querySelector('input[name="lawsuit"]:checked')?.value || '';
+  document.getElementById('lawsuit-detail').classList.toggle('active', val === '起こされている');
+}
+function togglePastBankruptcy() {
+  const val = document.querySelector('input[name="past_bankruptcy"]:checked')?.value || '';
+  document.getElementById('past-bankruptcy-detail').classList.toggle('active', val === '有る');
+}
+function toggleMenseki() {
+  const val = document.querySelector('input[name="menseki"]:checked')?.value || '';
+  document.getElementById('menseki-date').classList.toggle('active', val === '受けた');
+}
+function toggleDivorceDetail(radio) {
+  document.getElementById('divorce-detail').classList.toggle('active', radio.value === '有り');
+}
+function toggleDivorceTypes() {
+  const checked = [...document.querySelectorAll('input[name="divorce_type[]"]:checked')].map(el => el.value);
+  document.getElementById('div-zaisan').classList.toggle('active', checked.includes('財産分与'));
+  document.getElementById('div-isharyo').classList.toggle('active', checked.includes('慰謝料'));
+  document.getElementById('div-yoikuhi').classList.toggle('active', checked.includes('養育費'));
+}
+
+// ---- Dynamic add ----
+function cloneBlock(listId, titlePrefix, removeBtn = true) {
+  const list = document.getElementById(listId);
+  const blocks = list.querySelectorAll('.repeat-block');
+  const num = blocks.length + 1;
+  const tpl = blocks[0].cloneNode(true);
+  tpl.querySelector('.repeat-block-title').textContent = titlePrefix + ' ' + num;
+  tpl.querySelectorAll('input, textarea, select').forEach(el => { el.value = ''; if(el.type==='checkbox'||el.type==='radio') el.checked=false; });
+  if(removeBtn) {
+    const rb = document.createElement('button');
+    rb.type = 'button'; rb.className = 'remove-btn';
+    rb.textContent = '削除';
+    rb.onclick = () => { tpl.remove(); updateProgress(); };
+    tpl.appendChild(rb);
+  }
+  list.appendChild(tpl);
+  updateProgress();
+}
+
+function addCareer() { cloneBlock('career-list', '職歴'); }
+function addFamily() { cloneBlock('family-list', '子'); }
+function addMarriage() { cloneBlock('marriage-list', '婚姻歴'); }
+function addTax() { cloneBlock('tax-list', '滞納'); }
+function addPLoan() { cloneBlock('ploan-list', '借入'); }
+function addTravel() { cloneBlock('travel-list', '旅行'); }
+function addConvert() { cloneBlock('convert-list', '換金'); }
+function addBigbuy() { cloneBlock('bigbuy-list', '購入品'); }
+function addInsurance() { cloneBlock('insurance-list', '保険'); }
+function addBank() { cloneBlock('bank-list', '口座'); }
+function addInsurancePay() {
+  const list = document.getElementById('insurance-pay-list');
+  const existing = list.querySelectorAll('.pay-block');
+  const num = existing.length + 1;
+  const tpl = existing[0].cloneNode(true);
+  // タイトル更新
+  tpl.querySelector('span[style*="font-weight:500"]').textContent = '保険料' + '①②③④⑤⑥⑦⑧⑨⑩'.charAt(num - 1);
+  // ラジオ・インプットのnameをユニーク化
+  const uid = 'ins' + num;
+  tpl.querySelectorAll('input[type="radio"]').forEach(el => {
+    el.name = el.name.replace(/pay_ins\d+$/, 'pay_' + uid);
+    el.checked = false;
+  });
+  tpl.querySelectorAll('input[type="text"], input[type="number"]').forEach(el => {
+    el.name = el.name.replace(/pay_ins\d+/, 'pay_' + uid);
+    el.value = '';
+  });
+  // 口座振替詳細を閉じる
+  tpl.querySelectorAll('.pay-furikae-detail, .pay-holder-other').forEach(el => el.classList.remove('active'));
+  // onchange wire-up
+  tpl.querySelectorAll('input[type="radio"][value="口座振替"], input[type="radio"][value="現金払い"], input[type="radio"][value="その他"]').forEach(el => {
+    if(el.closest('.radio-group') && !el.closest('.pay-furikae-detail')) {
+      el.addEventListener('change', () => togglePayDetail(el));
+    }
+  });
+  tpl.querySelectorAll('.pay-furikae-detail input[type="radio"]').forEach(el => {
+    el.addEventListener('change', () => togglePayHolder(el.closest('.pay-furikae-detail')));
+  });
+  tpl.querySelectorAll('.pay-sonota-detail input[type="radio"]').forEach(el => {
+    el.addEventListener('change', () => togglePaySonota(el.closest('.pay-sonota-detail')));
+  });
+  // 削除ボタン追加
+  const del = document.createElement('button');
+  del.type = 'button'; del.className = 'remove-btn';
+  del.textContent = '削除';
+  del.onclick = () => { tpl.remove(); updateProgress(); };
+  tpl.appendChild(del);
+  list.appendChild(tpl);
+  updateProgress();
+}
+function addPastSell() { cloneBlock('past-sell-list', '売却品'); }
+function addGain() { cloneBlock('past-gain-list', '取得財産'); }
+function toggleAssetType(block) {
+  const val = block.querySelector('input[name="asset_kind[]"]:checked')?.value || '';
+  block.querySelector('.asset-realestate').classList.toggle('active', val === '不動産');
+  block.querySelector('.asset-vehicle').classList.toggle('active', val === '自動車' || val === 'バイク');
+  block.querySelector('.asset-other').classList.toggle('active', val === 'その他');
+}
+function addAsset() {
+  cloneBlock('asset-list', '財産');
+  // wire up radio change for newly cloned block
+  const list = document.getElementById('asset-list');
+  const blocks = list.querySelectorAll('.repeat-block');
+  const newBlock = blocks[blocks.length - 1];
+  newBlock.querySelector('.radio-group').addEventListener('change', () => toggleAssetType(newBlock));
+}
+
+function addHistory() { cloneBlock('history-list', '経緯'); }
+
+// ---- Progress ----
+function updateProgress() {
+  const sections = document.querySelectorAll('.section');
+  let filled = 0;
+  sections.forEach(sec => {
+    const inputs = sec.querySelectorAll('input:not([type=checkbox]):not([type=radio]), textarea, select');
+    const checks = sec.querySelectorAll('input[type=checkbox]:checked, input[type=radio]:checked');
+    let hasValue = checks.length > 0;
+    inputs.forEach(el => { if(el.value.trim()) hasValue = true; });
+    if(hasValue) filled++;
+  });
+  const pct = Math.round(filled / sections.length * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = filled + ' / ' + sections.length + ' セクション';
+}
+document.getElementById('mainForm').addEventListener('change', updateProgress);
+document.getElementById('mainForm').addEventListener('input', updateProgress);
+updateProgress();
+initFromUrl();
+
+// wire up first asset block's type selector
+(function() {
+  const firstBlock = document.querySelector('#asset-list .repeat-block');
+  if(firstBlock) {
+    firstBlock.querySelector('.radio-group').addEventListener('change', () => toggleAssetType(firstBlock));
+  }
+})();
+
+// ---- Collect data ----
+function collectFormData() {
+  const form = document.getElementById('mainForm');
+  const data = {};
+  
+  // Simple named fields
+  form.querySelectorAll('[name]:not([name$="[]"])').forEach(el => {
+    const n = el.name;
+    if(el.type === 'radio') { if(el.checked) data[n] = el.value; }
+    else if(el.type === 'checkbox') { if(el.checked) { if(!data[n]) data[n] = []; data[n].push(el.value); } }
+    else { data[n] = el.value; }
+  });
+
+  // Array fields
+  const arrayFields = {};
+  form.querySelectorAll('[name$="[]"]').forEach(el => {
+    const n = el.name.slice(0,-2);
+    if(!arrayFields[n]) arrayFields[n] = [];
+  });
+  
+  for(const fname in arrayFields) {
+    const els = form.querySelectorAll('[name="' + fname + '[]"]');
+    const vals = [];
+    els.forEach(el => {
+      if(el.type === 'checkbox') { if(el.checked) vals.push(el.value); }
+      else if(el.type === 'radio') { if(el.checked) vals.push(el.value); }
+      else vals.push(el.value);
+    });
+    data[fname] = vals;
+  }
+  
+  return data;
+}
+
+const GOOGLE_SUBMIT_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSe5Rr7H9St3Q8uYBT2v-h_-ACm8mLwM7hKDSP0ftgoMk-2vZw/formResponse';
+const GOOGLE_ENTRY_ID   = 'entry.927929445';
+let   _lastFormData     = null; // 再送信用
+
+function showState(name) {
+  ['sending','done','error'].forEach(s => {
+    document.getElementById('state-'+s).style.display = s===name ? '' : 'none';
+  });
+}
+
+function submitForm() {
+  const data = collectFormData();
+  _lastFormData = data;
+  document.getElementById('success-overlay').classList.add('active');
+  showState('sending');
+  sendToGoogle(data);
+}
+
+function retrySubmit() {
+  showState('sending');
+  sendToGoogle(_lastFormData);
+}
+
+function sendToGoogle(data) {
+  // dataToReadableText でテキスト化してGoogleフォームの1フィールドに送る
+  const text = dataToReadableText(data);
+  const body = new FormData();
+  body.append(GOOGLE_ENTRY_ID, text);
+
+  // Googleフォームはno-cors limitがあるためfetchのno-corsモードを使用
+  // no-corsは成功/失敗を検知できないため、5秒後に成功扱いにするタイムアウトで対応
+  let settled = false;
+
+  fetch(GOOGLE_SUBMIT_URL, {
+    method: 'POST',
+    mode:   'no-cors',
+    body:   body,
+  }).then(() => {
+    if(!settled) { settled = true; showState('done'); }
+  }).catch(() => {
+    if(!settled) { settled = true; showState('error'); }
+  });
+
+  // no-corsは常にopaque responseで例外も出ないため、5秒でフォールバック成功表示
+  setTimeout(() => {
+    if(!settled) { settled = true; showState('done'); }
+  }, 5000);
+}
+
+// JSONデータを人間が読めるテキストに変換
+function dataToReadableText(data) {
+  const labelMap = {
+    career_from_year:'就業開始年', career_from_month:'就業開始月',
+    career_to_year:'就業終了年', career_to_month:'就業終了月',
+    career_company:'勤務先', career_job:'職種', career_income:'手取月収（万円）',
+    edu_era:'元号', edu_year:'卒業年', edu_month:'卒業月', edu_day:'卒業日',
+    edu_level:'学校種別', edu_result:'卒業/中退',
+    family_name_father:'父：氏名', family_dob_father:'父：生年月日', family_job_father:'父：職業', family_income_father:'父：月収', family_live_father:'父：同居/別居',
+    family_name_mother:'母：氏名', family_dob_mother:'母：生年月日', family_job_mother:'母：職業', family_income_mother:'母：月収', family_live_mother:'母：同居/別居',
+    family_name_spouse:'配偶者：氏名', family_dob_spouse:'配偶者：生年月日', family_job_spouse:'配偶者：職業', family_income_spouse:'配偶者：月収', family_live_spouse:'配偶者：同居/別居',
+    parents_status:'両親の状況',
+    father_death_year:'父死亡年', father_death_month:'父死亡月', father_estate:'父の財産', father_inherit:'父：相続状況',
+    mother_death_year:'母死亡年', mother_death_month:'母死亡月', mother_estate:'母の財産', mother_inherit:'母：相続状況',
+    marry_year:'結婚年', marry_month:'結婚月', divorce_year:'離婚年', divorce_month:'離婚月', ex_name:'相手方氏名',
+    divorce_agreement:'取り決め', divorce_party:'取り決め相手',
+    housing_type:'住居種別', rent_contractor:'賃貸契約者',
+    fee_source:'費用調達方法', fee_provider_name:'援助者氏名', fee_provider_rel:'援助者関係', fee_type:'援助/借入',
+    tax_arrears:'税金滞納', tax_type:'滞納種類', tax_amount:'滞納金額',
+    personal_loan:'個人借入', ploan_name:'借入相手', ploan_rel:'関係', ploan_amount:'金額',
+    monthly_repayment:'月の約定返済額（万円）',
+    lawsuit:'訴訟等',
+    past_bankruptcy:'過去の破産', bankrupt_court:'申立裁判所', bankrupt_branch:'支部', bankrupt_year:'申立年', bankrupt_month:'申立月', menseki:'免責決定',
+    bar:'水商売', gamble:'ギャンブル', invest:'投資', travel:'海外旅行', convert:'換金', bigbuy:'高額購入',
+    past_sell:'財産売却', past_gain:'財産取得',
+    ins_company:'保険会社', ins_refund:'解約返戻金',
+    bank_name:'銀行名', bank_branch:'支店', bank_balance:'残高', bank_date:'記帳日',
+    hist_era:'借入元号', hist_year:'借入年', hist_month:'借入月', hist_content:'経緯', hist_income:'当時の収入', hist_repay:'当時の返済額',
+    asset_kind:'財産種別', asset_address:'不動産住所', asset_vehicle_model:'車種', asset_first_reg_year:'初年度登録年', asset_buy_price:'購入金額', asset_value:'現在の評価額',
+  };
+  let lines = ['【質問シート回答内容】', '送信日時：' + new Date().toLocaleString('ja-JP'), ''];
+  for(const [key, val] of Object.entries(data)) {
+    if(!val || (Array.isArray(val) && val.every(v => !v))) continue;
+    const label = labelMap[key] || key;
+    const display = Array.isArray(val) ? val.filter(v=>v).join(' / ') : val;
+    if(display) lines.push(label + '：' + display);
+  }
+  return lines.join('\n');
+}
+
+function copyFormText() {
+  const data = collectFormData();
+  const text = dataToReadableText(data);
+  const okEl = document.getElementById('success-copy-ok');
+  try {
+    navigator.clipboard.writeText(text).then(() => {
+      okEl.style.display = 'block';
+      setTimeout(() => okEl.style.display = 'none', 5000);
+    }).catch(() => {
+      fallbackCopy(text, okEl);
+    });
+  } catch(e) {
+    fallbackCopy(text, okEl);
+  }
+}
+function fallbackCopy(text, okEl) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  okEl.style.display = 'block';
+  setTimeout(() => okEl.style.display = 'none', 5000);
+}
+
+function downloadJSON() {
+  const data = collectFormData();
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '質問シート_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
