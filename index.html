@@ -1405,12 +1405,26 @@
         <div id="bank-list">
           <div class="repeat-block">
             <div class="repeat-block-title">口座 1</div>
-            <div class="field-row three">
+            <div class="field-row">
               <div class="field-group"><label class="field-label">銀行名</label><input type="text" name="bank_name[]"></div>
               <div class="field-group"><label class="field-label">支店名</label><input type="text" name="bank_branch[]"></div>
-              <div class="field-group"><label class="field-label">預金残高</label><div class="inline-unit"><input type="number" name="bank_balance[]"><span>円</span></div></div>
             </div>
-            <div class="field-group"><label class="field-label">記帳日</label><input type="date" name="bank_date[]" style="width:180px"></div>
+            <div class="field-row">
+              <div class="field-group">
+                <label class="field-label">口座種別</label>
+                <div class="radio-group">
+                  <label class="radio-item"><input type="radio" name="bank_type_1" value="普通"> 普通</label>
+                  <label class="radio-item"><input type="radio" name="bank_type_1" value="当座"> 当座</label>
+                  <label class="radio-item"><input type="radio" name="bank_type_1" value="貯蓄"> 貯蓄</label>
+                  <label class="radio-item"><input type="radio" name="bank_type_1" value="定期"> 定期</label>
+                </div>
+              </div>
+              <div class="field-group"><label class="field-label">口座番号</label><input type="text" name="bank_number[]" placeholder="例：1234567"></div>
+            </div>
+            <div class="field-row">
+              <div class="field-group"><label class="field-label">預金残高</label><div class="inline-unit"><input type="number" name="bank_balance[]"><span>円</span></div></div>
+              <div class="field-group"><label class="field-label">記帳日</label><input type="date" name="bank_date[]" style="width:180px"></div>
+            </div>
           </div>
         </div>
         <button type="button" class="add-btn" onclick="addBank()">＋ 口座を追加</button>
@@ -2134,7 +2148,28 @@ function addTravel() { cloneBlock('travel-list', '旅行'); }
 function addConvert() { cloneBlock('convert-list', '換金'); }
 function addBigbuy() { cloneBlock('bigbuy-list', '購入品'); }
 function addInsurance() { cloneBlock('insurance-list', '保険'); }
-function addBank() { cloneBlock('bank-list', '口座'); }
+function addBank() {
+  const list = document.getElementById('bank-list');
+  const blocks = list.querySelectorAll('.repeat-block');
+  const num = blocks.length + 1;
+  const tpl = blocks[0].cloneNode(true);
+  tpl.querySelector('.repeat-block-title').textContent = '口座 ' + num;
+  tpl.querySelectorAll('input').forEach(el => {
+    el.value = '';
+    if(el.type === 'radio') {
+      el.checked = false;
+      // bank_type_1 → bank_type_N にユニーク化
+      el.name = el.name.replace(/bank_type_\d+/, 'bank_type_' + num);
+    }
+  });
+  const rb = document.createElement('button');
+  rb.type = 'button'; rb.className = 'remove-btn';
+  rb.textContent = '削除';
+  rb.onclick = () => { tpl.remove(); updateProgress(); };
+  tpl.appendChild(rb);
+  list.appendChild(tpl);
+  updateProgress();
+}
 function addInsurancePay() {
   const list = document.getElementById('insurance-pay-list');
   const existing = list.querySelectorAll('.pay-block');
@@ -2344,7 +2379,7 @@ function dataToReadableText(data) {
     past_gain:'財産取得の有無', gain_item:'取得財産の内容', gain_amount:'取得金額', gain_year:'取得年', gain_month:'取得月', gain_use:'取得財産の使途',
     ins_company:'保険会社名', ins_policy_no:'証券番号', ins_refund:'解約返戻金額',
     ins_refund_yn_1:'保険①：解約返戻金の有無', ins_refund_yn_2:'保険②：解約返戻金の有無', ins_refund_yn_3:'保険③：解約返戻金の有無', ins_refund_yn_4:'保険④：解約返戻金の有無',
-    bank_name:'銀行名', bank_branch:'支店名', bank_balance:'預金残高', bank_date:'記帳日',
+    bank_name:'銀行名', bank_branch:'支店名', bank_number:'口座番号', bank_balance:'預金残高', bank_date:'記帳日', bank_type_1:'口座種別①', bank_type_2:'口座種別②', bank_type_3:'口座種別③', bank_type_4:'口座種別④', bank_type_5:'口座種別⑤',
     pay_rent:'家賃の支払方法', pay_rent_bank:'家賃：引落口座', pay_rent_holder:'家賃：口座名義人', pay_rent_holder_other:'家賃：口座名義人（その他）', pay_rent_sonota:'家賃：その他の内容', pay_rent_sonota_free:'家賃：その他詳細',
     pay_elec:'電気代の支払方法', pay_elec_bank:'電気代：引落口座', pay_elec_holder:'電気代：口座名義人', pay_elec_holder_other:'電気代：口座名義人（その他）', pay_elec_sonota:'電気代：その他の内容',
     pay_gas:'ガス代の支払方法', pay_gas_bank:'ガス代：引落口座', pay_gas_holder:'ガス代：口座名義人', pay_gas_holder_other:'ガス代：口座名義人（その他）', pay_gas_sonota:'ガス代：その他の内容',
@@ -2365,6 +2400,17 @@ function dataToReadableText(data) {
     menseki_year:'免責決定年', menseki_month:'免責決定月',
     bankrupt_court:'申立裁判所', bankrupt_branch:'支部',
     hist_era:'借入時の元号', hist_year:'借入年', hist_month:'借入月', hist_content:'借入の経緯詳細', hist_income:'当時の手取り収入', hist_repay:'当時の月々の返済額',
+    // 父母の財産種類
+    father_estate_type:'父：財産の内容', mother_estate_type:'母：財産の内容',
+    // 投資の種類
+    invest_type:'投資の種類', invest_type_other:'投資の種類（その他）',
+    // 口座・銀行追加分
+    bank_number:'口座番号', bank_type_1:'口座種別①', bank_type_2:'口座種別②', bank_type_3:'口座種別③', bank_type_4:'口座種別④', bank_type_5:'口座種別⑤',
+    // 保険証券番号
+    ins_policy_no:'証券番号',
+    // 依頼者基本情報
+    client_name:'依頼者氏名', client_name_kana:'フリガナ',
+    client_dob_era:'生年月日（元号）', client_dob_year:'生年月日（年）', client_dob_month:'生年月日（月）', client_dob_day:'生年月日（日）',
   };
   // 依頼者名・生年月日を先頭に追加
   const clientNameVal = (document.querySelector('input[name="client_name"]') || {}).value || '';
@@ -2386,7 +2432,20 @@ function dataToReadableText(data) {
   ];
   for(const [key, val] of Object.entries(data)) {
     if(!val || (Array.isArray(val) && val.every(v => !v))) continue;
-    const label = labelMap[key] || key;
+    let label = labelMap[key];
+    if(!label) {
+      // ギャンブル種類別の動的フィールドを日本語化
+      const gambleMatch = key.match(/^gamble_(.+)_(from_year|from_month|to_year|to_month|freq|min|max)$/);
+      if(gambleMatch) {
+        const typeLabels = { from_year:'開始年', from_month:'開始月', to_year:'終了年', to_month:'終了月', freq:'頻度（回/月）', min:'最低使用額', max:'最高使用額' };
+        label = gambleMatch[1] + '：' + (typeLabels[gambleMatch[2]] || gambleMatch[2]);
+      }
+      // 口座種別の動的フィールド
+      const bankTypeMatch = key.match(/^bank_type_(\d+)$/);
+      if(bankTypeMatch) label = '口座種別（' + bankTypeMatch[1] + '番目）';
+      // それでも未解決ならキーをそのまま使用
+      if(!label) label = key;
+    }
     const display = Array.isArray(val) ? val.filter(v=>v).join(' / ') : val;
     if(display) lines.push(label + '：' + display);
   }
