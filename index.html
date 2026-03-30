@@ -2321,33 +2321,46 @@ const COURT_MAP = [
 function getCourtByAddress(pref, city) {
   if(!pref && !city) return null;
 
-  // 都道府県で絞り込み
+  // 都道府県を正規化（「都」「道」「府」「県」なしでも対応）
+  const normPref = (pref || '').trim();
+
   const prefMatches = COURT_MAP.filter(entry => {
-    if(!pref) return true;
-    return entry.pref === pref ||
-           entry.pref.replace(/[都道府県]$/, '') === pref.replace(/[都道府県]$/, '');
+    if(!normPref) return true;
+    const ep = entry.pref.replace(/[都道府県]$/, '');
+    const ip = normPref.replace(/[都道府県]$/, '');
+    return ep === ip || entry.pref === normPref;
   });
 
-  if(prefMatches.length === 0) return null;
-
-  // 市区町村で前方一致（長い順に試みる）
-  if(city) {
-    const sortedByLength = prefMatches.slice().sort((a,b) => 0);
-    for(const entry of sortedByLength) {
-      for(const c of entry.cities) {
-        if(city.startsWith(c) || c.startsWith(city.replace(/[市区町村郡].*/, ''))) {
-          return entry.court;
-        }
-      }
-    }
-    // 市区町村で一致しない場合は都道府県の最初のエントリの本庁を返す
-    const mainCourt = prefMatches.find(e => !e.court.includes('支部'));
-    return mainCourt ? mainCourt.court + '（※要確認）' : prefMatches[0].court + '（※要確認）';
+  if(prefMatches.length === 0) {
+    // 都道府県が一致しない場合はnullではなく「判定不可」を返す
+    return normPref ? normPref + '（管轄裁判所：要確認）' : null;
   }
 
-  // 都道府県のみの場合は本庁
+  // 市区町村を正規化（番地・丁目以降を除去）
+  const normCity = (city || '').trim().replace(/[0-9０-９\-－]+.*$/, '').trim();
+
+  if(normCity) {
+    // 市区町村名で前方一致（長い候補から優先して試みる）
+    const allCities = [];
+    prefMatches.forEach(entry => {
+      entry.cities.forEach(c => allCities.push({ c, court: entry.court }));
+    });
+    // 長い候補から優先（「堺市北区」が「堺市」より先にマッチ）
+    allCities.sort((a, b) => b.c.length - a.c.length);
+
+    for(const { c, court } of allCities) {
+      if(normCity.startsWith(c) || c.startsWith(normCity.replace(/[市区町村郡].*$/, ''))) {
+        return court;
+      }
+    }
+    // 一致しない場合は本庁（要確認付き）
+    const mainCourt = prefMatches.find(e => !e.court.includes('支部'));
+    return (mainCourt ? mainCourt.court : prefMatches[0].court) + '（※支部は要確認）';
+  }
+
+  // 市区町村未入力の場合は本庁
   const mainCourt = prefMatches.find(e => !e.court.includes('支部'));
-  return mainCourt ? mainCourt.court + '（※市区町村を入力すると支部まで特定できます）' : prefMatches[0].court;
+  return (mainCourt ? mainCourt.court : prefMatches[0].court) + '（※市区町村を入力すると支部まで特定できます）';
 }
 
 // ---- Helpers ----
