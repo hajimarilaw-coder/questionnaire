@@ -634,30 +634,36 @@
     border: 1px solid var(--border);
     border-radius: 4px;
     padding: 10px 12px;
-    font-size: 12px;
-    color: var(--text);
-    background: var(--white);
+    font-size: 11px;
+    color: #999;
+    background: #f5f5f5;
     font-family: monospace;
     outline: none;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: none;
+    cursor: default;
   }
   .url-copy-btn {
-    background: var(--navy);
+    background: #e65c00;
     color: var(--white);
     border: none;
-    border-radius: 4px;
-    padding: 10px 20px;
+    border-radius: 6px;
+    padding: 12px 28px;
     font-family: "Noto Sans JP", sans-serif;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 15px;
+    font-weight: 700;
     cursor: pointer;
     white-space: nowrap;
     transition: background 0.2s;
     flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(230,92,0,0.3);
   }
-  .url-copy-btn:hover { background: var(--navy-light); }
+  .url-copy-btn:hover { background: #cc4f00; }
+  .url-copy-btn:active { transform: scale(0.97); }
   .copy-success {
     color: #2e7d32;
     font-size: 13px;
@@ -722,13 +728,13 @@
     <div id="setup-url-panel" style="display:none;">
       <div class="url-panel-inner">
         <div class="url-panel-title">✅ 準備完了　依頼者にこのURLを送ってください</div>
-        <div class="url-panel-desc">必ず「コピー」ボタンを使ってURLをコピーしてください。<br>URLを直接選択・コピーすると途中で切れてアクセスできなくなります。</div>
+        <div class="url-panel-desc" style="background:#fff3e0;border:1px solid #ffb74d;border-radius:6px;padding:10px 14px;margin-bottom:12px;color:#e65c00;font-weight:600;">
+          ⚠️ 必ず「コピー」ボタンを押してURLをコピーしてください。<br>
+          <span style="font-weight:400;color:#555;">URLを直接クリック・選択してコピーすると途中で切れてエラーになります。</span>
+        </div>
         <div class="url-box-wrap">
-          <input type="text" id="generated-url" class="url-box" readonly
-            style="color:#888;font-size:12px;cursor:default;"
-            onfocus="this.blur()"
-            onmousedown="return false;">
-          <button type="button" class="url-copy-btn" onclick="copyUrl()">コピー</button>
+          <input type="text" id="generated-url" class="url-box" readonly tabindex="-1">
+          <button type="button" class="url-copy-btn" onclick="copyUrl()">📋 コピー</button>
         </div>
         <div id="url-char-count" style="font-size:11px;color:#888;margin-top:4px;text-align:right;"></div>
         <div id="copy-success" class="copy-success" style="display:none;">✓ コピーしました（<span id="copied-char-count"></span>文字）　LINEまたはメールに貼り付けてください</div>
