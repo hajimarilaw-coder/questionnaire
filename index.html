@@ -722,12 +722,16 @@
     <div id="setup-url-panel" style="display:none;">
       <div class="url-panel-inner">
         <div class="url-panel-title">✅ 準備完了　依頼者にこのURLを送ってください</div>
-        <div class="url-panel-desc">下のURLをコピーしてLINEまたはメールで依頼者に送付してください。</div>
+        <div class="url-panel-desc">必ず「コピー」ボタンを使ってURLをコピーしてください。<br>URLを直接選択・コピーすると途中で切れてアクセスできなくなります。</div>
         <div class="url-box-wrap">
-          <input type="text" id="generated-url" class="url-box" readonly>
+          <input type="text" id="generated-url" class="url-box" readonly
+            style="color:#888;font-size:12px;cursor:default;"
+            onfocus="this.blur()"
+            onmousedown="return false;">
           <button type="button" class="url-copy-btn" onclick="copyUrl()">コピー</button>
         </div>
-        <div id="copy-success" class="copy-success" style="display:none;">✓ コピーしました</div>
+        <div id="url-char-count" style="font-size:11px;color:#888;margin-top:4px;text-align:right;"></div>
+        <div id="copy-success" class="copy-success" style="display:none;">✓ コピーしました（<span id="copied-char-count"></span>文字）　LINEまたはメールに貼り付けてください</div>
         <div class="url-panel-note">※ このURLを開いた依頼者には、弁護士記入欄は表示されません。</div>
       </div>
     </div>
@@ -1986,6 +1990,7 @@ function setupApply() {
   document.getElementById('generated-url').value = generatedUrl;
   document.getElementById('setup-url-panel').style.display = 'block';
   document.getElementById('copy-success').style.display = 'none';
+  document.getElementById('url-char-count').textContent = 'URL文字数：' + generatedUrl.length + '文字';
   document.querySelector('.setup-go-btn').textContent = '✓ URL生成済み（再生成する場合は再度クリック）';
 }
 
@@ -2006,6 +2011,9 @@ function copyUrl() {
   }
 }
 function showCopySuccess() {
+  const copiedLen = document.getElementById('generated-url').value.length;
+  const copiedCount = document.getElementById('copied-char-count');
+  if(copiedCount) copiedCount.textContent = copiedLen;
   const el = document.getElementById('copy-success');
   el.style.display = 'block';
   setTimeout(() => el.style.display = 'none', 3000);
