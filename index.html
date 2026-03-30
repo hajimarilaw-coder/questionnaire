@@ -2704,12 +2704,33 @@ function dataToReadableText(data) {
   const dobMonth= (document.querySelector('input[name="client_dob_month"]') || {}).value || '';
   const dobDay  = (document.querySelector('input[name="client_dob_day"]') || {}).value || '';
   const dobStr  = [dobEra, dobYear ? dobYear+'年' : '', dobMonth ? dobMonth+'月' : '', dobDay ? dobDay+'日' : ''].filter(Boolean).join('');
+
+  // 元号→西暦変換して年齢を計算
+  function calcAge(era, year, month, day) {
+    if(!year) return null;
+    const eraOffset = { '昭和': 1925, '平成': 1988, '令和': 2018 };
+    const offset = eraOffset[era];
+    if(!offset) return null;
+    const birthYear  = offset + parseInt(year, 10);
+    const birthMonth = parseInt(month, 10) || 1;
+    const birthDay   = parseInt(day, 10) || 1;
+    const now = new Date();
+    let age = now.getFullYear() - birthYear;
+    const notYetBirthday = (now.getMonth() + 1) < birthMonth ||
+      ((now.getMonth() + 1) === birthMonth && now.getDate() < birthDay);
+    if(notYetBirthday) age--;
+    return age >= 0 ? age : null;
+  }
+  const clientAge = calcAge(dobEra, dobYear, dobMonth, dobDay);
+  const today = new Date();
+  const todayStr = today.getFullYear() + '年' + (today.getMonth()+1) + '月' + today.getDate() + '日';
+  const ageStr = clientAge !== null ? todayStr + '時点で' + clientAge + '歳' : null;
   let lines = [
     '【質問シート回答内容】',
     '━━━━━━━━━━━━━━━━━━',
     '依頼者氏名　：' + (clientNameVal || '（未入力）'),
     'フリガナ　　：' + (clientKanaVal || '（未入力）'),
-    '生年月日　　：' + (dobStr || '（未入力）'),
+    '生年月日　　：' + (dobStr || '（未入力）') + (ageStr ? '　（' + ageStr + '）' : ''),
     '電話番号　　：' + (clientPhoneVal || '（未入力）'),
     '住所　　　　：' + (clientAddrStr || '（未入力）'),
     '管轄裁判所　：' + (getCourtByAddress(clientPrefVal, clientCityVal) || '（住所を入力してください）'),
