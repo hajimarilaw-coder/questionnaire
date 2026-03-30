@@ -1896,6 +1896,7 @@ function buildHistoryBlocks(creditors) {
         '</div>' +
         '<div class="field-group">' +
           '<label class="field-label">借り始めた時期</label>' +
+          '<input type="hidden" name="hist_creditor[]" value="' + c.name + '">' +
           '<div style="display:flex;gap:8px;align-items:center;">' +
             '<input type="text" name="hist_era[]" value="' + c.era + '" placeholder="元号（例：H・R）" style="width:90px">' +
             '<input type="text" name="hist_year[]" value="' + c.year + '" placeholder="年" style="width:60px">' +
@@ -1946,8 +1947,37 @@ function setupApply() {
     return;
   }
 
-  // URLパラメータを生成して表示
-  const payload = JSON.stringify({ client: clientName, creditors });
+  // 元号→西暦変換して古い順にソート
+  const eraOffset = { 'H': 1988, 'h': 1988, '平': 1988, '平成': 1988,
+                      'R': 2018, 'r': 2018, '令': 2018, '令和': 2018,
+                      'S': 1925, 's': 1925, '昭': 1925, '昭和': 1925 };
+  function toWesternYear(era, year) {
+    if(!year) return 99999; // 年不明は末尾へ
+    const offset = eraOffset[era] || eraOffset[era.charAt(0)];
+    if(!offset) return 99999;
+    return offset + parseInt(year, 10);
+  }
+  creditors.sort((a, b) => {
+    const ya = toWesternYear(a.era, a.year);
+    const yb = toWesternYear(b.era, b.year);
+    if(ya !== yb) return ya - yb;
+    // 同年の場合は月でソート
+    const ma = parseInt(a.mon, 10) || 0;
+    const mb = parseInt(b.mon, 10) || 0;
+    return ma - mb;
+  });
+
+  // URLパラメータを生成（キー名を短縮してURL圧縮）
+  // c=依頼者名, r=借入先配列, n=名前, e=元号, y=年, m=月, t=メモ
+  const compressed = {
+    c: clientName,
+    r: creditors.map(cr => {
+      const obj = { n: cr.name, e: cr.era, y: cr.year, m: cr.mon };
+      if(cr.note) obj.t = cr.note; // メモが空なら省略
+      return obj;
+    })
+  };
+  const payload = JSON.stringify(compressed);
   // encodeURIComponentのみ使用（btoaは日本語非対応のため使わない）
   const encoded = encodeURIComponent(payload);
   const baseUrl = window.location.href.split('?')[0].split('#')[0];
@@ -1989,8 +2019,16 @@ function initFromUrl() {
 
   try {
     const payload = JSON.parse(decodeURIComponent(d));
-    const clientName = payload.client || '';
-    const creditors  = payload.creditors || [];
+    // 短縮フォーマット（c/r）と旧フォーマット（client/creditors）両対応
+    const clientName = payload.c || payload.client || '';
+    const rawCreditors = payload.r || payload.creditors || [];
+    const creditors = rawCreditors.map(cr => ({
+      name: cr.n || cr.name || '',
+      era:  cr.e || cr.era  || '',
+      year: cr.y || cr.year || '',
+      mon:  cr.m || cr.mon  || '',
+      note: cr.t || cr.note || ''
+    }));
 
     if(clientName) {
       document.querySelector('.site-header h1').textContent = clientName + ' 様　質問シート';
@@ -2431,7 +2469,30 @@ function cloneBlock(listId, titlePrefix, removeBtn = true) {
 }
 
 function addCareer() { cloneBlock('career-list', '職歴'); }
-function addFamily() { cloneBlock('family-list', '子'); }
+function addFamily() {
+  const list = document.getElementById('family-list');
+  const num = list.querySelectorAll('.family-child-block').length + 1;
+  const block = document.createElement('div');
+  block.className = 'repeat-block family-child-block';
+  block.innerHTML =
+    '<div class="repeat-block-title">子 ' + num + '</div>' +
+    '<div class="field-row three">' +
+      '<div class="field-group"><label class="field-label">氏名</label><input type="text" name="family_name_child[]" placeholder="氏名"></div>' +
+      '<div class="field-group"><label class="field-label">生年月日</label><input type="date" name="family_dob_child[]"></div>' +
+      '<div class="field-group"><label class="field-label">職業</label><input type="text" name="family_job_child[]" placeholder="学生・無職 等"></div>' +
+    '</div>' +
+    '<div class="field-row">' +
+      '<div class="field-group"><label class="field-label">月収（約）</label><div class="inline-unit"><input type="number" name="family_income_child[]" style="width:100px"><span>万円</span></div></div>' +
+      '<div class="field-group"><label class="field-label">同居 / 別居</label><div class="radio-group"><label class="radio-item"><input type="radio" name="family_live_child_' + num + '" value="同居"> 同居</label><label class="radio-item"><input type="radio" name="family_live_child_' + num + '" value="別居"> 別居</label></div></div>' +
+    '</div>';
+  const rb = document.createElement('button');
+  rb.type = 'button'; rb.className = 'remove-btn';
+  rb.textContent = '削除';
+  rb.onclick = () => { block.remove(); updateProgress(); };
+  block.appendChild(rb);
+  list.appendChild(block);
+  updateProgress();
+}
 function addMarriage() { cloneBlock('marriage-list', '婚姻歴'); }
 function addTax() { cloneBlock('tax-list', '滞納'); }
 function addPLoan() { cloneBlock('ploan-list', '借入'); }
@@ -2628,148 +2689,452 @@ function sendToGoogle(data) {
 
 // JSONデータを人間が読めるテキストに変換
 function dataToReadableText(data) {
-  const labelMap = {
-    client_name:'依頼者氏名', client_name_kana:'フリガナ', client_phone:'電話番号', client_zip:'郵便番号', client_address_pref:'住所（都道府県）', client_address_city:'住所（市区町村・番地）', client_address_bldg:'建物名・部屋番号',
-    client_dob_era:'生年月日（元号）', client_dob_year:'生年月日（年）', client_dob_month:'生年月日（月）', client_dob_day:'生年月日（日）',
-    career_from_year:'就業開始年', career_from_month:'就業開始月',
-    career_to_year:'就業終了年', career_to_month:'就業終了月',
-    career_company:'勤務先', career_job:'職種', career_income:'手取月収（万円）', career_type_1:'雇用形態（自営）', career_type_2:'雇用形態（法人代表者）', career_type_3:'雇用形態（勤め）', career_type_4:'雇用形態（パート・バイト）', career_type_5:'雇用形態（無職）', career_type_6:'雇用形態（その他）', career_type_other:'雇用形態（その他内容）',
-    edu_era:'元号', edu_year:'卒業年', edu_month:'卒業月', edu_day:'卒業日',
-    edu_level:'学校種別', edu_result:'卒業/中退',
-    family_name_father:'父：氏名', family_dob_father:'父：生年月日', family_job_father:'父：職業', family_income_father:'父：月収', family_live_father:'父：同居/別居',
-    family_name_mother:'母：氏名', family_dob_mother:'母：生年月日', family_job_mother:'母：職業', family_income_mother:'母：月収', family_live_mother:'母：同居/別居',
-    family_name_spouse:'配偶者：氏名', family_dob_spouse:'配偶者：生年月日', family_job_spouse:'配偶者：職業', family_income_spouse:'配偶者：月収', family_live_spouse:'配偶者：同居/別居',
-    parents_status:'両親の状況',
-    father_death_year:'父：死亡年', father_death_month:'父：死亡月', father_death_day:'父：死亡日', mother_death_day:'母：死亡日',
-    father_estate:'父：財産の有無', father_inherit:'父：相続状況',
-    mother_death_year:'母：死亡年', mother_death_month:'母：死亡月', mother_death_day:'母：死亡日',
-    mother_estate:'母：財産の有無', mother_inherit:'母：相続状況',
-    marry_year:'結婚年', marry_month:'結婚月', divorce_year:'離婚年', divorce_month:'離婚月', ex_name:'相手方氏名',
-    divorce_agreement:'離婚後の取り決め', divorce_type:'取り決めの種類', divorce_party:'取り決め相手',
-    divorce_zaisan_amount:'財産分与金額', divorce_isharyo_amount:'慰謝料金額',
-    divorce_yoikuhi_monthly:'養育費（月額）', divorce_yoikuhi_age:'養育費（何歳まで）', divorce_yoikuhi_child:'養育費対象の子',
-    housing_type:'住居種別', rent_contractor:'賃貸契約者', rent_other_name:'賃貸契約者氏名', rent_other_rel:'賃貸契約者続柄',
-    house_owner_name:'家屋所有者氏名', house_owner_rel:'家屋所有者との関係',
-    fee_source:'費用調達方法', fee_provider_name:'援助者氏名', fee_provider_rel:'援助者関係', fee_type:'援助/借入',
-    tax_arrears:'税金滞納', tax_type:'滞納種類', tax_amount:'滞納金額',
-    personal_loan:'個人借入', ploan_name:'借入相手', ploan_rel:'関係', ploan_amount:'金額',
-    monthly_repayment:'月の約定返済額（万円）',
-    lawsuit:'訴訟等', lawsuit_type:'訴訟等の種類',
-    past_bankruptcy:'過去の破産', bankrupt_court:'申立裁判所', bankrupt_branch:'支部', bankrupt_year:'申立年', bankrupt_month:'申立月', menseki:'免責決定', menseki_year:'免責年', menseki_month:'免責月',
-    bar:'水商売の有無', bar_where:'水商売の行先', bar_from_year:'水商売開始年', bar_from_month:'水商売開始月', bar_to_year:'水商売終了年', bar_to_month:'水商売終了月', bar_freq:'水商売の頻度（回/月）', bar_min:'水商売の最低使用額', bar_max:'水商売の最高使用額',
-    gamble:'ギャンブルの有無', gamble_type:'ギャンブルの種類',
-    gamble_競馬_from_year:'競馬：開始年', gamble_競馬_from_month:'競馬：開始月', gamble_競馬_to_year:'競馬：終了年', gamble_競馬_to_month:'競馬：終了月', gamble_競馬_freq:'競馬：頻度（回/月）', gamble_競馬_min:'競馬：最低使用額', gamble_競馬_max:'競馬：最高使用額',
-    gamble_競艇_from_year:'競艇：開始年', gamble_競艇_from_month:'競艇：開始月', gamble_競艇_to_year:'競艇：終了年', gamble_競艇_to_month:'競艇：終了月', gamble_競艇_freq:'競艇：頻度（回/月）', gamble_競艇_min:'競艇：最低使用額', gamble_競艇_max:'競艇：最高使用額',
-    'gamble_パチンコ_スロット_from_year':'パチンコ/スロット：開始年', 'gamble_パチンコ_スロット_from_month':'パチンコ/スロット：開始月', 'gamble_パチンコ_スロット_to_year':'パチンコ/スロット：終了年', 'gamble_パチンコ_スロット_to_month':'パチンコ/スロット：終了月', 'gamble_パチンコ_スロット_freq':'パチンコ/スロット：頻度（回/月）', 'gamble_パチンコ_スロット_min':'パチンコ/スロット：最低使用額', 'gamble_パチンコ_スロット_max':'パチンコ/スロット：最高使用額',
-    gamble_その他_from_year:'ギャンブル（その他）：開始年', gamble_その他_from_month:'ギャンブル（その他）：開始月', gamble_その他_to_year:'ギャンブル（その他）：終了年', gamble_その他_to_month:'ギャンブル（その他）：終了月', gamble_その他_freq:'ギャンブル（その他）：頻度（回/月）', gamble_その他_min:'ギャンブル（その他）：最低使用額', gamble_その他_max:'ギャンブル（その他）：最高使用額',
-    invest:'投資の有無', invest_from_year:'投資開始年', invest_from_month:'投資開始月', invest_to_year:'投資終了年', invest_to_month:'投資終了月', invest_total:'投資合計額', invest_loss:'投資損失額',
-    travel:'海外旅行の有無', travel_dest:'旅行先', travel_year:'旅行年', travel_month:'旅行月', travel_cost:'旅行費用',
-    convert:'換金の有無', convert_item:'換金品名', convert_buy_price:'換金品購入金額', convert_buy_year:'購入年', convert_buy_month:'購入月', convert_sell_year:'換金年', convert_sell_month:'換金月', convert_sell_price:'換金額',
-    bigbuy:'高額購入の有無', bigbuy_item:'高額購入品名', bigbuy_price:'高額購入金額', bigbuy_year:'高額購入年', bigbuy_month:'高額購入月', bigbuy_sell:'高額品売却額',
-    past_sell:'財産売却の有無', sell_item:'売却品名', sell_buy_price:'売却品購入金額', sell_buy_year:'売却品購入年', sell_buy_month:'売却品購入月', sell_year:'売却年', sell_month:'売却月', sell_price:'売却額',
-    past_gain:'財産取得の有無', gain_item:'取得財産の内容', gain_amount:'取得金額', gain_year:'取得年', gain_month:'取得月', gain_use:'取得財産の使途',
-    ins_company:'保険会社名', ins_policy_no:'証券番号', ins_refund:'解約返戻金額',
-    ins_refund_yn_1:'保険①：解約返戻金の有無', ins_refund_yn_2:'保険②：解約返戻金の有無', ins_refund_yn_3:'保険③：解約返戻金の有無', ins_refund_yn_4:'保険④：解約返戻金の有無',
-    bank_name:'銀行名', bank_branch:'支店名', bank_number:'口座番号', bank_balance:'預金残高', bank_date:'記帳日', bank_type_1:'口座種別①', bank_type_2:'口座種別②', bank_type_3:'口座種別③', bank_type_4:'口座種別④', bank_type_5:'口座種別⑤',
-    pay_rent:'家賃の支払方法', pay_rent_bank:'家賃：引落口座', pay_rent_holder:'家賃：口座名義人', pay_rent_holder_other:'家賃：口座名義人（その他）', pay_rent_sonota:'家賃：その他の内容', pay_rent_sonota_free:'家賃：その他詳細',
-    pay_elec:'電気代の支払方法', pay_elec_bank:'電気代：引落口座', pay_elec_holder:'電気代：口座名義人', pay_elec_holder_other:'電気代：口座名義人（その他）', pay_elec_sonota:'電気代：その他の内容',
-    pay_gas:'ガス代の支払方法', pay_gas_bank:'ガス代：引落口座', pay_gas_holder:'ガス代：口座名義人', pay_gas_holder_other:'ガス代：口座名義人（その他）', pay_gas_sonota:'ガス代：その他の内容',
-    pay_water:'水道代の支払方法', pay_water_bank:'水道代：引落口座', pay_water_holder:'水道代：口座名義人', pay_water_holder_other:'水道代：口座名義人（その他）', pay_water_sonota:'水道代：その他の内容',
-    pay_ins1:'保険料①の支払方法', pay_ins1_bank:'保険料①：引落口座', pay_ins1_holder:'保険料①：口座名義人', pay_ins1_holder_other:'保険料①：口座名義人（その他）', pay_ins1_sonota:'保険料①：その他の内容',
-    hist_era:'借入元号', hist_year:'借入年', hist_month:'借入月', hist_content:'借入の経緯', hist_income:'当時の手取り収入', hist_repay:'当時の返済額',
-    asset_kind:'財産種別', asset_name:'財産名', asset_address:'不動産の所在地', asset_vehicle_model:'車種・メーカー', asset_first_reg_year:'初年度登録年', asset_first_reg_month:'初年度登録月', asset_other_name:'その他財産名', asset_buy_price:'購入金額', asset_buy_year:'購入年', asset_buy_month:'購入月', asset_value:'現在の評価額',
-    // 支払方法・その他系
-    pay_rent_note:'家賃：メモ', pay_elec_note:'電気代：メモ', pay_gas_note:'ガス代：メモ', pay_water_note:'水道代：メモ', pay_ins1_note:'保険料①：メモ',
-    pay_rent_sonota_free:'家賃：その他詳細', pay_elec_sonota_free:'電気代：その他詳細', pay_gas_sonota_free:'ガス代：その他詳細', pay_water_sonota_free:'水道代：その他詳細', pay_ins1_sonota_free:'保険料①：その他詳細',
-    // 過去の財産詳細
-    ex_name:'相手方氏名（婚姻歴）',
-    rent_other_name:'賃貸契約者氏名', rent_other_rel:'賃貸契約者続柄',
-    house_owner_name:'家屋所有者氏名', house_owner_rel:'家屋所有者との関係',
-    fee_provider_name:'費用提供者氏名', fee_provider_rel:'費用提供者続柄',
-    // 追加
-    ins_policy_no:'証券番号',
-    menseki_year:'免責決定年', menseki_month:'免責決定月',
-    bankrupt_court:'申立裁判所', bankrupt_branch:'支部',
-    hist_era:'借入時の元号', hist_year:'借入年', hist_month:'借入月', hist_content:'借入の経緯詳細', hist_income:'当時の手取り収入', hist_repay:'当時の月々の返済額',
-    // 父母の財産種類
-    father_estate_type:'父：財産の内容', mother_estate_type:'母：財産の内容',
-    // 投資の種類
-    invest_type:'投資の種類', invest_type_other:'投資の種類（その他）',
-    // 口座・銀行追加分
-    bank_number:'口座番号', bank_type_1:'口座種別①', bank_type_2:'口座種別②', bank_type_3:'口座種別③', bank_type_4:'口座種別④', bank_type_5:'口座種別⑤',
-    // 保険証券番号
-    ins_policy_no:'証券番号',
-    // 依頼者基本情報
-    client_name:'依頼者氏名', client_name_kana:'フリガナ', client_phone:'電話番号', client_zip:'郵便番号', client_address_pref:'住所（都道府県）', client_address_city:'住所（市区町村・番地）', client_address_bldg:'建物名・部屋番号',
-    client_dob_era:'生年月日（元号）', client_dob_year:'生年月日（年）', client_dob_month:'生年月日（月）', client_dob_day:'生年月日（日）',
-  };
-  // 依頼者名・生年月日を先頭に追加
-  const clientNameVal   = (document.querySelector('input[name="client_name"]') || {}).value || '';
-  const clientPhoneVal  = (document.querySelector('input[name="client_phone"]') || {}).value || '';
-  const clientZipVal    = (document.querySelector('input[name="client_zip"]') || {}).value || '';
-  const clientPrefVal   = (document.querySelector('input[name="client_address_pref"]') || {}).value || '';
-  const clientCityVal   = (document.querySelector('input[name="client_address_city"]') || {}).value || '';
-  const clientBldgVal   = (document.querySelector('input[name="client_address_bldg"]') || {}).value || '';
-  const clientAddrStr   = [clientZipVal ? '〒'+clientZipVal : '', clientPrefVal, clientCityVal, clientBldgVal].filter(Boolean).join(' ');
-  const clientKanaVal = (document.querySelector('input[name="client_name_kana"]') || {}).value || '';
-  const dobEra  = (document.querySelector('input[name="client_dob_era"]:checked') || {}).value || '';
-  const dobYear = (document.querySelector('input[name="client_dob_year"]') || {}).value || '';
-  const dobMonth= (document.querySelector('input[name="client_dob_month"]') || {}).value || '';
-  const dobDay  = (document.querySelector('input[name="client_dob_day"]') || {}).value || '';
-  const dobStr  = [dobEra, dobYear ? dobYear+'年' : '', dobMonth ? dobMonth+'月' : '', dobDay ? dobDay+'日' : ''].filter(Boolean).join('');
+  // ヘルパー：配列化
+  function toArr(v) { return Array.isArray(v) ? v : (v ? [v] : []); }
+  // ヘルパー：セクション見出し
+  function sec(title) { return ['', '【' + title + '】', '─────────────────────────']; }
+  // ヘルパー：空でない値だけ行を追加
+  function row(label, val) { return val ? '　' + label + '：' + val : null; }
 
-  // 元号→西暦変換して年齢を計算
-  function calcAge(era, year, month, day) {
-    if(!year) return null;
-    const eraOffset = { '昭和': 1925, '平成': 1988, '令和': 2018 };
-    const offset = eraOffset[era];
-    if(!offset) return null;
-    const birthYear  = offset + parseInt(year, 10);
-    const birthMonth = parseInt(month, 10) || 1;
-    const birthDay   = parseInt(day, 10) || 1;
+  // ── 基本情報（ヘッダー） ─────────────────────────────────────
+  const clientNameVal = (document.querySelector('input[name="client_name"]') || {}).value || '';
+  const clientKanaVal = (document.querySelector('input[name="client_name_kana"]') || {}).value || '';
+  const clientPhoneVal= (document.querySelector('input[name="client_phone"]') || {}).value || '';
+  const clientZipVal  = (document.querySelector('input[name="client_zip"]') || {}).value || '';
+  const clientPrefVal = (document.querySelector('input[name="client_address_pref"]') || {}).value || '';
+  const clientCityVal = (document.querySelector('input[name="client_address_city"]') || {}).value || '';
+  const clientBldgVal = (document.querySelector('input[name="client_address_bldg"]') || {}).value || '';
+  const clientAddrStr = [clientZipVal ? '〒'+clientZipVal : '', clientPrefVal, clientCityVal, clientBldgVal].filter(Boolean).join(' ');
+  const dobEra   = (document.querySelector('input[name="client_dob_era"]:checked') || {}).value || '';
+  const dobYear  = (document.querySelector('input[name="client_dob_year"]') || {}).value || '';
+  const dobMonth = (document.querySelector('input[name="client_dob_month"]') || {}).value || '';
+  const dobDay   = (document.querySelector('input[name="client_dob_day"]') || {}).value || '';
+  const dobStr   = [dobEra, dobYear?dobYear+'年':'', dobMonth?dobMonth+'月':'', dobDay?dobDay+'日':''].filter(Boolean).join('');
+  function calcAge(era, y, m, d) {
+    if(!y) return null;
+    const off = {'昭和':1925,'平成':1988,'令和':2018}[era];
+    if(!off) return null;
     const now = new Date();
-    let age = now.getFullYear() - birthYear;
-    const notYetBirthday = (now.getMonth() + 1) < birthMonth ||
-      ((now.getMonth() + 1) === birthMonth && now.getDate() < birthDay);
-    if(notYetBirthday) age--;
+    let age = now.getFullYear() - (off + parseInt(y));
+    if((now.getMonth()+1) < parseInt(m) || ((now.getMonth()+1)===parseInt(m) && now.getDate()<parseInt(d))) age--;
     return age >= 0 ? age : null;
   }
   const clientAge = calcAge(dobEra, dobYear, dobMonth, dobDay);
   const today = new Date();
-  const todayStr = today.getFullYear() + '年' + (today.getMonth()+1) + '月' + today.getDate() + '日';
-  const ageStr = clientAge !== null ? todayStr + '時点で' + clientAge + '歳' : null;
-  let lines = [
+  const todayStr = today.getFullYear()+'年'+(today.getMonth()+1)+'月'+today.getDate()+'日';
+  const ageStr = clientAge !== null ? todayStr+'時点で'+clientAge+'歳' : null;
+
+  const lines = [
     '【質問シート回答内容】',
     '━━━━━━━━━━━━━━━━━━',
-    '依頼者氏名　：' + (clientNameVal || '（未入力）'),
-    'フリガナ　　：' + (clientKanaVal || '（未入力）'),
-    '生年月日　　：' + (dobStr || '（未入力）') + (ageStr ? '　（' + ageStr + '）' : ''),
-    '電話番号　　：' + (clientPhoneVal || '（未入力）'),
-    '住所　　　　：' + (clientAddrStr || '（未入力）'),
-    '管轄裁判所　：' + (getCourtByAddress(clientPrefVal, clientCityVal) || '（住所を入力してください）'),
+    '依頼者氏名　：' + (clientNameVal||'（未入力）'),
+    'フリガナ　　：' + (clientKanaVal||'（未入力）'),
+    '生年月日　　：' + (dobStr||'（未入力）') + (ageStr ? '　（'+ageStr+'）' : ''),
+    '電話番号　　：' + (clientPhoneVal||'（未入力）'),
+    '住所　　　　：' + (clientAddrStr||'（未入力）'),
+    '管轄裁判所　：' + (getCourtByAddress(clientPrefVal, clientCityVal)||'（住所を入力してください）'),
     '送信日時　　：' + new Date().toLocaleString('ja-JP'),
     '━━━━━━━━━━━━━━━━━━',
-    ''
   ];
-  for(const [key, val] of Object.entries(data)) {
-    if(!val || (Array.isArray(val) && val.every(v => !v))) continue;
-    let label = labelMap[key];
-    if(!label) {
-      // ギャンブル種類別の動的フィールドを日本語化
-      const gambleMatch = key.match(/^gamble_(.+)_(from_year|from_month|to_year|to_month|freq|min|max)$/);
-      if(gambleMatch) {
-        const typeLabels = { from_year:'開始年', from_month:'開始月', to_year:'終了年', to_month:'終了月', freq:'頻度（回/月）', min:'最低使用額', max:'最高使用額' };
-        label = gambleMatch[1] + '：' + (typeLabels[gambleMatch[2]] || gambleMatch[2]);
-      }
-      // 口座種別の動的フィールド
-      const bankTypeMatch = key.match(/^bank_type_(\d+)$/);
-      if(bankTypeMatch) label = '口座種別（' + bankTypeMatch[1] + '番目）';
-      // それでも未解決ならキーをそのまま使用
-      if(!label) label = key;
+
+  // ── ①職歴 ───────────────────────────────────────────────────
+  const careerCos   = toArr(data.career_company);
+  const careerJobs  = toArr(data.career_job);
+  const careerIncs  = toArr(data.career_income);
+  const careerFrY   = toArr(data.career_from_year);
+  const careerFrM   = toArr(data.career_from_month);
+  const careerToY   = toArr(data.career_to_year);
+  const careerToM   = toArr(data.career_to_month);
+  const careerTypeLabels = ['自営','法人代表者','勤め','パート・バイト','無職','その他'];
+  const careerTypes = [1,2,3,4,5,6].map((n,i) => data['career_type_'+n] ? careerTypeLabels[i] : null).filter(Boolean);
+  if(data.career_type_other) careerTypes.push('その他（'+data.career_type_other+'）');
+  if(careerCos.some(v=>v) || careerTypes.length) {
+    lines.push(...sec('①職歴（過去10年分）'));
+    const maxC = Math.max(careerCos.length, 1);
+    for(let i=0;i<maxC;i++) {
+      const co  = careerCos[i]  || '';
+      const job = careerJobs[i] || '';
+      const inc = careerIncs[i] || '';
+      const frY = careerFrY[i]  || '', frM = careerFrM[i] || '';
+      const toY = careerToY[i]  || '', toM = careerToM[i] || '';
+      const period = (frY||frM) ? (frY+'年'+frM+'月〜'+(toY||toM ? toY+'年'+toM+'月' : '現在')) : '';
+      lines.push('');
+      lines.push('▼ 職歴'+(i+1)+(co?'：'+co:''));
+      if(period)  lines.push('　期間：'+period);
+      if(job)     lines.push('　職種：'+job);
+      if(inc)     lines.push('　手取月収：'+inc+'万円');
+      if(i===0 && careerTypes.length) lines.push('　雇用形態：'+careerTypes.join('・'));
     }
-    const display = Array.isArray(val) ? val.filter(v=>v).join(' / ') : val;
-    if(display) lines.push(label + '：' + display);
+    // 学歴
+    const eduLevel = data.edu_level, eduResult = data.edu_result;
+    const eduY = data.edu_year, eduM = data.edu_month;
+    if(eduLevel || eduResult) {
+      lines.push('');
+      lines.push('▼ 最終学歴');
+      if(eduLevel)  lines.push('　学校種別：'+eduLevel);
+      if(eduResult) lines.push('　卒業/中退：'+eduResult);
+      if(eduY||eduM) lines.push('　時期：'+(data.edu_era||'')+(eduY?eduY+'年':'')+(eduM?eduM+'月':'')+(data.edu_day?data.edu_day+'日':''));
+    }
+    lines.push('');
+    lines.push('─────────────────────────');
   }
+
+  // ── ②家族関係 ──────────────────────────────────────────────
+  const hasFamilyData = data.family_name_father || data.family_name_mother || data.family_name_spouse;
+  if(hasFamilyData || data.parents_status) {
+    lines.push(...sec('②家族関係'));
+    if(data.parents_status) lines.push('　両親の状況：'+data.parents_status);
+    // 父
+    if(data.family_name_father) {
+      lines.push('');
+      lines.push('▼ 父');
+      [['氏名',data.family_name_father],['生年月日',data.family_dob_father],['職業',data.family_job_father],['月収',(data.family_income_father?data.family_income_father+'万円':null)],['同居/別居',data.family_live_father]]
+        .forEach(([l,v])=>{ if(v) lines.push('　'+l+'：'+v); });
+      // 父死亡情報
+      if(data.father_death_year || data.father_death_month) {
+        const dy = data.father_death_year||'', dm = data.father_death_month||'', dd = data.father_death_day||'';
+        lines.push('　死亡：'+dy+'年'+dm+'月'+(dd?dd+'日':''));
+        if(data.father_estate)      lines.push('　財産：'+data.father_estate);
+        if(data.father_estate_type) lines.push('　財産内容：'+data.father_estate_type);
+        if(data.father_inherit)     lines.push('　相続：'+data.father_inherit);
+      }
+    }
+    // 母
+    if(data.family_name_mother) {
+      lines.push('');
+      lines.push('▼ 母');
+      [['氏名',data.family_name_mother],['生年月日',data.family_dob_mother],['職業',data.family_job_mother],['月収',(data.family_income_mother?data.family_income_mother+'万円':null)],['同居/別居',data.family_live_mother]]
+        .forEach(([l,v])=>{ if(v) lines.push('　'+l+'：'+v); });
+      if(data.mother_death_year || data.mother_death_month) {
+        const dy = data.mother_death_year||'', dm = data.mother_death_month||'', dd = data.mother_death_day||'';
+        lines.push('　死亡：'+dy+'年'+dm+'月'+(dd?dd+'日':''));
+        if(data.mother_estate)      lines.push('　財産：'+data.mother_estate);
+        if(data.mother_estate_type) lines.push('　財産内容：'+data.mother_estate_type);
+        if(data.mother_inherit)     lines.push('　相続：'+data.mother_inherit);
+      }
+    }
+    // 配偶者
+    if(data.family_name_spouse) {
+      lines.push('');
+      lines.push('▼ 配偶者');
+      [['氏名',data.family_name_spouse],['生年月日',data.family_dob_spouse],['職業',data.family_job_spouse],['月収',(data.family_income_spouse?data.family_income_spouse+'万円':null)],['同居/別居',data.family_live_spouse]]
+        .forEach(([l,v])=>{ if(v) lines.push('　'+l+'：'+v); });
+    }
+    // 結婚・離婚
+    // 子ども
+    const childNames   = Array.isArray(data.family_name_child)   ? data.family_name_child   : (data.family_name_child   ? [data.family_name_child]   : []);
+    const childJobs    = Array.isArray(data.family_job_child)    ? data.family_job_child    : (data.family_job_child    ? [data.family_job_child]    : []);
+    const childDobs    = Array.isArray(data.family_dob_child)    ? data.family_dob_child    : (data.family_dob_child    ? [data.family_dob_child]    : []);
+    const childIncomes = Array.isArray(data.family_income_child) ? data.family_income_child : (data.family_income_child ? [data.family_income_child] : []);
+    const childLives   = [1,2,3,4,5,6,7,8,9,10].map(n => data['family_live_child_'+n]||'').filter(Boolean);
+    childNames.forEach((name, i) => {
+      if(!name) return;
+      lines.push('');
+      lines.push('▼ 子'+(i+1)+'：'+name);
+      if(childDobs[i])    lines.push('　生年月日：'+childDobs[i]);
+      if(childJobs[i])    lines.push('　職業：'+childJobs[i]);
+      if(childIncomes[i]) lines.push('　月収：'+childIncomes[i]+'万円');
+      if(childLives[i])   lines.push('　同居/別居：'+childLives[i]);
+    });
+
+    if(data.marry_year||data.marry_month) {
+      lines.push('');
+      lines.push('▼ 婚姻歴');
+      lines.push('　結婚：'+(data.marry_year||'')+'年'+(data.marry_month||'')+'月');
+      if(data.divorce_year||data.divorce_month) {
+        lines.push('　離婚：'+(data.divorce_year||'')+'年'+(data.divorce_month||'')+'月');
+        if(data.ex_name)             lines.push('　相手方：'+data.ex_name);
+        if(data.divorce_agreement)   lines.push('　取り決め：'+data.divorce_agreement);
+        if(data.divorce_type)        lines.push('　種類：'+data.divorce_type);
+        if(data.divorce_party)       lines.push('　相手方：'+data.divorce_party);
+        if(data.divorce_isharyo_amount) lines.push('　慰謝料：'+data.divorce_isharyo_amount+'円');
+        if(data.divorce_zaisan_amount)  lines.push('　財産分与：'+data.divorce_zaisan_amount+'円');
+        if(data.divorce_yoikuhi_monthly) lines.push('　養育費：月'+data.divorce_yoikuhi_monthly+'円（'+data.divorce_yoikuhi_age+'歳まで・'+data.divorce_yoikuhi_child+'）');
+      }
+    }
+    lines.push('');
+    lines.push('─────────────────────────');
+  }
+
+  // ── ③住居・費用・税金・個人借入・訴訟・破産歴 ───────────────
+  const hasGeneral = data.housing_type||data.fee_source||data.tax_arrears||data.personal_loan||data.lawsuit||data.past_bankruptcy;
+  if(hasGeneral) {
+    lines.push(...sec('③住居・費用・その他'));
+    if(data.housing_type) {
+      lines.push('');
+      lines.push('▼ 住居');
+      lines.push('　種別：'+data.housing_type);
+      if(data.rent_contractor)  lines.push('　賃貸契約者：'+data.rent_contractor);
+      if(data.rent_other_name)  lines.push('　契約者氏名：'+data.rent_other_name+'（'+data.rent_other_rel+'）');
+      if(data.house_owner_name) lines.push('　所有者：'+data.house_owner_name+'（'+data.house_owner_rel+'）');
+    }
+    if(data.fee_source) {
+      lines.push('');
+      lines.push('▼ 費用調達');
+      lines.push('　方法：'+data.fee_source);
+      if(data.fee_type)           lines.push('　援助/借入区分：'+data.fee_type);
+      if(data.fee_provider_name) lines.push('　援助者：'+data.fee_provider_name+'（'+data.fee_provider_rel+'）');
+    }
+    if(data.tax_arrears) {
+      lines.push('');
+      lines.push('▼ 税金滞納：'+data.tax_arrears);
+      if(data.tax_type)   lines.push('　種類：'+data.tax_type);
+      if(data.tax_amount) lines.push('　金額：'+data.tax_amount+'円');
+    }
+    if(data.personal_loan) {
+      lines.push('');
+      lines.push('▼ 個人借入：'+data.personal_loan);
+      if(data.ploan_name)   lines.push('　借入相手：'+data.ploan_name+'（'+data.ploan_rel+'）');
+      if(data.ploan_amount) lines.push('　金額：'+data.ploan_amount+'円');
+    }
+    if(data.monthly_repayment) {
+      lines.push('');
+      lines.push('▼ 月の約定返済額：'+data.monthly_repayment+'万円');
+    }
+    if(data.lawsuit) {
+      lines.push('');
+      lines.push('▼ 訴訟等：'+data.lawsuit);
+      if(data.lawsuit_type) lines.push('　種類：'+data.lawsuit_type);
+    }
+    if(data.past_bankruptcy) {
+      lines.push('');
+      lines.push('▼ 過去の破産：'+data.past_bankruptcy);
+      if(data.bankrupt_court) lines.push('　裁判所：'+data.bankrupt_court+(data.bankrupt_branch?'　'+data.bankrupt_branch+'支部':''));
+      if(data.bankrupt_year)  lines.push('　申立：'+(data.bankrupt_year||'')+'年'+(data.bankrupt_month||'')+'月');
+      if(data.menseki)        lines.push('　免責：'+data.menseki+(data.menseki_year?' （'+data.menseki_year+'年'+data.menseki_month+'月）':''));
+    }
+    lines.push('');
+    lines.push('─────────────────────────');
+  }
+
+  // ── ④ギャンブル・水商売・投資・旅行・換金・高額購入 ─────────
+  const hasLifestyle = data.bar||data.gamble||data.invest||data.travel||data.convert||data.bigbuy;
+  if(hasLifestyle) {
+    lines.push(...sec('④生活状況（ギャンブル・水商売等）'));
+    // 水商売
+    if(data.bar) {
+      lines.push('');
+      lines.push('▼ 水商売：'+data.bar);
+      if(data.bar==='有り') {
+        if(data.bar_where)    lines.push('　行先：'+data.bar_where);
+        if(data.bar_from_year) lines.push('　期間：'+data.bar_from_year+'年'+data.bar_from_month+'月〜'+data.bar_to_year+'年'+data.bar_to_month+'月');
+        if(data.bar_freq)     lines.push('　頻度：月'+data.bar_freq+'回');
+        if(data.bar_min)      lines.push('　使用額：'+data.bar_min+'円〜'+data.bar_max+'円');
+      }
+    }
+    // ギャンブル
+    if(data.gamble) {
+      lines.push('');
+      lines.push('▼ ギャンブル：'+data.gamble);
+      if(data.gamble==='有り') {
+        const types = toArr(data['gamble_type[]'] || data.gamble_type);
+        if(types.length) lines.push('　種類：'+types.filter(Boolean).join('・'));
+        // 種類ごとのブロック
+        const gambleTypes = ['競馬','競艇','パチンコ_スロット','その他'];
+        const gambleLabels = {'競馬':'競馬','競艇':'競艇','パチンコ_スロット':'パチンコ/スロット','その他':'その他'};
+        gambleTypes.forEach(t => {
+          const label = gambleLabels[t];
+          const fy  = data['gamble_'+t+'_from_year'];
+          const fm  = data['gamble_'+t+'_from_month'];
+          const ty  = data['gamble_'+t+'_to_year'];
+          const tm  = data['gamble_'+t+'_to_month'];
+          const fr  = data['gamble_'+t+'_freq'];
+          const mn  = data['gamble_'+t+'_min'];
+          const mx  = data['gamble_'+t+'_max'];
+          if(fy||fm||fr||mn) {
+            lines.push('');
+            lines.push('　◆ '+label);
+            if(fy||fm) lines.push('　　期間：'+(fy?fy+'年':'')+(fm?fm+'月':'')+'〜'+(ty?ty+'年':'')+(tm?tm+'月':''));
+            if(fr)     lines.push('　　頻度：月'+fr+'回');
+            if(mn)     lines.push('　　使用額：'+mn+'円〜'+(mx||'')+'円');
+          }
+        });
+      }
+    }
+    // 投資
+    if(data.invest) {
+      lines.push('');
+      lines.push('▼ 投資：'+data.invest);
+      if(data.invest==='有り') {
+        if(data.invest_type)       lines.push('　種類：'+data.invest_type+(data.invest_type_other?'（'+data.invest_type_other+'）':''));
+        if(data.invest_from_year)  lines.push('　期間：'+data.invest_from_year+'年'+data.invest_from_month+'月〜'+data.invest_to_year+'年'+data.invest_to_month+'月');
+        if(data.invest_total)      lines.push('　合計投資額：'+data.invest_total+'円');
+        if(data.invest_loss)       lines.push('　損失額：'+data.invest_loss+'円');
+      }
+    }
+    // 旅行
+    if(data.travel) {
+      lines.push('');
+      lines.push('▼ 海外旅行：'+data.travel);
+      if(data.travel==='有り') {
+        if(data.travel_dest)  lines.push('　旅行先：'+data.travel_dest);
+        if(data.travel_year)  lines.push('　時期：'+data.travel_year+'年'+data.travel_month+'月');
+        if(data.travel_cost)  lines.push('　費用：'+data.travel_cost+'円');
+      }
+    }
+    // 換金
+    if(data.convert) {
+      lines.push('');
+      lines.push('▼ 換金：'+data.convert);
+      if(data.convert==='有り') {
+        if(data.convert_item)       lines.push('　品名：'+data.convert_item);
+        if(data.convert_buy_price)  lines.push('　購入：'+data.convert_buy_year+'年'+data.convert_buy_month+'月 '+data.convert_buy_price+'円');
+        if(data.convert_sell_price) lines.push('　換金：'+data.convert_sell_year+'年'+data.convert_sell_month+'月 '+data.convert_sell_price+'円');
+      }
+    }
+    // 高額購入
+    if(data.bigbuy) {
+      lines.push('');
+      lines.push('▼ 高額購入：'+data.bigbuy);
+      if(data.bigbuy==='有り') {
+        if(data.bigbuy_item)  lines.push('　品名：'+data.bigbuy_item);
+        if(data.bigbuy_price) lines.push('　金額：'+data.bigbuy_year+'年'+data.bigbuy_month+'月 '+data.bigbuy_price+'円');
+        if(data.bigbuy_sell)  lines.push('　売却額：'+data.bigbuy_sell+'円');
+      }
+    }
+    lines.push('');
+    lines.push('─────────────────────────');
+  }
+
+  // ── ⑤財産（売却・取得・不動産・車等） ─────────────────────
+  const assets = toArr(data.asset_kind);
+  const hasFunds = data.past_sell||data.past_gain||assets.some(v=>v);
+  if(hasFunds) {
+    lines.push(...sec('⑤財産'));
+    if(data.past_sell) {
+      lines.push('');
+      lines.push('▼ 財産売却：'+data.past_sell);
+      if(data.past_sell==='有り') {
+        if(data.sell_item)      lines.push('　品名：'+data.sell_item);
+        if(data.sell_buy_price) lines.push('　購入：'+data.sell_buy_year+'年'+data.sell_buy_month+'月 '+data.sell_buy_price+'円');
+        if(data.sell_price)     lines.push('　売却：'+data.sell_year+'年'+data.sell_month+'月 '+data.sell_price+'円');
+      }
+    }
+    if(data.past_gain) {
+      lines.push('');
+      lines.push('▼ 財産取得：'+data.past_gain);
+      if(data.past_gain==='有り') {
+        if(data.gain_item)   lines.push('　内容：'+data.gain_item);
+        if(data.gain_amount) lines.push('　金額：'+data.gain_year+'年'+data.gain_month+'月 '+data.gain_amount+'円');
+        if(data.gain_use)    lines.push('　使途：'+data.gain_use);
+      }
+    }
+    if(assets.some(v=>v)) {
+      const aKinds  = toArr(data.asset_kind);
+      const aModels = toArr(data.asset_vehicle_model);
+      const aFrY    = toArr(data.asset_first_reg_year);
+      const aFrM    = toArr(data.asset_first_reg_month);
+      const aBuyP   = toArr(data.asset_buy_price);
+      const aVal    = toArr(data.asset_value);
+      const aAddr   = toArr(data.asset_address);
+      for(let i=0;i<aKinds.length;i++) {
+        if(!aKinds[i]) continue;
+        lines.push('');
+        lines.push('▼ 財産'+(i+1)+'：'+aKinds[i]);
+        if(aAddr[i])   lines.push('　所在地：'+aAddr[i]);
+        if(aModels[i]) lines.push('　車種：'+aModels[i]);
+        if(aFrY[i])    lines.push('　初年度登録：'+aFrY[i]+'年'+(aFrM[i]?aFrM[i]+'月':''));
+        const buyPeriod = [toArr(data.asset_buy_year)[i], toArr(data.asset_buy_month)[i]].filter(Boolean);
+        if(buyPeriod.length) lines.push('　購入時期：'+buyPeriod[0]+'年'+(buyPeriod[1]?buyPeriod[1]+'月':''));
+        if(aBuyP[i])         lines.push('　購入金額：'+aBuyP[i]+'円');
+        const oName = toArr(data.asset_other_name)[i];
+        if(oName)            lines.push('　名称：'+oName);
+        if(aVal[i])    lines.push('　現在の評価額：'+aVal[i]+'円');
+      }
+    }
+    lines.push('');
+    lines.push('─────────────────────────');
+  }
+
+  // ── ⑥加入保険（保険会社別） ─────────────────────────────────
+  const iCompanies = toArr(data.ins_company);
+  const iPolicies  = toArr(data.ins_policy_no);
+  const iRefunds   = toArr(data.ins_refund);
+  const iRefundYns = [1,2,3,4,5].map(n => data['ins_refund_yn_'+n]||'');
+  if(iCompanies.some(v=>v)) {
+    lines.push(...sec('⑥加入保険'));
+    for(let i=0;i<iCompanies.length;i++) {
+      if(!iCompanies[i]) continue;
+      lines.push('');
+      lines.push('▼ 保険'+(i+1)+'：'+iCompanies[i]);
+      if(iPolicies[i])   lines.push('　証券番号：'+iPolicies[i]);
+      if(iRefundYns[i])  lines.push('　解約返戻金の有無：'+iRefundYns[i]);
+      if(iRefunds[i])    lines.push('　解約返戻金額：'+iRefunds[i]+'円');
+    }
+    lines.push('');
+    lines.push('─────────────────────────');
+  }
+
+  // ── ⑦銀行口座（口座別） ──────────────────────────────────────
+  const bNames    = toArr(data.bank_name);
+  const bBranches = toArr(data.bank_branch);
+  const bNumbers  = toArr(data.bank_number);
+  const bBalances = toArr(data.bank_balance);
+  const bDates    = toArr(data.bank_date);
+  const bTypes    = [1,2,3,4,5].map(n => data['bank_type_'+n]||'');
+  if(bNames.some(v=>v)) {
+    lines.push(...sec('⑦銀行口座'));
+    for(let i=0;i<bNames.length;i++) {
+      if(!bNames[i]) continue;
+      lines.push('');
+      lines.push('▼ 口座'+(i+1)+'：'+bNames[i]+(bBranches[i]?' '+bBranches[i]+'支店':''));
+      if(bTypes[i])    lines.push('　口座種別：'+bTypes[i]);
+      if(bNumbers[i])  lines.push('　口座番号：'+bNumbers[i]);
+      if(bBalances[i]) lines.push('　預金残高：'+bBalances[i]+'円');
+      if(bDates[i])    lines.push('　記帳日：'+bDates[i]);
+    }
+    lines.push('');
+    lines.push('─────────────────────────');
+  }
+
+  // ── ⑧支払方法 ───────────────────────────────────────────────
+  const payItems = [
+    ['家賃','pay_rent','pay_rent_bank','pay_rent_holder','pay_rent_sonota'],
+    ['電気代','pay_elec','pay_elec_bank','pay_elec_holder','pay_elec_sonota'],
+    ['ガス代','pay_gas','pay_gas_bank','pay_gas_holder','pay_gas_sonota'],
+    ['水道代','pay_water','pay_water_bank','pay_water_holder','pay_water_sonota'],
+    ['保険料','pay_ins1','pay_ins1_bank','pay_ins1_holder','pay_ins1_sonota'],
+  ];
+  const hasPayData = payItems.some(([,k]) => data[k]);
+  if(hasPayData) {
+    lines.push(...sec('⑧支払方法'));
+    payItems.forEach(([name, kMethod, kBank, kHolder, kSonota]) => {
+      if(!data[kMethod]) return;
+      lines.push('');
+      lines.push('▼ '+name+'：'+data[kMethod]);
+      if(data[kBank])   lines.push('　引落口座：'+data[kBank]);
+      if(data[kHolder]) lines.push('　名義人：'+data[kHolder]);
+      if(data[kSonota]) lines.push('　内容：'+data[kSonota]);
+    });
+    lines.push('');
+    lines.push('─────────────────────────');
+  }
+
+  // ── ⑨負債が増えた経緯（借入先別） ─────────────────────────
+  const creditors = toArr(data.hist_creditor);
+  const heras     = toArr(data.hist_era);
+  const hyears    = toArr(data.hist_year);
+  const hmonths   = toArr(data.hist_month);
+  const hcontents = toArr(data.hist_content);
+  const hincomes  = toArr(data.hist_income);
+  const hrepays   = toArr(data.hist_repay);
+  const maxLen = Math.max(creditors.length, hcontents.length, 0);
+  if(maxLen > 0) {
+    lines.push(...sec('⑨負債が増えた経緯（借入先別）'));
+    for(let i=0;i<maxLen;i++) {
+      const name   = creditors[i] || '借入先'+(i+1);
+      const era    = heras[i]||'', yr = hyears[i]||'', mon = hmonths[i]||'';
+      const period = (era||yr||mon) ? era+yr+'年'+mon+'月頃〜' : '（時期不明）';
+      lines.push('');
+      lines.push('▼ 借入先'+(i+1)+'：'+name+'　借入開始：'+period);
+      if(hcontents[i]) lines.push('　【経緯】'+hcontents[i]);
+      if(hincomes[i])  lines.push('　【当時の収入】'+hincomes[i]);
+      if(hrepays[i])   lines.push('　【月々の返済額】'+hrepays[i]+'円');
+    }
+    lines.push('');
+    lines.push('─────────────────────────');
+  }
+
   return lines.join('\n');
 }
 
