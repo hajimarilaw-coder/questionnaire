@@ -2900,14 +2900,21 @@ function dataToReadableText(data) {
     if(data.tax_arrears) {
       lines.push('');
       lines.push('▼ 税金滞納：'+data.tax_arrears);
-      if(data.tax_type)   lines.push('　種類：'+data.tax_type);
-      if(data.tax_amount) lines.push('　金額：'+data.tax_amount+'円');
+      const taxTypes = toArr(data.tax_type);
+      const taxAmts  = toArr(data.tax_amount);
+      taxTypes.forEach((t,i) => {
+        if(t) lines.push('　種類：'+t+( taxAmts[i] ? '　金額：'+taxAmts[i]+'円' : '' ));
+      });
     }
     if(data.personal_loan) {
       lines.push('');
       lines.push('▼ 個人借入：'+data.personal_loan);
-      if(data.ploan_name)   lines.push('　借入相手：'+data.ploan_name+'（'+data.ploan_rel+'）');
-      if(data.ploan_amount) lines.push('　金額：'+data.ploan_amount+'円');
+      const ploanNames = toArr(data.ploan_name);
+      const ploanRels  = toArr(data.ploan_rel);
+      const ploanAmts  = toArr(data.ploan_amount);
+      ploanNames.forEach((n,i) => {
+        if(n) lines.push('　借入相手'+( ploanNames.length>1 ? (i+1) : '')+'：'+n+'（'+(ploanRels[i]||'')+'）　'+( ploanAmts[i] ? ploanAmts[i]+'円' : '' ));
+      });
     }
     if(data.monthly_repayment) {
       lines.push('');
@@ -2916,7 +2923,8 @@ function dataToReadableText(data) {
     if(data.lawsuit) {
       lines.push('');
       lines.push('▼ 訴訟等：'+data.lawsuit);
-      if(data.lawsuit_type) lines.push('　種類：'+data.lawsuit_type);
+      const lwTypes = toArr(data.lawsuit_type).filter(Boolean);
+      if(lwTypes.length) lines.push('　種類：'+lwTypes.join('、'));
     }
     if(data.past_bankruptcy) {
       lines.push('');
@@ -3011,7 +3019,8 @@ function dataToReadableText(data) {
       if(data.bigbuy==='有り') {
         if(data.bigbuy_item)  lines.push('　品名：'+data.bigbuy_item);
         if(data.bigbuy_price) lines.push('　金額：'+data.bigbuy_year+'年'+data.bigbuy_month+'月 '+data.bigbuy_price+'円');
-        if(data.bigbuy_sell)  lines.push('　売却額：'+data.bigbuy_sell+'円');
+        const bsellArr = toArr(data.bigbuy_sell).filter(v => v && v.trim());
+        if(bsellArr.length) lines.push('　売却状況：'+bsellArr[0]);
       }
     }
     lines.push('');
@@ -3132,7 +3141,15 @@ function dataToReadableText(data) {
         const holderStr = data[kHolder] + (data[kHolder]==='その他' && data[kHolderOther] ? '（'+data[kHolderOther]+'）' : '');
         lines.push('　名義人：'+holderStr);
       }
-      if(data[kSonota]) lines.push('　内容：'+data[kSonota]+(data[kSonotaFree] ? '（'+data[kSonotaFree]+'）' : ''));
+      // 支払がその他の場合：sonota ラジオ（給料天引き等）またはテキスト自由記述を出力
+      if(data[kMethod]==='その他') {
+        const sonotaVal = data[kSonota] || '';
+        const sonotaFree = data[kSonotaFree] || '';
+        const sonotaStr = sonotaVal ? sonotaVal + (sonotaFree ? '（'+sonotaFree+'）' : '') : sonotaFree;
+        if(sonotaStr) lines.push('　詳細：'+sonotaStr);
+      } else if(data[kSonota]) {
+        lines.push('　内容：'+data[kSonota]+(data[kSonotaFree] ? '（'+data[kSonotaFree]+'）' : ''));
+      }
     });
     lines.push('');
     lines.push('─────────────────────────');
