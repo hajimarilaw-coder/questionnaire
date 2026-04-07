@@ -2760,8 +2760,14 @@ function dataToReadableText(data) {
   const careerToY   = toArr(data.career_to_year);
   const careerToM   = toArr(data.career_to_month);
   const careerTypeLabels = ['自営','法人代表者','勤め','パート・バイト','無職','その他'];
-  const careerTypes = [1,2,3,4,5,6].map((n,i) => data['career_type_'+n] ? careerTypeLabels[i] : null).filter(Boolean);
-  if(data.career_type_other) careerTypes.push('その他（'+data.career_type_other+'）');
+  const careerTypes = [1,2,3,4,5,6].map((n,i) => {
+    const v = data['career_type_'+n];
+    return (Array.isArray(v) ? v.length > 0 : !!v) ? careerTypeLabels[i] : null;
+  }).filter(Boolean);
+  if(data.career_type_other) {
+    const ov = Array.isArray(data.career_type_other) ? data.career_type_other[0] : data.career_type_other;
+    if(ov) careerTypes.push('その他（'+ov+'）');
+  }
   if(careerCos.some(v=>v) || careerTypes.length) {
     lines.push(...sec('①職歴（過去10年分）'));
     const maxC = Math.max(careerCos.length, 1);
@@ -3091,7 +3097,8 @@ function dataToReadableText(data) {
     for(let i=0;i<bNames.length;i++) {
       if(!bNames[i]) continue;
       lines.push('');
-      lines.push('▼ 口座'+(i+1)+'：'+bNames[i]+(bBranches[i]?' '+bBranches[i]+'支店':''));
+      const branchLabel = bBranches[i] ? (' ' + bBranches[i] + (bBranches[i].endsWith('支店') ? '' : '支店')) : '';
+      lines.push('▼ 口座'+(i+1)+'：'+bNames[i]+branchLabel);
       if(bTypes[i])    lines.push('　口座種別：'+bTypes[i]);
       if(bNumbers[i])  lines.push('　口座番号：'+bNumbers[i]);
       if(bBalances[i]) lines.push('　預金残高：'+bBalances[i]+'円');
