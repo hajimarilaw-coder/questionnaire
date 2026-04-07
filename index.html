@@ -1824,6 +1824,10 @@
       <button type="button" class="submit-btn" onclick="submitForm()">入力内容を確認・保存する</button>
       <p class="submit-note">入力内容はJSONファイルとしてダウンロードできます。</p>
     </div>
+    <div style="margin-top:16px;text-align:center;">
+      <button type="button" onclick="printForm()" style="background:#4a5568;color:#fff;border:none;padding:12px 32px;border-radius:6px;font-size:15px;cursor:pointer;letter-spacing:0.05em;">🖨️ 手書き用 質問シートを印刷</button>
+      <p style="font-size:12px;color:#888;margin-top:6px;">印刷用に全項目を展開した質問シートが開きます（借入先は自動反映）</p>
+    </div>
 
   </form>
 </div>
@@ -3181,6 +3185,563 @@ function dataToReadableText(data) {
   }
 
   return lines.join('\n');
+}
+
+
+// ─────────────────────────────────────────────────────────────────────
+// 手書き用印刷シート生成
+// ─────────────────────────────────────────────────────────────────────
+function printForm() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const dParam = urlParams.get('d');
+  let clientName = '';
+  let creditors = [];
+  if (dParam) {
+    try {
+      const parsed = JSON.parse(decodeURIComponent(dParam));
+      clientName = parsed.c || '';
+      creditors = (parsed.r || []).map((r, i) => ({
+        num: i + 1,
+        name: r.n || '',
+        era: r.e || '',
+        year: r.y || '',
+        month: r.m || ''
+      }));
+    } catch(e) {}
+  }
+
+  // 借入先の開始時期テキストを生成
+  function eraLabel(e) {
+    return e === 'S' ? '昭和' : e === 'H' ? '平成' : e === 'R' ? '令和' : '';
+  }
+
+  const html = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>質問シート（手書き用）${clientName ? ' - ' + clientName + ' 様' : ''}</title>
+<style>
+  @media print {
+    @page { size: A4; margin: 15mm 12mm; }
+    .no-print { display: none !important; }
+    body { font-size: 11pt; }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif; font-size: 11pt; color: #111; background: #fff; padding: 20px; }
+  h1 { font-size: 16pt; text-align: center; margin-bottom: 4px; }
+  .subtitle { text-align: center; font-size: 10pt; color: #555; margin-bottom: 16px; }
+  .client-name { text-align: center; font-size: 13pt; font-weight: bold; margin-bottom: 20px; }
+  .section { border: 1.5px solid #333; border-radius: 4px; margin-bottom: 14px; page-break-inside: avoid; }
+  .section-header { background: #2d3748; color: #fff; padding: 6px 10px; font-size: 11pt; font-weight: bold; }
+  .section-body { padding: 10px 12px; }
+  .question { margin-bottom: 10px; }
+  .q-label { font-size: 10.5pt; font-weight: bold; margin-bottom: 4px; color: #222; }
+  .q-note { font-size: 9pt; color: #555; margin-bottom: 4px; }
+  .choices { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 4px 0 6px 0; }
+  .choice { font-size: 10.5pt; white-space: nowrap; }
+  .writeline { border-bottom: 1px solid #999; min-height: 22px; margin: 3px 0 6px 0; width: 100%; }
+  .writeline-sm { border-bottom: 1px solid #999; min-height: 22px; display: inline-block; width: 80px; }
+  .writeline-md { border-bottom: 1px solid #999; min-height: 22px; display: inline-block; width: 140px; }
+  .writeline-lg { border-bottom: 1px solid #999; min-height: 22px; display: inline-block; width: 260px; }
+  .textarea-box { border: 1px solid #999; min-height: 60px; width: 100%; margin: 4px 0; }
+  .inline-row { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: flex-end; margin: 4px 0; }
+  .inline-label { font-size: 10pt; white-space: nowrap; }
+  .repeat-block { border: 1px dashed #aaa; border-radius: 4px; padding: 8px 10px; margin-bottom: 8px; }
+  .repeat-title { font-weight: bold; font-size: 10pt; color: #555; margin-bottom: 6px; }
+  .sub-section { background: #f5f5f5; border-left: 3px solid #aaa; padding: 6px 10px; margin: 6px 0; }
+  .print-btn { position: fixed; bottom: 20px; right: 20px; padding: 12px 24px; background: #2d3748; color: #fff; border: none; border-radius: 8px; font-size: 13pt; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 999; }
+  table.field-table { width: 100%; border-collapse: collapse; margin: 4px 0; }
+  table.field-table td { padding: 3px 6px; font-size: 10.5pt; border-bottom: 1px solid #eee; vertical-align: bottom; }
+  table.field-table td:first-child { white-space: nowrap; color: #444; width: 1%; padding-right: 10px; }
+  .creditor-block { border: 1.5px solid #666; border-radius: 4px; margin-bottom: 10px; page-break-inside: avoid; }
+  .creditor-header { background: #4a5568; color: #fff; padding: 5px 10px; font-size: 10.5pt; font-weight: bold; }
+  .creditor-body { padding: 8px 12px; }
+</style>
+</head>
+<body>
+<button class="print-btn no-print" onclick="window.print()">🖨️ 印刷する</button>
+
+<h1>ご依頼者様 質問シート（手書き用）</h1>
+${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' : '<div class="client-name">氏名：<span style="display:inline-block;width:200px;border-bottom:1px solid #333;">&nbsp;</span> 様</div>'}
+<div class="subtitle">※ 各項目に正確にご記入ください。わからない場合は空欄で構いません。</div>
+
+<!-- ① 基本情報 -->
+<div class="section">
+  <div class="section-header">① ご依頼者様の基本情報</div>
+  <div class="section-body">
+    <table class="field-table">
+      <tr><td>お名前（フルネーム）</td><td><div class="writeline"></div></td></tr>
+      <tr><td>フリガナ</td><td><div class="writeline"></div></td></tr>
+      <tr><td>生年月日</td><td>
+        <div class="inline-row">
+          <span class="choice">○昭和　○平成　○令和</span>
+          <span class="writeline-sm"></span>年
+          <span class="writeline-sm"></span>月
+          <span class="writeline-sm"></span>日
+        </div>
+      </td></tr>
+      <tr><td>電話番号</td><td><div class="writeline"></div></td></tr>
+      <tr><td>郵便番号</td><td><div class="writeline-md"></div></td></tr>
+      <tr><td>都道府県</td><td><div class="writeline-md"></div></td></tr>
+      <tr><td>市区町村・番地</td><td><div class="writeline"></div></td></tr>
+      <tr><td>建物名・部屋番号</td><td><div class="writeline"></div></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ② 学歴・職歴 -->
+<div class="section">
+  <div class="section-header">② 学歴・職歴（過去10年分）</div>
+  <div class="section-body">
+    <div class="q-note">※ 直近から順に記入してください（アルバイト・パート含む）</div>
+    ${[1,2,3].map(n => `
+    <div class="repeat-block">
+      <div class="repeat-title">職歴 ${n}</div>
+      <table class="field-table">
+        <tr><td>勤務先名</td><td><div class="writeline"></div></td></tr>
+        <tr><td>職種</td><td><div class="writeline-lg"></div></td></tr>
+        <tr><td>在職期間</td><td>
+          <div class="inline-row">
+            <span class="writeline-sm"></span>年<span class="writeline-sm"></span>月〜
+            <span class="writeline-sm"></span>年<span class="writeline-sm"></span>月
+          </div>
+        </td></tr>
+        <tr><td>手取月収</td><td><div class="writeline-md"></div>万円</td></tr>
+        <tr><td>雇用形態</td><td><div class="choices">
+          <span class="choice">○正社員</span><span class="choice">○契約社員</span>
+          <span class="choice">○勤め（正規以外）</span><span class="choice">○アルバイト・パート</span>
+          <span class="choice">○自営業</span><span class="choice">○無職</span><span class="choice">○その他（　　　　　　）</span>
+        </div></td></tr>
+      </table>
+    </div>`).join('')}
+  </div>
+</div>
+
+<!-- ③ 家族関係 -->
+<div class="section">
+  <div class="section-header">③ 家族関係</div>
+  <div class="section-body">
+    <div class="question">
+      <div class="q-label">ご両親の状況</div>
+      <div class="choices">
+        <span class="choice">○両親とも健在</span><span class="choice">○父のみ健在</span>
+        <span class="choice">○母のみ健在</span><span class="choice">○両親とも他界</span>
+      </div>
+    </div>
+    ${['父','母','配偶者・パートナー'].map(r => `
+    <div class="sub-section">
+      <div class="repeat-title">${r}</div>
+      <table class="field-table">
+        <tr><td>氏名</td><td><div class="writeline"></div></td></tr>
+        <tr><td>生年月日</td><td><div class="writeline-md"></div></td></tr>
+        <tr><td>職業</td><td><div class="writeline-md"></div></td></tr>
+        <tr><td>月収</td><td><div class="writeline-sm"></div>万円</td></tr>
+        <tr><td>同居/別居</td><td><span class="choice">○同居　○別居</span></td></tr>
+      </table>
+    </div>`).join('')}
+    <div class="sub-section">
+      <div class="repeat-title">お子様（複数いる場合は続けてご記入ください）</div>
+      <table class="field-table">
+        <tr><td>氏名</td><td><div class="writeline"></div></td></tr>
+        <tr><td>生年月日</td><td><div class="writeline-md"></div></td></tr>
+        <tr><td>職業</td><td><div class="writeline-md"></div></td></tr>
+        <tr><td>同居/別居</td><td><span class="choice">○同居　○別居</span></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ④ 婚姻歴 -->
+<div class="section">
+  <div class="section-header">④ 結婚歴・離婚歴</div>
+  <div class="section-body">
+    <div class="question">
+      <div class="q-label">婚姻・離婚の経歴</div>
+      <table class="field-table">
+        <tr><td>結婚時期</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
+        <tr><td>離婚の有無</td><td><span class="choice">○あり　○なし</span></td></tr>
+        <tr><td>離婚時期（あり場合）</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
+        <tr><td>離婚の種類</td><td><div class="choices"><span class="choice">○協議離婚</span><span class="choice">○調停離婚</span><span class="choice">○裁判離婚</span></div></td></tr>
+        <tr><td>慰謝料（あり場合）</td><td><div class="writeline-md"></div>万円</td></tr>
+        <tr><td>財産分与（あり場合）</td><td><div class="writeline-md"></div>万円</td></tr>
+        <tr><td>養育費</td><td><span class="choice">○あり（月<span class="writeline-sm" style="width:60px;"></span>万円×<span class="writeline-sm" style="width:40px;"></span>人分）　○なし</span></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ⑤ 住居 -->
+<div class="section">
+  <div class="section-header">⑤ 現在の住居</div>
+  <div class="section-body">
+    <div class="question">
+      <div class="q-label">住居の種類</div>
+      <div class="choices">
+        <span class="choice">○賃貸住宅</span><span class="choice">○自己所有（持ち家）</span>
+        <span class="choice">○親族所有（実家等）</span><span class="choice">○社宅・官舎</span><span class="choice">○その他</span>
+      </div>
+    </div>
+    <div class="question">
+      <div class="q-label">賃貸の場合：契約者</div>
+      <div class="choices">
+        <span class="choice">○ご自身</span><span class="choice">○配偶者・パートナー</span>
+        <span class="choice">○親族（氏名：<span class="writeline-md"></span>　続柄：<span class="writeline-sm"></span>）</span>
+        <span class="choice">○その他（<span class="writeline-lg"></span>）</span>
+      </div>
+    </div>
+    <div class="question">
+      <div class="q-label">自己所有の場合：所有者名</div>
+      <table class="field-table">
+        <tr><td>所有者</td><td><div class="writeline-lg"></div>（続柄：<div class="writeline-sm"></div>）</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ⑥ 費用 -->
+<div class="section">
+  <div class="section-header">⑥ 手続き費用の調達方法</div>
+  <div class="section-body">
+    <div class="choices">
+      <span class="choice">○ご自身の収入</span><span class="choice">○預貯金</span>
+      <span class="choice">○親族・知人からの援助</span><span class="choice">○その他</span>
+    </div>
+    <div class="question" style="margin-top:8px;">
+      <div class="q-label">援助・借入の場合</div>
+      <table class="field-table">
+        <tr><td>援助者氏名</td><td><div class="writeline-lg"></div></td></tr>
+        <tr><td>続柄</td><td><div class="writeline-md"></div></td></tr>
+        <tr><td>種類</td><td><span class="choice">○援助（返済不要）　○借入（返済あり）</span></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ⑦ 税金 -->
+<div class="section">
+  <div class="section-header">⑦ 税金・健康保険・年金の滞納</div>
+  <div class="section-body">
+    <div class="q-label">滞納の有無</div>
+    <div class="choices"><span class="choice">○滞納なし</span><span class="choice">○滞納あり</span></div>
+    <div class="question" style="margin-top:8px;">
+      <div class="q-label">滞納ありの場合（複数ある場合は続けて記入）</div>
+      ${[1,2].map(n => `
+      <div class="repeat-block">
+        <table class="field-table">
+          <tr><td>税金の種類</td><td><div class="writeline-lg"></div></td></tr>
+          <tr><td>滞納額</td><td><div class="writeline-md"></div>円</td></tr>
+        </table>
+      </div>`).join('')}
+    </div>
+  </div>
+</div>
+
+<!-- ⑧ 個人借入 -->
+<div class="section">
+  <div class="section-header">⑧ 個人からの借入</div>
+  <div class="section-body">
+    <div class="choices"><span class="choice">○無い</span><span class="choice">○有り</span></div>
+    <div class="question" style="margin-top:8px;">
+      <div class="q-label">有りの場合</div>
+      ${[1,2].map(n => `
+      <div class="repeat-block">
+        <div class="repeat-title">借入 ${n}</div>
+        <table class="field-table">
+          <tr><td>貸した人の氏名</td><td><div class="writeline-lg"></div></td></tr>
+          <tr><td>続柄</td><td><div class="writeline-md"></div></td></tr>
+          <tr><td>借入額</td><td><div class="writeline-md"></div>円</td></tr>
+        </table>
+      </div>`).join('')}
+    </div>
+    <table class="field-table" style="margin-top:8px;">
+      <tr><td>月々の約定返済額（全社合計）</td><td><div class="writeline-md"></div>万円</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ⑨ 訴訟 -->
+<div class="section">
+  <div class="section-header">⑨ 訴訟・支払督促・差押えの有無</div>
+  <div class="section-body">
+    <div class="choices"><span class="choice">○起こされていない</span><span class="choice">○起こされている</span></div>
+    <div class="question" style="margin-top:8px;">
+      <div class="q-label">起こされている場合：種類・内容</div>
+      <div class="writeline"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑩ 過去破産 -->
+<div class="section">
+  <div class="section-header">⑩ 過去の破産手続き</div>
+  <div class="section-body">
+    <div class="choices"><span class="choice">○無い</span><span class="choice">○有り</span></div>
+    <div class="question" style="margin-top:8px;">
+      <div class="q-label">有りの場合</div>
+      <table class="field-table">
+        <tr><td>申立裁判所</td><td><div class="writeline-lg"></div></td></tr>
+        <tr><td>申立時期</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
+        <tr><td>免責の有無</td><td><span class="choice">○免責あり　○免責なし</span></td></tr>
+        <tr><td>免責時期（あり場合）</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ⑪ 生活状況 -->
+<div class="section">
+  <div class="section-header">⑪ 過去の生活状況（借入当時〜現在）</div>
+  <div class="section-body">
+
+    <div class="question">
+      <div class="q-label">（1）バー・スナック・風俗・キャバクラなど</div>
+      <div class="choices"><span class="choice">○無し</span><span class="choice">○有り</span></div>
+      <div class="sub-section">
+        <table class="field-table">
+          <tr><td>行先</td><td><div class="writeline-lg"></div></td></tr>
+          <tr><td>時期</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月〜<span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
+          <tr><td>頻度</td><td>月<div class="writeline-sm"></div>回くらい</td></tr>
+          <tr><td>1回あたりの金額</td><td><div class="writeline-sm"></div>円〜<div class="writeline-sm"></div>円くらい</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label">（2）ギャンブル（パチンコ・競馬・競艇等）</div>
+      <div class="choices"><span class="choice">○無し</span><span class="choice">○有り</span></div>
+      <div class="sub-section">
+        <div class="choices" style="margin-bottom:6px;">
+          <span class="choice">□パチンコ/スロット</span><span class="choice">□競馬</span><span class="choice">□競艇</span><span class="choice">□その他（<div class="writeline-sm" style="display:inline-block;"></div>）</span>
+        </div>
+        <table class="field-table">
+          <tr><td>時期</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月〜<span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
+          <tr><td>頻度</td><td>月<div class="writeline-sm"></div>回くらい</td></tr>
+          <tr><td>1回あたりの金額</td><td><div class="writeline-sm"></div>円〜<div class="writeline-sm"></div>円くらい</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label">（3）投資（株・FX・仮想通貨等）</div>
+      <div class="choices"><span class="choice">○無し</span><span class="choice">○有り</span></div>
+      <div class="sub-section">
+        <table class="field-table">
+          <tr><td>種類</td><td><div class="choices"><span class="choice">□株式</span><span class="choice">□FX</span><span class="choice">□仮想通貨</span><span class="choice">□その他</span></div></td></tr>
+          <tr><td>時期</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月〜<span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
+          <tr><td>投資総額</td><td><div class="writeline-md"></div>円</td></tr>
+          <tr><td>損失額</td><td><div class="writeline-md"></div>円</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label">（4）海外旅行</div>
+      <div class="choices"><span class="choice">○無し</span><span class="choice">○有り</span></div>
+      <div class="sub-section">
+        <table class="field-table">
+          <tr><td>渡航先</td><td><div class="writeline-lg"></div></td></tr>
+          <tr><td>時期</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
+          <tr><td>費用</td><td><div class="writeline-md"></div>円</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label">（5）高額な物品を購入して換金したこと（ブランド品・金券等）</div>
+      <div class="choices"><span class="choice">○無し</span><span class="choice">○有り</span></div>
+      <div class="sub-section">
+        <table class="field-table">
+          <tr><td>品名</td><td><div class="writeline-lg"></div></td></tr>
+          <tr><td>購入時期・金額</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月　<span class="writeline-md"></span>円</div></td></tr>
+          <tr><td>換金時期・金額</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月　<span class="writeline-md"></span>円</div></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="question">
+      <div class="q-label">（6）10万円以上の高額購入（家具・電化製品・宝飾品等）</div>
+      <div class="choices"><span class="choice">○無し</span><span class="choice">○有り</span></div>
+      <div class="sub-section">
+        <table class="field-table">
+          <tr><td>品名</td><td><div class="writeline-lg"></div></td></tr>
+          <tr><td>購入時期・金額</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月　<span class="writeline-md"></span>円</div></td></tr>
+          <tr><td>現在の状況</td><td><div class="writeline-lg"></div></td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ⑫ 財産売却・取得 -->
+<div class="section">
+  <div class="section-header">⑫ 過去2年以内の財産売却・取得</div>
+  <div class="section-body">
+    <div class="question">
+      <div class="q-label">（1）過去2年以内に10万円以上で売却した財産（貴金属・車・株等）</div>
+      <div class="choices"><span class="choice">○無し</span><span class="choice">○有り</span></div>
+      <div class="sub-section">
+        ${[1,2].map(n => `
+        <div class="repeat-block">
+          <div class="repeat-title">売却品 ${n}</div>
+          <table class="field-table">
+            <tr><td>品名</td><td><div class="writeline-lg"></div></td></tr>
+            <tr><td>購入時期・金額</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月　<span class="writeline-md"></span>円</div></td></tr>
+            <tr><td>売却時期・金額</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月　<span class="writeline-md"></span>円</div></td></tr>
+            <tr><td>売却代金の使途</td><td><div class="writeline-lg"></div></td></tr>
+            <tr><td>使った時期</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月頃</div></td></tr>
+          </table>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="question">
+      <div class="q-label">（2）過去2年以内に10万円以上の財産を得たこと（相続・保険金・退職金等）</div>
+      <div class="choices"><span class="choice">○無し</span><span class="choice">○有り</span></div>
+      <div class="sub-section">
+        <table class="field-table">
+          <tr><td>内容</td><td><div class="writeline-lg"></div></td></tr>
+          <tr><td>取得時期・金額</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月　<span class="writeline-md"></span>円</div></td></tr>
+          <tr><td>使途</td><td><div class="writeline-lg"></div></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑬ 保険 -->
+<div class="section">
+  <div class="section-header">⑬ 加入している保険</div>
+  <div class="section-body">
+    ${[1,2,3].map(n => `
+    <div class="repeat-block">
+      <div class="repeat-title">保険 ${n}</div>
+      <table class="field-table">
+        <tr><td>保険会社名</td><td><div class="writeline-lg"></div></td></tr>
+        <tr><td>証券番号</td><td><div class="writeline-lg"></div></td></tr>
+        <tr><td>解約返戻金</td><td><span class="choice">○有（　<span class="writeline-md" style="display:inline-block;"></span>　円）　○無</span></td></tr>
+      </table>
+    </div>`).join('')}
+  </div>
+</div>
+
+<!-- ⑭ 銀行口座 -->
+<div class="section">
+  <div class="section-header">⑭ 銀行口座・信用金庫の口座</div>
+  <div class="section-body">
+    ${[1,2,3].map(n => `
+    <div class="repeat-block">
+      <div class="repeat-title">口座 ${n}</div>
+      <table class="field-table">
+        <tr><td>銀行名</td><td><div class="writeline-lg"></div></td></tr>
+        <tr><td>支店名</td><td><div class="writeline-lg"></div></td></tr>
+        <tr><td>口座種類</td><td><span class="choice">○普通　○定期　○当座</span></td></tr>
+        <tr><td>口座番号</td><td><div class="writeline-lg"></div></td></tr>
+        <tr><td>残高（おおよそ）</td><td><div class="writeline-md"></div>円</td></tr>
+        <tr><td>直近の記帳日</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
+      </table>
+    </div>`).join('')}
+  </div>
+</div>
+
+<!-- ⑮ 支払方法 -->
+<div class="section">
+  <div class="section-header">⑮ 家賃・光熱費・保険料の支払方法</div>
+  <div class="section-body">
+    ${['家賃','電気代','ガス代','水道代','保険料'].map(item => `
+    <div class="question">
+      <div class="q-label">${item}</div>
+      <div class="choices">
+        <span class="choice">○現金払い</span><span class="choice">○口座振替</span>
+        <span class="choice">○クレジットカード</span><span class="choice">○給料天引き</span>
+        <span class="choice">○会社負担（社宅等）</span><span class="choice">○その他</span>
+      </div>
+      <div class="sub-section">
+        <table class="field-table">
+          <tr><td>口座振替の場合：引落口座</td><td><div class="writeline-lg"></div></td></tr>
+          <tr><td>名義人</td><td><span class="choice">○本人　○配偶者　○その他（<div class="writeline-md" style="display:inline-block;"></div>）</span></td></tr>
+          <tr><td>その他の場合：詳細</td><td><div class="writeline-lg"></div></td></tr>
+        </table>
+      </div>
+    </div>`).join('')}
+  </div>
+</div>
+
+<!-- ⑯ 不動産・車等 -->
+<div class="section">
+  <div class="section-header">⑯ 現在お持ちの不動産・自動車・バイク等</div>
+  <div class="section-body">
+    <div class="q-note">※ 不動産・車・バイク・貴金属等10万円以上の価値のあるものを記入してください</div>
+    ${[1,2,3].map(n => `
+    <div class="repeat-block">
+      <div class="repeat-title">資産 ${n}</div>
+      <table class="field-table">
+        <tr><td>種類</td><td><div class="choices"><span class="choice">○不動産（土地）</span><span class="choice">○不動産（建物）</span><span class="choice">○自動車</span><span class="choice">○バイク</span><span class="choice">○その他</span></div></td></tr>
+        <tr><td>詳細（車種・所在地等）</td><td><div class="writeline-lg"></div></td></tr>
+        <tr><td>購入時期</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
+        <tr><td>購入金額</td><td><div class="writeline-md"></div>円</td></tr>
+        <tr><td>現在の価値（おおよそ）</td><td><div class="writeline-md"></div>円</td></tr>
+      </table>
+    </div>`).join('')}
+  </div>
+</div>
+
+<!-- ⑰ 借入経緯（借入先ごと） -->
+<div class="section">
+  <div class="section-header">⑰ 負債が増えた経緯（借入先ごとに記入）</div>
+  <div class="section-body">
+    <div class="q-note">※ 各借入先について、いつ・なぜ借りたか、当時の収入や生活状況を詳しく記入してください</div>
+    ${creditors.length > 0 ? creditors.map(c => `
+    <div class="creditor-block">
+      <div class="creditor-header">借入先 ${c.num}：${c.name}（${eraLabel(c.era)}${c.year}年${c.month}月頃〜）</div>
+      <div class="creditor-body">
+        <div class="q-label" style="margin-bottom:4px;">借入開始当時の収入</div>
+        <div class="writeline"></div>
+        <div class="q-label" style="margin-top:8px;margin-bottom:4px;">借入の経緯・理由・生活状況</div>
+        <div class="textarea-box"></div>
+        <div class="q-label" style="margin-top:8px;margin-bottom:4px;">月々の返済額（当時）</div>
+        <div class="inline-row"><span class="writeline-md"></span>円くらい</div>
+      </div>
+    </div>`).join('') : `
+    <div class="creditor-block">
+      <div class="creditor-header">借入先 1：</div>
+      <div class="creditor-body">
+        <div class="q-label" style="margin-bottom:4px;">借入開始当時の収入</div>
+        <div class="writeline"></div>
+        <div class="q-label" style="margin-top:8px;margin-bottom:4px;">借入の経緯・理由・生活状況</div>
+        <div class="textarea-box"></div>
+        <div class="q-label" style="margin-top:8px;margin-bottom:4px;">月々の返済額（当時）</div>
+        <div class="inline-row"><span class="writeline-md"></span>円くらい</div>
+      </div>
+    </div>
+    <div class="creditor-block">
+      <div class="creditor-header">借入先 2：</div>
+      <div class="creditor-body">
+        <div class="q-label" style="margin-bottom:4px;">借入開始当時の収入</div>
+        <div class="writeline"></div>
+        <div class="q-label" style="margin-top:8px;margin-bottom:4px;">借入の経緯・理由・生活状況</div>
+        <div class="textarea-box"></div>
+        <div class="q-label" style="margin-top:8px;margin-bottom:4px;">月々の返済額（当時）</div>
+        <div class="inline-row"><span class="writeline-md"></span>円くらい</div>
+      </div>
+    </div>`}
+  </div>
+</div>
+
+<div style="text-align:center;padding:20px;font-size:10pt;color:#666;">
+  ── 以上、はじまり法律事務所 ──
+</div>
+
+<script>
+window.onload = function() {
+  // 印刷ボタンがない場合は自動的に印刷ダイアログを開く
+};
+</script>
+</body>
+</html>`;
+
+  const blob = new Blob([html], {type: 'text/html; charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
 }
 
 function copyFormText() {
