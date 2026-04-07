@@ -780,17 +780,15 @@
         <div class="field-row">
           <div class="field-group">
             <label class="field-label">生年月日<span class="req">※必須</span></label>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-              <div class="radio-group" style="margin-right:8px;">
-                <label class="radio-item"><input type="radio" name="client_dob_era" value="昭和"> 昭和</label>
-                <label class="radio-item"><input type="radio" name="client_dob_era" value="平成"> 平成</label>
-                <label class="radio-item"><input type="radio" name="client_dob_era" value="令和"> 令和</label>
-              </div>
-              <input type="text" name="client_dob_year" placeholder="年" style="width:65px">
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:nowrap;white-space:nowrap;">
+              <label class="radio-item" style="white-space:nowrap;"><input type="radio" name="client_dob_era" value="昭和"> 昭和</label>
+              <label class="radio-item" style="white-space:nowrap;"><input type="radio" name="client_dob_era" value="平成"> 平成</label>
+              <label class="radio-item" style="white-space:nowrap;margin-right:6px;"><input type="radio" name="client_dob_era" value="令和"> 令和</label>
+              <input type="text" name="client_dob_year" placeholder="年" style="width:55px;min-width:55px;">
               <span style="font-size:13px;color:var(--text-muted)">年</span>
-              <input type="text" name="client_dob_month" placeholder="月" style="width:55px">
+              <input type="text" name="client_dob_month" placeholder="月" style="width:45px;min-width:45px;">
               <span style="font-size:13px;color:var(--text-muted)">月</span>
-              <input type="text" name="client_dob_day" placeholder="日" style="width:55px">
+              <input type="text" name="client_dob_day" placeholder="日" style="width:45px;min-width:45px;">
               <span style="font-size:13px;color:var(--text-muted)">日</span>
             </div>
           </div>
