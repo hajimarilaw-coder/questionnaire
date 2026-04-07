@@ -1707,6 +1707,10 @@
                 <div class="field-group"><label class="field-label">換金（売却）時期</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="sell_year[]" placeholder="年" style="width:70px"><span style="font-size:13px;">年</span><input type="text" name="sell_month[]" placeholder="月" style="width:50px"><span style="font-size:13px;">月頃</span></div></div>
               </div>
               <div class="field-group"><label class="field-label">換金額（売却額）</label><div class="inline-unit"><input type="number" name="sell_price[]"><span>円</span></div></div>
+              <div class="field-row">
+                <div class="field-group"><label class="field-label">売却代金の使途</label><input type="text" name="sell_use[]" placeholder="例：生活費・返済・車購入など"></div>
+                <div class="field-group"><label class="field-label">使った時期</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" name="sell_use_year[]" placeholder="年" style="width:70px"><span style="font-size:13px;">年</span><input type="text" name="sell_use_month[]" placeholder="月" style="width:50px"><span style="font-size:13px;">月頃</span></div></div>
+              </div>
             </div>
           </div>
           <button type="button" class="add-btn" onclick="addPastSell()">＋ 追加</button>
@@ -3026,6 +3030,8 @@ function dataToReadableText(data) {
         if(data.sell_item)      lines.push('　品名：'+data.sell_item);
         if(data.sell_buy_price) lines.push('　購入：'+data.sell_buy_year+'年'+data.sell_buy_month+'月 '+data.sell_buy_price+'円');
         if(data.sell_price)     lines.push('　売却：'+data.sell_year+'年'+data.sell_month+'月 '+data.sell_price+'円');
+        if(data.sell_use)       lines.push('　使途：'+data.sell_use);
+        if(data.sell_use_year)  lines.push('　使った時期：'+data.sell_use_year+'年'+data.sell_use_month+'月頃');
       }
     }
     if(data.past_gain) {
@@ -3108,22 +3114,25 @@ function dataToReadableText(data) {
 
   // ── ⑧支払方法 ───────────────────────────────────────────────
   const payItems = [
-    ['家賃','pay_rent','pay_rent_bank','pay_rent_holder','pay_rent_sonota'],
-    ['電気代','pay_elec','pay_elec_bank','pay_elec_holder','pay_elec_sonota'],
-    ['ガス代','pay_gas','pay_gas_bank','pay_gas_holder','pay_gas_sonota'],
-    ['水道代','pay_water','pay_water_bank','pay_water_holder','pay_water_sonota'],
-    ['保険料','pay_ins1','pay_ins1_bank','pay_ins1_holder','pay_ins1_sonota'],
+    ['家賃','pay_rent','pay_rent_bank','pay_rent_holder','pay_rent_holder_other','pay_rent_sonota','pay_rent_sonota_free'],
+    ['電気代','pay_elec','pay_elec_bank','pay_elec_holder','pay_elec_holder_other','pay_elec_sonota','pay_elec_sonota_free'],
+    ['ガス代','pay_gas','pay_gas_bank','pay_gas_holder','pay_gas_holder_other','pay_gas_sonota','pay_gas_sonota_free'],
+    ['水道代','pay_water','pay_water_bank','pay_water_holder','pay_water_holder_other','pay_water_sonota','pay_water_sonota_free'],
+    ['保険料','pay_ins1','pay_ins1_bank','pay_ins1_holder','pay_ins1_holder_other','pay_ins1_sonota','pay_ins1_sonota_free'],
   ];
   const hasPayData = payItems.some(([,k]) => data[k]);
   if(hasPayData) {
     lines.push(...sec('⑧支払方法'));
-    payItems.forEach(([name, kMethod, kBank, kHolder, kSonota]) => {
+    payItems.forEach(([name, kMethod, kBank, kHolder, kHolderOther, kSonota, kSonotaFree]) => {
       if(!data[kMethod]) return;
       lines.push('');
       lines.push('▼ '+name+'：'+data[kMethod]);
       if(data[kBank])   lines.push('　引落口座：'+data[kBank]);
-      if(data[kHolder]) lines.push('　名義人：'+data[kHolder]);
-      if(data[kSonota]) lines.push('　内容：'+data[kSonota]);
+      if(data[kHolder]) {
+        const holderStr = data[kHolder] + (data[kHolder]==='その他' && data[kHolderOther] ? '（'+data[kHolderOther]+'）' : '');
+        lines.push('　名義人：'+holderStr);
+      }
+      if(data[kSonota]) lines.push('　内容：'+data[kSonota]+(data[kSonotaFree] ? '（'+data[kSonotaFree]+'）' : ''));
     });
     lines.push('');
     lines.push('─────────────────────────');
