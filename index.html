@@ -109,6 +109,21 @@
     border-radius: 6px;
     overflow: hidden;
   }
+  .section-header.section-complete {
+    background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%);
+  }
+  .section-header.section-complete .section-num {
+    background: rgba(255,255,255,0.25);
+  }
+  .section-header.section-complete::after {
+    content: ' ✓';
+    font-size: 14px;
+    opacity: 0.9;
+  }
+  .section-header.section-incomplete {
+    outline: 2px solid #e53e3e;
+    outline-offset: -2px;
+  }
   .section-header {
     background: var(--navy);
     color: var(--white);
@@ -761,7 +776,7 @@
 <div id="main-form-area">
 <div class="progress-wrap">
   <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar"></div></div>
-  <div class="progress-text" id="progressText">0 / 19 セクション</div>
+  <div class="progress-text" id="progressText">0 / 20 セクション完了</div>
 </div>
 
 <div class="container">
@@ -840,6 +855,13 @@
         <div class="section-note">
           ※ 雇用形態のチェック・職種・手取り収入の記載漏れにご注意ください。<br>
           ※ 派遣社員の場合は派遣先ではなく契約している派遣会社を記載してください。
+        </div>
+        <div class="field-group" style="margin-bottom:12px;">
+          <label class="field-label">職歴の有無</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="career_exists" value="有り" onclick="toggleCareerList(true)"> 有り</label>
+            <label class="radio-item"><input type="radio" name="career_exists" value="無し（職歴なし）" onclick="toggleCareerList(false)"> 無し（職歴なし）</label>
+          </div>
         </div>
         <div id="career-list">
           <div class="repeat-block">
@@ -942,16 +964,23 @@
       </div>
     </div>
 
-    <!-- ======================== 2. 家族関係 ======================== -->
+    <!-- ======================== 2. 家族関係・同居人 ======================== -->
     <div class="section" data-section="2">
       <div class="section-header">
         <div class="section-num">2</div>
-        <div class="section-title">家族関係</div>
+        <div class="section-title">家族関係・同居人</div>
       </div>
       <div class="section-body">
         <div class="section-note">
           ※ 両親まで記入してください。離婚等により別居の子がいる場合も記入してください。<br>
           ※ ご両親のうちお亡くなりになっている方は氏名のみ記入し、詳細は「3」にてご記載ください。
+        </div>
+        <div class="field-group" style="margin-bottom:12px;">
+          <label class="field-label">家族の有無</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="family_exists" value="有り" onclick="toggleFamilyList(true)"> 有り</label>
+            <label class="radio-item"><input type="radio" name="family_exists" value="無し（家族がいない）" onclick="toggleFamilyList(false)"> 無し（家族がいない）</label>
+          </div>
         </div>
         <div id="family-list">
           <!-- 固定行：父・母・夫妻 -->
@@ -959,7 +988,7 @@
             <div class="repeat-block-title">父</div>
             <div class="field-row three">
               <div class="field-group"><label class="field-label">氏名</label><input type="text" name="family_name_father" placeholder="（亡くなっている場合も記入）"></div>
-              <div class="field-group"><label class="field-label">生年月日</label><input type="date" name="family_dob_father"></div>
+              <div class="field-group"><label class="field-label">生年月日</label><input type="date" name="family_dob_father" value="1960-01-01"></div>
               <div class="field-group"><label class="field-label">職業</label><input type="text" name="family_job_father"></div>
             </div>
             <div class="field-row">
@@ -971,7 +1000,7 @@
             <div class="repeat-block-title">母</div>
             <div class="field-row three">
               <div class="field-group"><label class="field-label">氏名</label><input type="text" name="family_name_mother"></div>
-              <div class="field-group"><label class="field-label">生年月日</label><input type="date" name="family_dob_mother"></div>
+              <div class="field-group"><label class="field-label">生年月日</label><input type="date" name="family_dob_mother" value="1960-01-01"></div>
               <div class="field-group"><label class="field-label">職業</label><input type="text" name="family_job_mother"></div>
             </div>
             <div class="field-row">
@@ -983,7 +1012,7 @@
             <div class="repeat-block-title">夫・妻</div>
             <div class="field-row three">
               <div class="field-group"><label class="field-label">氏名</label><input type="text" name="family_name_spouse"></div>
-              <div class="field-group"><label class="field-label">生年月日</label><input type="date" name="family_dob_spouse"></div>
+              <div class="field-group"><label class="field-label">生年月日</label><input type="date" name="family_dob_spouse" value="1960-01-01"></div>
               <div class="field-group"><label class="field-label">職業</label><input type="text" name="family_job_spouse"></div>
             </div>
             <div class="field-row">
@@ -993,6 +1022,7 @@
           </div>
         </div>
         <button type="button" class="add-btn" onclick="addFamily()">＋ 子どもを追加</button>
+        <button type="button" class="add-btn" onclick="addRoommate()" style="margin-left:8px;">＋ 同居人を追加</button>
       </div>
     </div>
 
@@ -1035,6 +1065,14 @@
       </div>
       <div class="section-body">
         <div class="section-note">※ 旧姓でご記入ください。</div>
+        <div class="field-group" style="margin-bottom:12px;">
+          <label class="field-label">結婚・離婚の経歴</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="marry_status" value="有り" onclick="toggleDetail('marriage-section', this, '有り')"> 有り</label>
+            <label class="radio-item"><input type="radio" name="marry_status" value="無し" onclick="toggleDetail('marriage-section', this, '有り')"> 無し</label>
+          </div>
+        </div>
+        <div id="marriage-section" class="cond-panel">
         <div id="marriage-list">
           <div class="repeat-block">
             <div class="repeat-block-title">婚姻歴 1</div>
@@ -1045,7 +1083,9 @@
             <div class="field-group"><label class="field-label">相手方の氏名</label><input type="text" name="ex_name[]" placeholder="旧姓で記入"></div>
           </div>
         </div>
+        </div><!-- /#marriage-list -->
         <button type="button" class="add-btn" onclick="addMarriage()">＋ 婚姻歴を追加</button>
+        </div><!-- /#marriage-section -->
 
         <div class="cond-panel active" style="margin-top:18px;">
           <div style="font-weight:500;margin-bottom:10px;font-size:13px;">⇒ 離婚歴がある場合：財産分与・慰謝料・養育費の取り決め</div>
@@ -1422,6 +1462,14 @@
       </div>
       <div class="section-body">
         <div class="section-note">生命保険・火災保険・自動車保険・ペット保険など種類問わず全てご記入ください。賃貸にお住まいの場合、火災保険は必ずご確認ください。</div>
+        <div class="field-group" style="margin-bottom:12px;">
+          <label class="field-label">加入している保険</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="ins_exists" value="有り" onclick="toggleDetail('insurance-section', this, '有り')"> 有り</label>
+            <label class="radio-item"><input type="radio" name="ins_exists" value="無し" onclick="toggleDetail('insurance-section', this, '有り')"> 無し</label>
+          </div>
+        </div>
+        <div id="insurance-section" class="cond-panel">
         <div id="insurance-list">
           <div class="repeat-block">
             <div class="repeat-block-title">保険 1</div>
@@ -1772,6 +1820,14 @@
         <div class="section-title">現在お持ちの不動産・自動車・バイク等</div>
       </div>
       <div class="section-body">
+        <div class="field-group" style="margin-bottom:12px;">
+          <label class="field-label">不動産・自動車・バイク等の資産</label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="asset_exists" value="有り" onclick="toggleDetail('asset-section', this, '有り')"> 有り</label>
+            <label class="radio-item"><input type="radio" name="asset_exists" value="無し" onclick="toggleDetail('asset-section', this, '有り')"> 無し</label>
+          </div>
+        </div>
+        <div id="asset-section" class="cond-panel">
         <div id="asset-list">
           <div class="repeat-block">
             <div class="repeat-block-title">財産 1</div>
@@ -1806,7 +1862,9 @@
             </div>
           </div>
         </div>
+        </div><!-- /#asset-list -->
         <button type="button" class="add-btn" onclick="addAsset()">＋ 財産を追加</button>
+        </div><!-- /#asset-section -->
       </div>
     </div>
 
@@ -1836,7 +1894,6 @@
     <!-- Submit -->
     <div class="submit-area">
       <button type="button" class="submit-btn" onclick="submitForm()">入力内容を確認・保存する</button>
-      <p class="submit-note">入力内容はJSONファイルとしてダウンロードできます。</p>
     </div>
 
 
@@ -2509,12 +2566,36 @@ function addFamily() {
     '<div class="repeat-block-title">子 ' + num + '</div>' +
     '<div class="field-row three">' +
       '<div class="field-group"><label class="field-label">氏名</label><input type="text" name="family_name_child[]" placeholder="氏名"></div>' +
-      '<div class="field-group"><label class="field-label">生年月日</label><input type="date" name="family_dob_child[]"></div>' +
+      '<div class="field-group"><label class="field-label">生年月日</label><input type="date" name="family_dob_child[]" value="1990-01-01"></div>' +
       '<div class="field-group"><label class="field-label">職業</label><input type="text" name="family_job_child[]" placeholder="学生・無職 等"></div>' +
     '</div>' +
     '<div class="field-row">' +
       '<div class="field-group"><label class="field-label">月収（約）</label><div class="inline-unit"><input type="number" name="family_income_child[]" style="width:100px"><span>万円</span></div></div>' +
       '<div class="field-group"><label class="field-label">同居 / 別居</label><div class="radio-group"><label class="radio-item"><input type="radio" name="family_live_child_' + num + '" value="同居"> 同居</label><label class="radio-item"><input type="radio" name="family_live_child_' + num + '" value="別居"> 別居</label></div></div>' +
+    '</div>';
+  const rb = document.createElement('button');
+  rb.type = 'button'; rb.className = 'remove-btn';
+  rb.textContent = '削除';
+  rb.onclick = () => { block.remove(); updateProgress(); };
+  block.appendChild(rb);
+  list.appendChild(block);
+  updateProgress();
+}
+function addRoommate() {
+  const list = document.getElementById('family-list');
+  const num = list.querySelectorAll('.family-roommate-block').length + 1;
+  const block = document.createElement('div');
+  block.className = 'repeat-block family-roommate-block';
+  block.innerHTML =
+    '<div class="repeat-block-title">同居人 ' + num + '</div>' +
+    '<div class="field-row three">' +
+      '<div class="field-group"><label class="field-label">氏名</label><input type="text" name="roommate_name[]" placeholder="氏名"></div>' +
+      '<div class="field-group"><label class="field-label">続柄</label><input type="text" name="roommate_rel[]" placeholder="例：友人・知人"></div>' +
+      '<div class="field-group"><label class="field-label">生年月日</label><input type="date" name="roommate_dob[]" value="1980-01-01"></div>' +
+    '</div>' +
+    '<div class="field-row">' +
+      '<div class="field-group"><label class="field-label">職業</label><input type="text" name="roommate_job[]" placeholder="例：会社員"></div>' +
+      '<div class="field-group"><label class="field-label">月収（約）</label><div class="inline-unit"><input type="number" name="roommate_income[]" style="width:100px"><span>万円</span></div></div>' +
     '</div>';
   const rb = document.createElement('button');
   rb.type = 'button'; rb.className = 'remove-btn';
@@ -2613,19 +2694,113 @@ function addAsset() {
 function addHistory() { cloneBlock('history-list', '経緯'); }
 
 // ---- Progress ----
+function toggleCareerList(show) {
+  document.getElementById('career-list').style.display = show ? '' : 'none';
+  document.querySelectorAll('.add-btn[onclick="addCareer()"]').forEach(b => b.style.display = show ? '' : 'none');
+  updateProgress();
+}
+function toggleFamilyList(show) {
+  document.getElementById('family-list').style.display = show ? '' : 'none';
+  document.querySelectorAll('.add-btn[onclick*="addFamily"], .add-btn[onclick*="addRoommate"]').forEach(b => b.style.display = show ? '' : 'none');
+  updateProgress();
+}
+// ── セクション完了判定 ──────────────────────────────────────────────────────
+// 各セクションの「最低限これが選ばれていれば完了」キーラジオ
+const SECTION_REQUIRED_RADIO = {
+  1:  'career_exists',
+  2:  'family_exists',
+  3:  'parents_status',
+  4:  'marry_status',
+  5:  'housing_type',
+  6:  'fee_source',
+  7:  'tax_arrears',
+  8:  'personal_loan',
+  10: 'lawsuit',
+  11: 'past_bankruptcy',
+  12: 'bar',    // 生活状況は最初のbar
+  13: 'ins_exists',
+  15: 'pay_rent',
+  16: 'past_sell',
+  17: 'past_gain',
+  18: 'asset_exists',
+};
+
+function isSectionComplete(sec) {
+  const num = parseInt(sec.dataset.section);
+
+  // セクション0：基本情報（氏名・元号・電話・都道府県 必須）
+  if(num === 0) {
+    const name  = sec.querySelector('input[name="client_name"]')?.value?.trim();
+    const era   = sec.querySelector('input[name="client_dob_era"]:checked');
+    const year  = sec.querySelector('input[name="client_dob_year"]')?.value?.trim();
+    const month = sec.querySelector('input[name="client_dob_month"]')?.value?.trim();
+    const day   = sec.querySelector('input[name="client_dob_day"]')?.value?.trim();
+    const phone = sec.querySelector('input[name="client_phone"]')?.value?.trim();
+    const pref  = sec.querySelector('input[name="client_address_pref"]')?.value?.trim();
+    const city  = sec.querySelector('input[name="client_address_city"]')?.value?.trim();
+    return !!(name && era && year && month && day && phone && pref && city);
+  }
+
+  // セクション9：約定返済額（数値入力必須）
+  if(num === 9) {
+    const v = sec.querySelector('input[name="monthly_repayment"]')?.value?.trim();
+    return !!v;
+  }
+
+  // セクション14：銀行口座（銀行名1件以上必須）
+  if(num === 14) {
+    const names = sec.querySelectorAll('input[name="bank_name[]"]');
+    return [...names].some(el => el.value.trim());
+  }
+
+  // セクション19：経緯（借入先ごとのtextarea 1件以上必須）
+  if(num === 19) {
+    const areas = sec.querySelectorAll('textarea[name="hist_content[]"]');
+    return [...areas].some(el => el.value.trim());
+  }
+
+  // その他セクション：対応するラジオが選択済みか
+  const requiredRadioName = SECTION_REQUIRED_RADIO[num];
+  if(requiredRadioName) {
+    return !!sec.querySelector('input[name="' + requiredRadioName + '"]:checked');
+  }
+
+  // 対応定義がない場合：何か1つでも入力があればOK
+  const checks = sec.querySelectorAll('input[type=radio]:checked, input[type=checkbox]:checked');
+  if(checks.length > 0) return true;
+  const inputs = sec.querySelectorAll('input:not([type=checkbox]):not([type=radio]), textarea');
+  return [...inputs].some(el => el.value.trim());
+}
+
 function updateProgress() {
   const sections = document.querySelectorAll('.section');
   let filled = 0;
   sections.forEach(sec => {
-    const inputs = sec.querySelectorAll('input:not([type=checkbox]):not([type=radio]), textarea, select');
-    const checks = sec.querySelectorAll('input[type=checkbox]:checked, input[type=radio]:checked');
-    let hasValue = checks.length > 0;
-    inputs.forEach(el => { if(el.value.trim()) hasValue = true; });
-    if(hasValue) filled++;
+    const complete = isSectionComplete(sec);
+    // セクションヘッダーに完了マークを表示
+    const header = sec.querySelector('.section-header');
+    if(header) {
+      header.classList.toggle('section-complete', complete);
+    }
+    if(complete) filled++;
   });
   const pct = Math.round(filled / sections.length * 100);
   document.getElementById('progressBar').style.width = pct + '%';
-  document.getElementById('progressText').textContent = filled + ' / ' + sections.length + ' セクション';
+  document.getElementById('progressText').textContent = filled + ' / ' + sections.length + ' セクション完了';
+}
+
+// submitForm の手前でバリデーション
+function validateAll() {
+  const sections = document.querySelectorAll('.section');
+  const incomplete = [];
+  sections.forEach(sec => {
+    if(!isSectionComplete(sec)) {
+      const title = sec.querySelector('.section-title')?.textContent?.trim() || '';
+      const num = sec.dataset.section;
+      incomplete.push({ num, title, el: sec });
+    }
+  });
+  return incomplete;
 }
 document.getElementById('mainForm').addEventListener('change', updateProgress);
 document.getElementById('mainForm').addEventListener('input', updateProgress);
@@ -2685,6 +2860,19 @@ function showState(name) {
 }
 
 function submitForm() {
+  // 全セクション必須チェック
+  const incomplete = validateAll();
+  if(incomplete.length > 0) {
+    const titles = incomplete.map(s => '【' + (parseInt(s.num)+1) + '】' + s.title).join('
+');
+    alert('以下のセクションが未入力です。
+回答してから送信してください。
+
+' + titles);
+    // 最初の未入力セクションにスクロール
+    incomplete[0].el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
   const data = collectFormData();
   _lastFormData = data;
   document.getElementById('success-overlay').classList.add('active');
@@ -2874,9 +3062,11 @@ function dataToReadableText(data) {
       if(childLives[i])   lines.push('　同居/別居：'+childLives[i]);
     });
 
-    if(data.marry_year||data.marry_month) {
+    if(data.marry_status) {
       lines.push('');
-      lines.push('▼ 婚姻歴');
+      lines.push('▼ 婚姻歴：'+data.marry_status);
+    }
+    if(data.marry_status==='有り' && (data.marry_year||data.marry_month)) {
       lines.push('　結婚：'+(data.marry_year||'')+'年'+(data.marry_month||'')+'月');
       if(data.divorce_year||data.divorce_month) {
         lines.push('　離婚：'+(data.divorce_year||'')+'年'+(data.divorce_month||'')+'月');
@@ -3067,6 +3257,7 @@ function dataToReadableText(data) {
         if(data.gain_use)    lines.push('　使途：'+data.gain_use);
       }
     }
+    if(data.asset_exists) lines.push('▼ 資産：'+data.asset_exists);
     if(assets.some(v=>v)) {
       const aKinds  = toArr(data.asset_kind);
       const aModels = toArr(data.asset_vehicle_model);
@@ -3095,6 +3286,7 @@ function dataToReadableText(data) {
   }
 
   // ── ⑥加入保険（保険会社別） ─────────────────────────────────
+  if(data.ins_exists) lines.push('▼ 保険加入：'+data.ins_exists);
   const iCompanies = toArr(data.ins_company);
   const iPolicies  = toArr(data.ins_policy_no);
   const iRefunds   = toArr(data.ins_refund);
@@ -3372,7 +3564,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
 
 <!-- ③ 家族関係 -->
 <div class="section">
-  <div class="section-header">③ 家族関係</div>
+  <div class="section-header">③ 家族関係・同居人</div>
   <div class="section-body">
     <div class="question">
       <div class="q-label">ご両親の状況</div>
@@ -3389,7 +3581,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
         <tr><td>生年月日</td><td><div class="writeline-md"></div></td></tr>
         <tr><td>職業</td><td><div class="writeline-md"></div></td></tr>
         <tr><td>月収</td><td><div class="writeline-sm"></div>万円</td></tr>
-        <tr><td>同居/別居</td><td><span class="choice">○同居　○別居</span></td></tr>
+        <tr><td>同居/別居</td><td><span class="choice">○同居　○別居　○死別</span></td></tr>
       </table>
     </div>`).join('')}
     <div class="sub-section">
@@ -3398,7 +3590,17 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
         <tr><td>氏名</td><td><div class="writeline"></div></td></tr>
         <tr><td>生年月日</td><td><div class="writeline-md"></div></td></tr>
         <tr><td>職業</td><td><div class="writeline-md"></div></td></tr>
-        <tr><td>同居/別居</td><td><span class="choice">○同居　○別居</span></td></tr>
+        <tr><td>同居/別居</td><td><span class="choice">○同居　○別居　○死別</span></td></tr>
+      </table>
+    </div>
+    <div class="sub-section">
+      <div class="repeat-title">同居人（複数いる場合は続けてご記入ください）</div>
+      <table class="field-table">
+        <tr><td>氏名</td><td><div class="writeline"></div></td></tr>
+        <tr><td>続柄</td><td><div class="writeline-md"></div></td></tr>
+        <tr><td>生年月日</td><td><div class="writeline-md"></div></td></tr>
+        <tr><td>職業</td><td><div class="writeline-md"></div></td></tr>
+        <tr><td>月収（約）</td><td><div class="writeline-sm"></div>万円</td></tr>
       </table>
     </div>
   </div>
@@ -3409,7 +3611,11 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
   <div class="section-header">④ 結婚歴・離婚歴</div>
   <div class="section-body">
     <div class="question">
-      <div class="q-label">婚姻・離婚の経歴</div>
+      <div class="q-label">結婚・離婚の経歴はありますか？</div>
+      <div class="choices"><span class="choice">○無し</span><span class="choice">○有り</span></div>
+    </div>
+    <div class="sub-section">
+      <div class="q-label" style="margin-bottom:6px;">▼ 有りの場合</div>
       <table class="field-table">
         <tr><td>結婚時期</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
         <tr><td>離婚の有無</td><td><span class="choice">○あり　○なし</span></td></tr>
@@ -3679,15 +3885,34 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
 <div class="section">
   <div class="section-header">⑬ 加入している保険</div>
   <div class="section-body">
-    ${[1,2,3].map(n => `
-    <div class="repeat-block">
-      <div class="repeat-title">保険 ${n}</div>
-      <table class="field-table">
-        <tr><td>保険会社名</td><td><div class="writeline-lg"></div></td></tr>
-        <tr><td>証券番号</td><td><div class="writeline-lg"></div></td></tr>
-        <tr><td>解約返戻金</td><td><span class="choice">○有（　<span class="writeline-md" style="display:inline-block;"></span>　円）　○無</span></td></tr>
-      </table>
-    </div>`).join('')}
+    <div class="question">
+      <div class="q-label">加入している保険はありますか？</div>
+      <div class="choices"><span class="choice">○無し</span><span class="choice">○有り</span></div>
+    </div>
+    <div class="sub-section">
+      <div class="q-label" style="margin-bottom:6px;">▼ 有りの場合</div>
+      ${[1,2,3].map(n => `
+      <div class="repeat-block">
+        <div class="repeat-title">保険 ${n}</div>
+        <table class="field-table">
+          <tr><td>保険会社名</td><td><div class="writeline-lg"></div></td></tr>
+          <tr><td>証券番号</td><td><div class="writeline-lg"></div></td></tr>
+          <tr><td>解約返戻金</td><td><span class="choice">○有（　<span class="writeline-md" style="display:inline-block;"></span>　円）　○無</span></td></tr>
+          <tr><td>保険料の負担</td><td><div class="choices">
+            <span class="choice">○自己負担</span>
+            <span class="choice">○他者負担（<span class="writeline-md" style="display:inline-block;"></span>）</span>
+          </div></td></tr>
+          <tr><td>自己負担の場合：支払方法</td><td><div class="choices">
+            <span class="choice">○口座振替</span>
+            <span class="choice">○現金払い</span>
+            <span class="choice">○給料天引き</span>
+            <span class="choice">○その他（<span class="writeline-md" style="display:inline-block;"></span>）</span>
+          </div></td></tr>
+          <tr><td>口座振替の場合：引落口座</td><td><div class="writeline-lg"></div></td></tr>
+          <tr><td>名義人</td><td><span class="choice">○本人　○配偶者　○その他（<span class="writeline-md" style="display:inline-block;"></span>）</span></td></tr>
+        </table>
+      </div>`).join('')}
+    </div>
   </div>
 </div>
 
@@ -3712,24 +3937,128 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
 
 <!-- ⑮ 支払方法 -->
 <div class="section">
-  <div class="section-header">⑮ 家賃・光熱費・保険料の支払方法</div>
+  <div class="section-header">⑮ 家賃・光熱費の支払方法</div>
   <div class="section-body">
-    ${['家賃','電気代','ガス代','水道代','保険料'].map(item => `
+
+    <!-- 家賃 -->
     <div class="question">
-      <div class="q-label">${item}</div>
+      <div class="q-label">【家賃】</div>
       <div class="choices">
-        <span class="choice">○現金払い</span><span class="choice">○口座振替</span>
-        <span class="choice">○クレジットカード</span><span class="choice">○給料天引き</span>
-        <span class="choice">○会社負担（社宅等）</span><span class="choice">○その他</span>
+        <span class="choice">○ 発生していない（持ち家・実家等）</span>
+        <span class="choice">○ 自己負担</span>
+        <span class="choice">○ 他者負担</span>
       </div>
       <div class="sub-section">
-        <table class="field-table">
+        <div class="q-label" style="margin-bottom:4px;">▼ 自己負担の場合：支払方法</div>
+        <div class="choices">
+          <span class="choice">○口座振替</span>
+          <span class="choice">○現金払い</span>
+          <span class="choice">○給料天引き</span>
+          <span class="choice">○その他（<span class="writeline-lg" style="display:inline-block;"></span>）</span>
+        </div>
+        <table class="field-table" style="margin-top:6px;">
           <tr><td>口座振替の場合：引落口座</td><td><div class="writeline-lg"></div></td></tr>
-          <tr><td>名義人</td><td><span class="choice">○本人　○配偶者　○その他（<div class="writeline-md" style="display:inline-block;"></div>）</span></td></tr>
-          <tr><td>その他の場合：詳細</td><td><div class="writeline-lg"></div></td></tr>
+          <tr><td>名義人</td><td><span class="choice">○本人　○配偶者　○その他（<span class="writeline-md" style="display:inline-block;"></span>）</span></td></tr>
         </table>
+        <div class="q-label" style="margin-top:8px;margin-bottom:4px;">▼ 他者負担の場合：負担者</div>
+        <div class="choices">
+          <span class="choice">○家族・同居人の支払い</span>
+          <span class="choice">○会社負担</span>
+          <span class="choice">○その他（<span class="writeline-lg" style="display:inline-block;"></span>）</span>
+        </div>
       </div>
-    </div>`).join('')}
+    </div>
+
+    <!-- 電気代 -->
+    <div class="question">
+      <div class="q-label">【電気代】</div>
+      <div class="choices">
+        <span class="choice">○ 家賃に含まれる</span>
+        <span class="choice">○ 自己負担</span>
+        <span class="choice">○ 他者負担</span>
+      </div>
+      <div class="sub-section">
+        <div class="q-label" style="margin-bottom:4px;">▼ 自己負担の場合：支払方法</div>
+        <div class="choices">
+          <span class="choice">○口座振替</span>
+          <span class="choice">○現金払い</span>
+          <span class="choice">○給料天引き</span>
+          <span class="choice">○その他（<span class="writeline-lg" style="display:inline-block;"></span>）</span>
+        </div>
+        <table class="field-table" style="margin-top:6px;">
+          <tr><td>口座振替の場合：引落口座</td><td><div class="writeline-lg"></div></td></tr>
+          <tr><td>名義人</td><td><span class="choice">○本人　○配偶者　○その他（<span class="writeline-md" style="display:inline-block;"></span>）</span></td></tr>
+        </table>
+        <div class="q-label" style="margin-top:8px;margin-bottom:4px;">▼ 他者負担の場合：負担者</div>
+        <div class="choices">
+          <span class="choice">○家族・同居人の支払い</span>
+          <span class="choice">○会社負担</span>
+          <span class="choice">○その他（<span class="writeline-lg" style="display:inline-block;"></span>）</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ガス代 -->
+    <div class="question">
+      <div class="q-label">【ガス代】</div>
+      <div class="choices">
+        <span class="choice">○ 発生していない（オール電化等）</span>
+        <span class="choice">○ 家賃に含まれる</span>
+        <span class="choice">○ 自己負担</span>
+        <span class="choice">○ 他者負担</span>
+      </div>
+      <div class="sub-section">
+        <div class="q-label" style="margin-bottom:4px;">▼ 自己負担の場合：支払方法</div>
+        <div class="choices">
+          <span class="choice">○口座振替</span>
+          <span class="choice">○現金払い</span>
+          <span class="choice">○給料天引き</span>
+          <span class="choice">○その他（<span class="writeline-lg" style="display:inline-block;"></span>）</span>
+        </div>
+        <table class="field-table" style="margin-top:6px;">
+          <tr><td>口座振替の場合：引落口座</td><td><div class="writeline-lg"></div></td></tr>
+          <tr><td>名義人</td><td><span class="choice">○本人　○配偶者　○その他（<span class="writeline-md" style="display:inline-block;"></span>）</span></td></tr>
+        </table>
+        <div class="q-label" style="margin-top:8px;margin-bottom:4px;">▼ 他者負担の場合：負担者</div>
+        <div class="choices">
+          <span class="choice">○家族・同居人の支払い</span>
+          <span class="choice">○会社負担</span>
+          <span class="choice">○その他（<span class="writeline-lg" style="display:inline-block;"></span>）</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 水道代 -->
+    <div class="question">
+      <div class="q-label">【水道代】</div>
+      <div class="choices">
+        <span class="choice">○ 家賃に含まれる</span>
+        <span class="choice">○ 自己負担</span>
+        <span class="choice">○ 他者負担</span>
+      </div>
+      <div class="sub-section">
+        <div class="q-label" style="margin-bottom:4px;">▼ 自己負担の場合：支払方法</div>
+        <div class="choices">
+          <span class="choice">○口座振替</span>
+          <span class="choice">○現金払い</span>
+          <span class="choice">○給料天引き</span>
+          <span class="choice">○その他（<span class="writeline-lg" style="display:inline-block;"></span>）</span>
+        </div>
+        <table class="field-table" style="margin-top:6px;">
+          <tr><td>口座振替の場合：引落口座</td><td><div class="writeline-lg"></div></td></tr>
+          <tr><td>名義人</td><td><span class="choice">○本人　○配偶者　○その他（<span class="writeline-md" style="display:inline-block;"></span>）</span></td></tr>
+        </table>
+        <div class="q-label" style="margin-top:8px;margin-bottom:4px;">▼ 他者負担の場合：負担者</div>
+        <div class="choices">
+          <span class="choice">○家族・同居人の支払い</span>
+          <span class="choice">○会社負担</span>
+          <span class="choice">○その他（<span class="writeline-lg" style="display:inline-block;"></span>）</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="q-note" style="margin-top:8px;">※ 保険料の支払方法は⑬加入保険の欄にご記入ください。</div>
+
   </div>
 </div>
 
@@ -3737,18 +4066,24 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
 <div class="section">
   <div class="section-header">⑯ 現在お持ちの不動産・自動車・バイク等</div>
   <div class="section-body">
-    <div class="q-note">※ 不動産・車・バイク・貴金属等10万円以上の価値のあるものを記入してください</div>
-    ${[1,2,3].map(n => `
-    <div class="repeat-block">
-      <div class="repeat-title">資産 ${n}</div>
-      <table class="field-table">
-        <tr><td>種類</td><td><div class="choices"><span class="choice">○不動産（土地）</span><span class="choice">○不動産（建物）</span><span class="choice">○自動車</span><span class="choice">○バイク</span><span class="choice">○その他</span></div></td></tr>
-        <tr><td>詳細（車種・所在地等）</td><td><div class="writeline-lg"></div></td></tr>
-        <tr><td>購入時期</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
-        <tr><td>購入金額</td><td><div class="writeline-md"></div>円</td></tr>
-        <tr><td>現在の価値（おおよそ）</td><td><div class="writeline-md"></div>円</td></tr>
-      </table>
-    </div>`).join('')}
+    <div class="question">
+      <div class="q-label">不動産・自動車・バイク等（10万円以上の価値のあるもの）をお持ちですか？</div>
+      <div class="choices"><span class="choice">○無し</span><span class="choice">○有り</span></div>
+    </div>
+    <div class="sub-section">
+      <div class="q-label" style="margin-bottom:6px;">▼ 有りの場合</div>
+      ${[1,2,3].map(n => `
+      <div class="repeat-block">
+        <div class="repeat-title">資産 ${n}</div>
+        <table class="field-table">
+          <tr><td>種類</td><td><div class="choices"><span class="choice">○不動産（土地）</span><span class="choice">○不動産（建物）</span><span class="choice">○自動車</span><span class="choice">○バイク</span><span class="choice">○その他</span></div></td></tr>
+          <tr><td>詳細（車種・所在地等）</td><td><div class="writeline-lg"></div></td></tr>
+          <tr><td>購入時期</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
+          <tr><td>購入金額</td><td><div class="writeline-md"></div>円</td></tr>
+          <tr><td>現在の価値（おおよそ）</td><td><div class="writeline-md"></div>円</td></tr>
+        </table>
+      </div>`).join('')}
+    </div>
   </div>
 </div>
 
