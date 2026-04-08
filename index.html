@@ -3260,7 +3260,7 @@ function printFormWithData(clientName, creditors) {
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif; font-size: 11pt; color: #111; background: #fff; padding: 20px; }
   h1 { font-size: 16pt; text-align: center; margin-bottom: 4px; }
-  .subtitle { text-align: center; font-size: 10pt; color: #555; margin-bottom: 16px; }
+  .subtitle { text-align: center; font-size: 12pt; font-weight: bold; color: #111; margin-bottom: 16px; }
   .client-name { text-align: center; font-size: 13pt; font-weight: bold; margin-bottom: 20px; }
   .section { border: 1.5px solid #333; border-radius: 4px; margin-bottom: 14px; page-break-inside: avoid; }
   .section-header { background: #2d3748; color: #fff; padding: 6px 10px; font-size: 11pt; font-weight: bold; }
@@ -3294,7 +3294,7 @@ function printFormWithData(clientName, creditors) {
 
 <h1>ご依頼者様 質問シート（手書き用）</h1>
 ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' : '<div class="client-name">氏名：<span style="display:inline-block;width:200px;border-bottom:1px solid #333;">&nbsp;</span> 様</div>'}
-<div class="subtitle">※ 各項目に正確にご記入ください。わからない場合は空欄で構いません。</div>
+<div class="subtitle">※ 各項目を正確にご記入ください。記載欄が足りない場合は空いているスペースに記載してください。</div>
 
 <!-- ① 基本情報 -->
 <div class="section">
@@ -3324,8 +3324,30 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
 <div class="section">
   <div class="section-header">② 学歴・職歴（過去10年分）</div>
   <div class="section-body">
-    <div class="q-note">※ 直近から順に記入してください（アルバイト・パート含む）</div>
-    ${[1,2,3].map(n => `
+    <div class="question" style="margin-bottom:10px;">
+      <div class="q-label">最終学歴</div>
+      <table class="field-table">
+        <tr><td>学校名</td><td><div class="writeline-lg"></div></td></tr>
+        <tr><td>学校種別</td><td><div class="choices">
+          <span class="choice">○中学校</span><span class="choice">○高校</span>
+          <span class="choice">○専門学校</span><span class="choice">○短大</span>
+          <span class="choice">○大学</span><span class="choice">○大学院</span>
+          <span class="choice">○その他（　　　　　　）</span>
+        </div></td></tr>
+        <tr><td>卒業・中退</td><td><div class="choices">
+          <span class="choice">○卒業</span><span class="choice">○中退</span>
+        </div></td></tr>
+        <tr><td>卒業・中退時期</td><td>
+          <div class="inline-row">
+            <span class="choice">○昭和　○平成　○令和</span>
+            <span class="writeline-sm"></span>年
+            <span class="writeline-sm"></span>月
+          </div>
+        </td></tr>
+      </table>
+    </div>
+    <div class="q-note">※ 職歴は直近から順に記入してください（アルバイト・パート含む）</div>
+    ${[1,2,3,4,5].map(n => `
     <div class="repeat-block">
       <div class="repeat-title">職歴 ${n}</div>
       <table class="field-table">
@@ -3496,8 +3518,16 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
   <div class="section-body">
     <div class="choices"><span class="choice">○起こされていない</span><span class="choice">○起こされている</span></div>
     <div class="question" style="margin-top:8px;">
-      <div class="q-label">起こされている場合：種類・内容</div>
-      <div class="writeline"></div>
+      <div class="q-label">起こされている場合：種類（該当するものすべて）</div>
+      <div class="choices" style="margin-top:4px;">
+        <span class="choice">□訴訟</span>
+        <span class="choice">□支払督促</span>
+        <span class="choice">□差押え（給与）</span>
+        <span class="choice">□差押え（預金）</span>
+        <span class="choice">□差押え（その他）</span>
+        <span class="choice">□仮差押え</span>
+        <span class="choice">□その他（<span class="writeline-lg" style="display:inline-block;"></span>）</span>
+      </div>
     </div>
   </div>
 </div>
@@ -3541,14 +3571,16 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
       <div class="q-label">（2）ギャンブル（パチンコ・競馬・競艇等）</div>
       <div class="choices"><span class="choice">○無し</span><span class="choice">○有り</span></div>
       <div class="sub-section">
-        <div class="choices" style="margin-bottom:6px;">
-          <span class="choice">□パチンコ/スロット</span><span class="choice">□競馬</span><span class="choice">□競艇</span><span class="choice">□その他（<div class="writeline-sm" style="display:inline-block;"></div>）</span>
-        </div>
-        <table class="field-table">
-          <tr><td>時期</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月〜<span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
-          <tr><td>頻度</td><td>月<div class="writeline-sm"></div>回くらい</td></tr>
-          <tr><td>1回あたりの金額</td><td><div class="writeline-sm"></div>円〜<div class="writeline-sm"></div>円くらい</td></tr>
-        </table>
+        ${[1,2,3].map(g => `
+        <div class="repeat-block">
+          <div class="repeat-title">ギャンブル ${g}</div>
+          <table class="field-table">
+            <tr><td>種類</td><td><div class="choices"><span class="choice">□パチンコ/スロット</span><span class="choice">□競馬</span><span class="choice">□競艇</span><span class="choice">□その他（<div class="writeline-sm" style="display:inline-block;"></div>）</span></div></td></tr>
+            <tr><td>時期</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月〜<span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
+            <tr><td>頻度</td><td>月<div class="writeline-sm"></div>回くらい</td></tr>
+            <tr><td>1回あたりの金額</td><td><div class="writeline-sm"></div>円〜<div class="writeline-sm"></div>円くらい</td></tr>
+          </table>
+        </div>`).join('')}
       </div>
     </div>
 
@@ -3556,12 +3588,16 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
       <div class="q-label">（3）投資（株・FX・仮想通貨等）</div>
       <div class="choices"><span class="choice">○無し</span><span class="choice">○有り</span></div>
       <div class="sub-section">
-        <table class="field-table">
-          <tr><td>種類</td><td><div class="choices"><span class="choice">□株式</span><span class="choice">□FX</span><span class="choice">□仮想通貨</span><span class="choice">□その他</span></div></td></tr>
-          <tr><td>時期</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月〜<span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
-          <tr><td>投資総額</td><td><div class="writeline-md"></div>円</td></tr>
-          <tr><td>損失額</td><td><div class="writeline-md"></div>円</td></tr>
-        </table>
+        ${[1,2,3].map(v => `
+        <div class="repeat-block">
+          <div class="repeat-title">投資 ${v}</div>
+          <table class="field-table">
+            <tr><td>種類</td><td><div class="choices"><span class="choice">□株式</span><span class="choice">□FX</span><span class="choice">□仮想通貨</span><span class="choice">□マンション投資</span><span class="choice">□先物取引</span><span class="choice">□その他（<div class="writeline-sm" style="display:inline-block;"></div>）</span></div></td></tr>
+            <tr><td>時期</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月〜<span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
+            <tr><td>投資総額</td><td><div class="writeline-md"></div>円</td></tr>
+            <tr><td>損失額</td><td><div class="writeline-md"></div>円</td></tr>
+          </table>
+        </div>`).join('')}
       </div>
     </div>
 
@@ -3659,7 +3695,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
 <div class="section">
   <div class="section-header">⑭ 銀行口座・信用金庫の口座</div>
   <div class="section-body">
-    ${[1,2,3].map(n => `
+    ${[1,2,3,4,5].map(n => `
     <div class="repeat-block">
       <div class="repeat-title">口座 ${n}</div>
       <table class="field-table">
@@ -3728,7 +3764,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
         <div class="q-label" style="margin-bottom:4px;">借入開始当時の収入</div>
         <div class="writeline"></div>
         <div class="q-label" style="margin-top:8px;margin-bottom:4px;">借入の経緯・理由・生活状況</div>
-        <div class="textarea-box"></div>
+        <div class="textarea-box" style="min-height:120px;"></div>
         <div class="q-label" style="margin-top:8px;margin-bottom:4px;">月々の返済額（当時）</div>
         <div class="inline-row"><span class="writeline-md"></span>円くらい</div>
       </div>
@@ -3739,7 +3775,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
         <div class="q-label" style="margin-bottom:4px;">借入開始当時の収入</div>
         <div class="writeline"></div>
         <div class="q-label" style="margin-top:8px;margin-bottom:4px;">借入の経緯・理由・生活状況</div>
-        <div class="textarea-box"></div>
+        <div class="textarea-box" style="min-height:120px;"></div>
         <div class="q-label" style="margin-top:8px;margin-bottom:4px;">月々の返済額（当時）</div>
         <div class="inline-row"><span class="writeline-md"></span>円くらい</div>
       </div>
@@ -3750,7 +3786,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
         <div class="q-label" style="margin-bottom:4px;">借入開始当時の収入</div>
         <div class="writeline"></div>
         <div class="q-label" style="margin-top:8px;margin-bottom:4px;">借入の経緯・理由・生活状況</div>
-        <div class="textarea-box"></div>
+        <div class="textarea-box" style="min-height:120px;"></div>
         <div class="q-label" style="margin-top:8px;margin-bottom:4px;">月々の返済額（当時）</div>
         <div class="inline-row"><span class="writeline-md"></span>円くらい</div>
       </div>
