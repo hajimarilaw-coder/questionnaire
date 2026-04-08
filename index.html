@@ -544,6 +544,19 @@
     transition: background 0.2s, transform 0.15s;
   }
   .setup-go-btn:hover { background: var(--navy-light); transform: translateY(-1px); }
+  .setup-print-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 11px 28px;
+    background: #4a5568;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+  }
+  .setup-print-btn:hover { background: #2d3748; transform: translateY(-1px); }
   .setup-caution {
     text-align: center;
     font-size: 12px;
@@ -722,6 +735,7 @@
 
     <div class="setup-actions">
       <button type="button" class="setup-go-btn" onclick="setupApply()">依頼者用URLを生成する　→</button>
+      <button type="button" class="setup-print-btn" onclick="setupPrintForm()">🖨️ 手書き用シートを印刷</button>
     </div>
 
     <!-- URL表示パネル（準備後に表示） -->
@@ -1824,10 +1838,7 @@
       <button type="button" class="submit-btn" onclick="submitForm()">入力内容を確認・保存する</button>
       <p class="submit-note">入力内容はJSONファイルとしてダウンロードできます。</p>
     </div>
-    <div style="margin-top:16px;text-align:center;">
-      <button type="button" onclick="printForm()" style="background:#4a5568;color:#fff;border:none;padding:12px 32px;border-radius:6px;font-size:15px;cursor:pointer;letter-spacing:0.05em;">🖨️ 手書き用 質問シートを印刷</button>
-      <p style="font-size:12px;color:#888;margin-top:6px;">印刷用に全項目を展開した質問シートが開きます（借入先は自動反映）</p>
-    </div>
+
 
   </form>
 </div>
@@ -3188,6 +3199,22 @@ function dataToReadableText(data) {
 }
 
 
+
+function setupPrintForm() {
+  // セットアップエリアから直接値を読み取る
+  const clientName = document.getElementById('setup-client-name')?.value?.trim() || '';
+  const creditorRows = document.querySelectorAll('#setup-creditor-list .setup-creditor-row');
+  const creditors = [];
+  creditorRows.forEach((row, i) => {
+    const name = row.querySelector('.setup-creditor-name')?.value?.trim() || '';
+    const era  = row.querySelector('.setup-creditor-era')?.value?.trim() || '';
+    const year = row.querySelector('.setup-creditor-year')?.value?.trim() || '';
+    const month= row.querySelector('.setup-creditor-month')?.value?.trim() || '';
+    if (name) creditors.push({ num: creditors.length + 1, name, era, year, month });
+  });
+  printFormWithData(clientName, creditors);
+}
+
 // ─────────────────────────────────────────────────────────────────────
 // 手書き用印刷シート生成
 // ─────────────────────────────────────────────────────────────────────
@@ -3209,6 +3236,10 @@ function printForm() {
       }));
     } catch(e) {}
   }
+  printFormWithData(clientName, creditors);
+}
+
+function printFormWithData(clientName, creditors) {
 
   // 借入先の開始時期テキストを生成
   function eraLabel(e) {
