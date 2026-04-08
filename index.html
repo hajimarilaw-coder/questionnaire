@@ -2863,12 +2863,8 @@ function submitForm() {
   // 全セクション必須チェック
   const incomplete = validateAll();
   if(incomplete.length > 0) {
-    const titles = incomplete.map(s => '【' + (parseInt(s.num)+1) + '】' + s.title).join('
-');
-    alert('以下のセクションが未入力です。
-回答してから送信してください。
-
-' + titles);
+    const titles = incomplete.map(s => '【' + (parseInt(s.num)+1) + '】' + s.title).join('\n');
+    alert('以下のセクションが未入力です。\n回答してから送信してください。\n\n' + titles);
     // 最初の未入力セクションにスクロール
     incomplete[0].el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
