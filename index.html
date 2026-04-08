@@ -931,14 +931,12 @@
             </div>
           </div>
           <div class="field-group">
-            <label class="field-label">卒業（中退）年月日</label>
+            <label class="field-label">卒業（中退）年月</label>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
               <input type="text" name="edu_year" placeholder="年" style="width:70px">
               <span style="font-size:13px;color:var(--text-muted)">年</span>
               <input type="text" name="edu_month" placeholder="月" style="width:50px">
               <span style="font-size:13px;color:var(--text-muted)">月</span>
-              <input type="text" name="edu_day" placeholder="日" style="width:50px">
-              <span style="font-size:13px;color:var(--text-muted)">日</span>
             </div>
           </div>
         </div>
@@ -1073,18 +1071,17 @@
           </div>
         </div>
         <div id="marriage-section" class="cond-panel">
-        <div id="marriage-list">
-          <div class="repeat-block">
-            <div class="repeat-block-title">婚姻歴 1</div>
-            <div class="field-row">
-              <div class="field-group"><label class="field-label">結婚年月</label><div style="display:flex;gap:8px;align-items:center;"><input type="text" name="marry_year[]" placeholder="年" style="width:70px"><span style="font-size:13px;color:var(--text-muted)">年</span><input type="text" name="marry_month[]" placeholder="月" style="width:50px"><span style="font-size:13px;color:var(--text-muted)">月</span></div></div>
-              <div class="field-group"><label class="field-label">離婚年月（婚姻継続中は空欄）</label><div style="display:flex;gap:8px;align-items:center;"><input type="text" name="divorce_year[]" placeholder="年" style="width:70px"><span style="font-size:13px;color:var(--text-muted)">年</span><input type="text" name="divorce_month[]" placeholder="月" style="width:50px"><span style="font-size:13px;color:var(--text-muted)">月</span></div></div>
+          <div id="marriage-list">
+            <div class="repeat-block">
+              <div class="repeat-block-title">婚姻歴 1</div>
+              <div class="field-row">
+                <div class="field-group"><label class="field-label">結婚年月</label><div style="display:flex;gap:8px;align-items:center;"><input type="text" name="marry_year[]" placeholder="年" style="width:70px"><span style="font-size:13px;color:var(--text-muted)">年</span><input type="text" name="marry_month[]" placeholder="月" style="width:50px"><span style="font-size:13px;color:var(--text-muted)">月</span></div></div>
+                <div class="field-group"><label class="field-label">離婚年月（婚姻継続中は空欄）</label><div style="display:flex;gap:8px;align-items:center;"><input type="text" name="divorce_year[]" placeholder="年" style="width:70px"><span style="font-size:13px;color:var(--text-muted)">年</span><input type="text" name="divorce_month[]" placeholder="月" style="width:50px"><span style="font-size:13px;color:var(--text-muted)">月</span></div></div>
+              </div>
+              <div class="field-group"><label class="field-label">相手方の氏名</label><input type="text" name="ex_name[]" placeholder="旧姓で記入"></div>
             </div>
-            <div class="field-group"><label class="field-label">相手方の氏名</label><input type="text" name="ex_name[]" placeholder="旧姓で記入"></div>
-          </div>
-        </div>
-        </div><!-- /#marriage-list -->
-        <button type="button" class="add-btn" onclick="addMarriage()">＋ 婚姻歴を追加</button>
+          </div><!-- /#marriage-list -->
+          <button type="button" class="add-btn" onclick="addMarriage()">＋ 婚姻歴を追加</button>
         </div><!-- /#marriage-section -->
 
         <div class="cond-panel active" style="margin-top:18px;">
@@ -1479,8 +1476,9 @@
             </div>
             <div class="field-group"><label class="field-label">解約返戻金</label><div class="radio-group"><label class="radio-item"><input type="radio" name="ins_refund_yn_1" value="有"> 有</label><label class="radio-item"><input type="radio" name="ins_refund_yn_1" value="無"> 無</label></div><div class="inline-unit" style="margin-top:6px;"><input type="number" name="ins_refund[]" placeholder="（有の場合）"><span>円</span></div></div>
           </div>
-        </div>
+        </div><!-- /#insurance-list -->
         <button type="button" class="add-btn" onclick="addInsurance()">＋ 保険を追加</button>
+        </div><!-- /#insurance-section -->
       </div>
     </div>
 
@@ -2994,7 +2992,7 @@ function dataToReadableText(data) {
       lines.push('▼ 最終学歴');
       if(eduLevel)  lines.push('　学校種別：'+eduLevel);
       if(eduResult) lines.push('　卒業/中退：'+eduResult);
-      if(eduY||eduM) lines.push('　時期：'+(data.edu_era||'')+(eduY?eduY+'年':'')+(eduM?eduM+'月':'')+(data.edu_day?data.edu_day+'日':''));
+      if(eduY||eduM) lines.push('　時期：'+(data.edu_era||'')+(eduY?eduY+'年':'')+(eduM?eduM+'月':''));
     }
     lines.push('');
     lines.push('─────────────────────────');
