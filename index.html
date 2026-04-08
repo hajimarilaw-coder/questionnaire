@@ -172,6 +172,12 @@
     margin-bottom: 5px;
     letter-spacing: 0.03em;
   }
+  label.field-label .req, .section-title .req {
+    color: #ff8080;
+    font-size: 11px;
+    margin-left: 6px;
+    font-weight: 400;
+  }
   label.field-label .req {
     color: var(--red);
     font-size: 11px;
@@ -849,7 +855,7 @@
     <div class="section" data-section="1">
       <div class="section-header">
         <div class="section-num">1</div>
-        <div class="section-title">職歴（過去10年分）</div>
+        <div class="section-title">職歴（過去10年分）<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="section-note">
@@ -857,7 +863,7 @@
           ※ 派遣社員の場合は派遣先ではなく契約している派遣会社を記載してください。
         </div>
         <div class="field-group" style="margin-bottom:12px;">
-          <label class="field-label">職歴の有無</label>
+          <label class="field-label">職歴の有無<span class="req">※必須</span></label>
           <div class="radio-group">
             <label class="radio-item"><input type="radio" name="career_exists" value="有り" onclick="toggleCareerList(true)"> 有り</label>
             <label class="radio-item"><input type="radio" name="career_exists" value="無し（職歴なし）" onclick="toggleCareerList(false)"> 無し（職歴なし）</label>
@@ -966,7 +972,7 @@
     <div class="section" data-section="2">
       <div class="section-header">
         <div class="section-num">2</div>
-        <div class="section-title">家族関係・同居人</div>
+        <div class="section-title">家族関係・同居人<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="section-note">
@@ -974,7 +980,7 @@
           ※ ご両親のうちお亡くなりになっている方は氏名のみ記入し、詳細は「3」にてご記載ください。
         </div>
         <div class="field-group" style="margin-bottom:12px;">
-          <label class="field-label">家族の有無</label>
+          <label class="field-label">家族の有無<span class="req">※必須</span></label>
           <div class="radio-group">
             <label class="radio-item"><input type="radio" name="family_exists" value="有り" onclick="toggleFamilyList(true)"> 有り</label>
             <label class="radio-item"><input type="radio" name="family_exists" value="無し（家族がいない）" onclick="toggleFamilyList(false)"> 無し（家族がいない）</label>
@@ -1028,11 +1034,11 @@
     <div class="section" data-section="3">
       <div class="section-header">
         <div class="section-num">3</div>
-        <div class="section-title">ご両親の状況</div>
+        <div class="section-title">ご両親の状況<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="field-group">
-          <label class="field-label">ご両親はご健在ですか？</label>
+          <label class="field-label">ご両親はご健在ですか？<span class="req">※必須</span></label>
           <div class="radio-group">
             <label class="radio-item"><input type="radio" name="parents_status" value="両親とも健在" onclick="toggleParents()"> 両親とも健在</label>
             <label class="radio-item"><input type="radio" name="parents_status" value="父が亡くなっている" onclick="toggleParents()"> 父が亡くなっている</label>
@@ -1059,12 +1065,12 @@
     <div class="section" data-section="4">
       <div class="section-header">
         <div class="section-num">4</div>
-        <div class="section-title">結婚歴・離婚歴</div>
+        <div class="section-title">結婚歴・離婚歴<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="section-note">※ 旧姓でご記入ください。</div>
         <div class="field-group" style="margin-bottom:12px;">
-          <label class="field-label">結婚・離婚の経歴</label>
+          <label class="field-label">結婚・離婚の経歴<span class="req">※必須</span></label>
           <div class="radio-group">
             <label class="radio-item"><input type="radio" name="marry_status" value="有り" onclick="toggleDetail('marriage-section', this, '有り')"> 有り</label>
             <label class="radio-item"><input type="radio" name="marry_status" value="無し" onclick="toggleDetail('marriage-section', this, '有り')"> 無し</label>
@@ -1128,7 +1134,7 @@
     <div class="section" data-section="5">
       <div class="section-header">
         <div class="section-num">5</div>
-        <div class="section-title">現在の住居</div>
+        <div class="section-title">現在の住居<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="field-group">
@@ -1153,7 +1159,7 @@
     <div class="section" data-section="6">
       <div class="section-header">
         <div class="section-num">6</div>
-        <div class="section-title">手続き費用の調達方法</div>
+        <div class="section-title">手続き費用の調達方法<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="field-group">
@@ -1176,7 +1182,7 @@
     <div class="section" data-section="7">
       <div class="section-header">
         <div class="section-num">7</div>
-        <div class="section-title">税金・国民健康保険・国民年金の滞納</div>
+        <div class="section-title">税金・国民健康保険・国民年金の滞納<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="field-group">
@@ -1204,7 +1210,7 @@
     <div class="section" data-section="8">
       <div class="section-header">
         <div class="section-num">8</div>
-        <div class="section-title">親族・知人・友人など個人からの借入</div>
+        <div class="section-title">親族・知人・友人など個人からの借入<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="field-group">
@@ -1233,7 +1239,7 @@
     <div class="section" data-section="9">
       <div class="section-header">
         <div class="section-num">9</div>
-        <div class="section-title">ご相談前の毎月の約定返済額</div>
+        <div class="section-title">ご相談前の毎月の約定返済額<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="field-group">
@@ -1251,7 +1257,7 @@
     <div class="section" data-section="10">
       <div class="section-header">
         <div class="section-num">10</div>
-        <div class="section-title">訴訟・支払督促・差押えの有無</div>
+        <div class="section-title">訴訟・支払督促・差押えの有無<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="section-note">裁判所から訴状・支払督促・差押命令などの書類が届いていませんか？</div>
@@ -1277,7 +1283,7 @@
     <div class="section" data-section="11">
       <div class="section-header">
         <div class="section-num">11</div>
-        <div class="section-title">過去の破産手続き</div>
+        <div class="section-title">過去の破産手続き<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="field-group">
@@ -1310,13 +1316,13 @@
     <div class="section" data-section="12">
       <div class="section-header">
         <div class="section-num">12</div>
-        <div class="section-title">借入理由・過去の生活状況</div>
+        <div class="section-title">借入理由・過去の生活状況<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
 
         <!-- 12-1 水商売 -->
         <div class="field-group" style="margin-bottom:20px;">
-          <label class="field-label" style="font-size:14px;margin-bottom:8px;">（1）バー・スナック・風俗・キャバクラなどに行ったことがありますか？</label>
+          <label class="field-label" style="font-size:14px;margin-bottom:8px;">（1）バー・スナック・風俗・キャバクラなどに行ったことがありますか？<span class="req">※必須</span></label>
           <div class="radio-group">
             <label class="radio-item"><input type="radio" name="bar" value="無し" onclick="toggleDetail('bar-detail', this, '有り')"> 無し</label>
             <label class="radio-item"><input type="radio" name="bar" value="有り" onclick="toggleDetail('bar-detail', this, '有り')"> 有り</label>
@@ -1455,12 +1461,12 @@
     <div class="section" data-section="13">
       <div class="section-header">
         <div class="section-num">13</div>
-        <div class="section-title">加入している保険</div>
+        <div class="section-title">加入している保険<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="section-note">生命保険・火災保険・自動車保険・ペット保険など種類問わず全てご記入ください。賃貸にお住まいの場合、火災保険は必ずご確認ください。</div>
         <div class="field-group" style="margin-bottom:12px;">
-          <label class="field-label">加入している保険</label>
+          <label class="field-label">加入している保険<span class="req">※必須</span></label>
           <div class="radio-group">
             <label class="radio-item"><input type="radio" name="ins_exists" value="有り" onclick="toggleDetail('insurance-section', this, '有り')"> 有り</label>
             <label class="radio-item"><input type="radio" name="ins_exists" value="無し" onclick="toggleDetail('insurance-section', this, '有り')"> 無し</label>
@@ -1486,7 +1492,7 @@
     <div class="section" data-section="14">
       <div class="section-header">
         <div class="section-num">14</div>
-        <div class="section-title">銀行口座・信用金庫の口座</div>
+        <div class="section-title">銀行口座・信用金庫の口座<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="section-note">ネット銀行・過去2年以内に解約した口座も含みます。利用のない口座も記帳して残高をご記入ください。</div>
@@ -1494,7 +1500,7 @@
           <div class="repeat-block">
             <div class="repeat-block-title">口座 1</div>
             <div class="field-row">
-              <div class="field-group"><label class="field-label">銀行名</label><input type="text" name="bank_name[]"></div>
+              <div class="field-group"><label class="field-label">銀行名<span class="req">※必須</span></label><input type="text" name="bank_name[]"></div>
               <div class="field-group"><label class="field-label">支店名</label><input type="text" name="bank_branch[]"></div>
             </div>
             <div class="field-row">
@@ -1523,7 +1529,7 @@
     <div class="section" data-section="15">
       <div class="section-header">
         <div class="section-num">15</div>
-        <div class="section-title">家賃・光熱費・保険料の支払方法</div>
+        <div class="section-title">家賃・光熱費・保険料の支払方法<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="section-note">それぞれ該当するものを選択してください。口座振替の場合は引き落とし先口座と口座名義人もご入力ください。</div>
@@ -1744,7 +1750,7 @@
     <div class="section" data-section="16">
       <div class="section-header">
         <div class="section-num">16</div>
-        <div class="section-title">過去2年以内に10万円以上で売却した財産</div>
+        <div class="section-title">過去2年以内に10万円以上で売却した財産<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="section-note">貴金属・時計・物品・車・株など</div>
@@ -1782,7 +1788,7 @@
     <div class="section" data-section="17">
       <div class="section-header">
         <div class="section-num">17</div>
-        <div class="section-title">過去2年以内に10万円以上の財産を得たこと</div>
+        <div class="section-title">過去2年以内に10万円以上の財産を得たこと<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="section-note">金品・現金・相続した土地・保険の解約返戻金・退職金など</div>
@@ -1815,11 +1821,11 @@
     <div class="section" data-section="18">
       <div class="section-header">
         <div class="section-num">18</div>
-        <div class="section-title">現在お持ちの不動産・自動車・バイク等</div>
+        <div class="section-title">現在お持ちの不動産・自動車・バイク等<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="field-group" style="margin-bottom:12px;">
-          <label class="field-label">不動産・自動車・バイク等の資産</label>
+          <label class="field-label">不動産・自動車・バイク等の資産<span class="req">※必須</span></label>
           <div class="radio-group">
             <label class="radio-item"><input type="radio" name="asset_exists" value="有り" onclick="toggleDetail('asset-section', this, '有り')"> 有り</label>
             <label class="radio-item"><input type="radio" name="asset_exists" value="無し" onclick="toggleDetail('asset-section', this, '有り')"> 無し</label>
@@ -1859,7 +1865,6 @@
               <div class="field-group"><label class="field-label">現在の評価額</label><div class="inline-unit"><input type="number" name="asset_value[]"><span>円</span></div></div>
             </div>
           </div>
-        </div>
         </div><!-- /#asset-list -->
         <button type="button" class="add-btn" onclick="addAsset()">＋ 財産を追加</button>
         </div><!-- /#asset-section -->
@@ -1870,7 +1875,7 @@
     <div class="section" data-section="19">
       <div class="section-header">
         <div class="section-num">19</div>
-        <div class="section-title">負債が増えた経緯（借入理由・生活状況の詳細）</div>
+        <div class="section-title">負債が増えた経緯（借入理由・生活状況の詳細）<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="section-note">
@@ -3567,7 +3572,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
         <span class="choice">○母のみ健在</span><span class="choice">○両親とも他界</span>
       </div>
     </div>
-    ${['父','母','配偶者・パートナー'].map(r => `
+    ${['父','母','配偶者'].map(r => `
     <div class="sub-section">
       <div class="repeat-title">${r}</div>
       <table class="field-table">
@@ -3578,15 +3583,16 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
         <tr><td>同居/別居</td><td><span class="choice">○同居　○別居　○死別</span></td></tr>
       </table>
     </div>`).join('')}
+    ${[1,2,3,4,5].map(n => `
     <div class="sub-section">
-      <div class="repeat-title">お子様（複数いる場合は続けてご記入ください）</div>
+      <div class="repeat-title">お子様 ${n}</div>
       <table class="field-table">
         <tr><td>氏名</td><td><div class="writeline"></div></td></tr>
         <tr><td>生年月日</td><td><div class="writeline-md"></div></td></tr>
         <tr><td>職業</td><td><div class="writeline-md"></div></td></tr>
         <tr><td>同居/別居</td><td><span class="choice">○同居　○別居　○死別</span></td></tr>
       </table>
-    </div>
+    </div>`).join('')}
     <div class="sub-section">
       <div class="repeat-title">同居人（複数いる場合は続けてご記入ください）</div>
       <table class="field-table">
@@ -3617,7 +3623,13 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
         <tr><td>離婚の種類</td><td><div class="choices"><span class="choice">○協議離婚</span><span class="choice">○調停離婚</span><span class="choice">○裁判離婚</span></div></td></tr>
         <tr><td>慰謝料（あり場合）</td><td><div class="writeline-md"></div>万円</td></tr>
         <tr><td>財産分与（あり場合）</td><td><div class="writeline-md"></div>万円</td></tr>
-        <tr><td>養育費</td><td><span class="choice">○あり（月<span class="writeline-sm" style="width:60px;"></span>万円×<span class="writeline-sm" style="width:40px;"></span>人分）　○なし</span></td></tr>
+        <tr><td>養育費</td><td>
+          <div class="choices"><span class="choice">○あり　○なし</span></div>
+          <div class="inline-row" style="margin-top:4px;">
+            あり場合：総額<span class="writeline-md" style="display:inline-block;"></span>円
+            （子ども<span class="writeline-sm" style="display:inline-block;width:40px;"></span>人）
+          </div>
+        </td></tr>
       </table>
     </div>
   </div>
@@ -3637,7 +3649,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
     <div class="question">
       <div class="q-label">賃貸の場合：契約者</div>
       <div class="choices">
-        <span class="choice">○ご自身</span><span class="choice">○配偶者・パートナー</span>
+        <span class="choice">○ご自身</span><span class="choice">○配偶者</span>
         <span class="choice">○親族（氏名：<span class="writeline-md"></span>　続柄：<span class="writeline-sm"></span>）</span>
         <span class="choice">○その他（<span class="writeline-lg"></span>）</span>
       </div>
@@ -3678,7 +3690,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
     <div class="choices"><span class="choice">○滞納なし</span><span class="choice">○滞納あり</span></div>
     <div class="question" style="margin-top:8px;">
       <div class="q-label">滞納ありの場合（複数ある場合は続けて記入）</div>
-      ${[1,2].map(n => `
+      ${[1,2,3].map(n => `
       <div class="repeat-block">
         <table class="field-table">
           <tr><td>税金の種類</td><td><div class="writeline-lg"></div></td></tr>
@@ -3894,7 +3906,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
           <tr><td>解約返戻金</td><td><span class="choice">○有（　<span class="writeline-md" style="display:inline-block;"></span>　円）　○無</span></td></tr>
           <tr><td>保険料の負担</td><td><div class="choices">
             <span class="choice">○自己負担</span>
-            <span class="choice">○他者負担（<span class="writeline-md" style="display:inline-block;"></span>）</span>
+            <span class="choice">○他者負担</span>
           </div></td></tr>
           <tr><td>自己負担の場合：支払方法</td><td><div class="choices">
             <span class="choice">○口座振替</span>
@@ -3904,6 +3916,11 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
           </div></td></tr>
           <tr><td>口座振替の場合：引落口座</td><td><div class="writeline-lg"></div></td></tr>
           <tr><td>名義人</td><td><span class="choice">○本人　○配偶者　○その他（<span class="writeline-md" style="display:inline-block;"></span>）</span></td></tr>
+          <tr><td>他者負担の場合：負担者</td><td><div class="choices">
+            <span class="choice">○家族の支払い（<span class="writeline-md" style="display:inline-block;"></span>）</span>
+            <span class="choice">○会社負担</span>
+            <span class="choice">○その他（<span class="writeline-md" style="display:inline-block;"></span>）</span>
+          </div></td></tr>
         </table>
       </div>`).join('')}
     </div>
@@ -3922,7 +3939,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
         <tr><td>支店名</td><td><div class="writeline-lg"></div></td></tr>
         <tr><td>口座種類</td><td><span class="choice">○普通　○定期　○当座</span></td></tr>
         <tr><td>口座番号</td><td><div class="writeline-lg"></div></td></tr>
-        <tr><td>残高（おおよそ）</td><td><div class="writeline-md"></div>円</td></tr>
+        <tr><td>残高</td><td><div class="writeline-md"></div>円</td></tr>
         <tr><td>直近の記帳日</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
       </table>
     </div>`).join('')}
@@ -4094,7 +4111,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
         <div class="writeline"></div>
         <div class="q-label" style="margin-top:8px;margin-bottom:4px;">借入の経緯・理由・生活状況</div>
         <div class="textarea-box" style="min-height:120px;"></div>
-        <div class="q-label" style="margin-top:8px;margin-bottom:4px;">月々の返済額（当時）</div>
+        <div class="q-label" style="margin-top:8px;margin-bottom:4px;">月々の返済額（当時の全社合計）</div>
         <div class="inline-row"><span class="writeline-md"></span>円くらい</div>
       </div>
     </div>`).join('') : `
@@ -4105,7 +4122,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
         <div class="writeline"></div>
         <div class="q-label" style="margin-top:8px;margin-bottom:4px;">借入の経緯・理由・生活状況</div>
         <div class="textarea-box" style="min-height:120px;"></div>
-        <div class="q-label" style="margin-top:8px;margin-bottom:4px;">月々の返済額（当時）</div>
+        <div class="q-label" style="margin-top:8px;margin-bottom:4px;">月々の返済額（当時の全社合計）</div>
         <div class="inline-row"><span class="writeline-md"></span>円くらい</div>
       </div>
     </div>
@@ -4116,7 +4133,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
         <div class="writeline"></div>
         <div class="q-label" style="margin-top:8px;margin-bottom:4px;">借入の経緯・理由・生活状況</div>
         <div class="textarea-box" style="min-height:120px;"></div>
-        <div class="q-label" style="margin-top:8px;margin-bottom:4px;">月々の返済額（当時）</div>
+        <div class="q-label" style="margin-top:8px;margin-bottom:4px;">月々の返済額（当時の全社合計）</div>
         <div class="inline-row"><span class="writeline-md"></span>円くらい</div>
       </div>
     </div>`}
