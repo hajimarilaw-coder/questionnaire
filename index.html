@@ -1483,10 +1483,10 @@
             <div class="field-group"><label class="field-label">解約返戻金</label><div class="radio-group"><label class="radio-item"><input type="radio" name="ins_refund_yn_1" value="有"> 有</label><label class="radio-item"><input type="radio" name="ins_refund_yn_1" value="無"> 無</label></div><div class="inline-unit" style="margin-top:6px;"><input type="number" name="ins_refund[]" placeholder="（有の場合）"><span>円</span></div></div>
             <div class="field-group" style="margin-top:10px;">
               <label class="field-label">保険料の支払方法</label>
-              <div class="radio-group" style="margin-bottom:8px;" onchange="togglePayDetail(this.querySelector(':checked'))">
-                <label class="radio-item"><input type="radio" name="pay_ins1" value="口座振替" onchange="togglePayDetail(this)"> 口座振替</label>
-                <label class="radio-item"><input type="radio" name="pay_ins1" value="現金払い" onchange="togglePayDetail(this)"> 現金払い</label>
-                <label class="radio-item"><input type="radio" name="pay_ins1" value="その他" onchange="togglePayDetail(this)"> その他</label>
+              <div class="radio-group" style="margin-bottom:8px;">
+                <label class="radio-item"><input type="radio" name="pay_ins1" value="口座振替" onchange="toggleInsPayDetail(this)"> 口座振替</label>
+                <label class="radio-item"><input type="radio" name="pay_ins1" value="現金払い" onchange="toggleInsPayDetail(this)"> 現金払い</label>
+                <label class="radio-item"><input type="radio" name="pay_ins1" value="その他" onchange="toggleInsPayDetail(this)"> その他</label>
               </div>
               <div class="pay-furikae-detail cond-panel">
                 <div class="field-row">
@@ -1576,6 +1576,7 @@
           <div class="repeat-block pay-block" style="margin-bottom:14px;">
             <div class="field-group" style="margin-bottom:8px;"><span style="font-weight:500;font-size:14px;">家賃</span></div>
             <div class="radio-group" style="margin-bottom:8px;">
+              <label class="radio-item"><input type="radio" name="pay_rent" value="発生していない（持ち家・実家等）" onchange="togglePayDetail(this)"> 発生していない（持ち家・実家等）</label>
               <label class="radio-item"><input type="radio" name="pay_rent" value="口座振替" onchange="togglePayDetail(this)"> 口座振替</label>
               <label class="radio-item"><input type="radio" name="pay_rent" value="現金払い" onchange="togglePayDetail(this)"> 現金払い</label>
               <label class="radio-item"><input type="radio" name="pay_rent" value="その他" onchange="togglePayDetail(this)"> その他</label>
@@ -1617,6 +1618,7 @@
           <div class="repeat-block pay-block" style="margin-bottom:14px;">
             <div class="field-group" style="margin-bottom:8px;"><span style="font-weight:500;font-size:14px;">電気代</span></div>
             <div class="radio-group" style="margin-bottom:8px;">
+              <label class="radio-item"><input type="radio" name="pay_elec" value="家賃に含まれる" onchange="togglePayDetail(this)"> 家賃に含まれる</label>
               <label class="radio-item"><input type="radio" name="pay_elec" value="口座振替" onchange="togglePayDetail(this)"> 口座振替</label>
               <label class="radio-item"><input type="radio" name="pay_elec" value="現金払い" onchange="togglePayDetail(this)"> 現金払い</label>
               <label class="radio-item"><input type="radio" name="pay_elec" value="その他" onchange="togglePayDetail(this)"> その他</label>
@@ -1658,6 +1660,8 @@
           <div class="repeat-block pay-block" style="margin-bottom:14px;">
             <div class="field-group" style="margin-bottom:8px;"><span style="font-weight:500;font-size:14px;">ガス代</span></div>
             <div class="radio-group" style="margin-bottom:8px;">
+              <label class="radio-item"><input type="radio" name="pay_gas" value="発生していない（オール電化等）" onchange="togglePayDetail(this)"> 発生していない（オール電化等）</label>
+              <label class="radio-item"><input type="radio" name="pay_gas" value="家賃に含まれる" onchange="togglePayDetail(this)"> 家賃に含まれる</label>
               <label class="radio-item"><input type="radio" name="pay_gas" value="口座振替" onchange="togglePayDetail(this)"> 口座振替</label>
               <label class="radio-item"><input type="radio" name="pay_gas" value="現金払い" onchange="togglePayDetail(this)"> 現金払い</label>
               <label class="radio-item"><input type="radio" name="pay_gas" value="その他" onchange="togglePayDetail(this)"> その他</label>
@@ -1699,6 +1703,7 @@
           <div class="repeat-block pay-block" style="margin-bottom:14px;">
             <div class="field-group" style="margin-bottom:8px;"><span style="font-weight:500;font-size:14px;">水道代</span></div>
             <div class="radio-group" style="margin-bottom:8px;">
+              <label class="radio-item"><input type="radio" name="pay_water" value="家賃に含まれる" onchange="togglePayDetail(this)"> 家賃に含まれる</label>
               <label class="radio-item"><input type="radio" name="pay_water" value="口座振替" onchange="togglePayDetail(this)"> 口座振替</label>
               <label class="radio-item"><input type="radio" name="pay_water" value="現金払い" onchange="togglePayDetail(this)"> 現金払い</label>
               <label class="radio-item"><input type="radio" name="pay_water" value="その他" onchange="togglePayDetail(this)"> その他</label>
@@ -2140,14 +2145,30 @@ function togglePayDetail(radio) {
   const block = radio.closest('.pay-block');
   const furikae = block.querySelector('.pay-furikae-detail');
   const sonota  = block.querySelector('.pay-sonota-detail');
-  furikae.classList.toggle('active', radio.value === '口座振替');
-  sonota.classList.toggle('active',  radio.value === 'その他');
-  // 非表示になった側の入力をリセット
+  // 発生していない・家賃に含まれる の場合は詳細非表示
+  const noDetail = ['発生していない（持ち家・実家等）','発生していない（オール電化等）','家賃に含まれる'].includes(radio.value);
+  furikae.classList.toggle('active', !noDetail && radio.value === '口座振替');
+  sonota.classList.toggle('active',  !noDetail && radio.value === 'その他');
   if(radio.value !== '口座振替') {
     block.querySelector('.pay-holder-other')?.classList.remove('active');
   }
   if(radio.value !== 'その他') {
     block.querySelector('.pay-sonota-free')?.classList.remove('active');
+  }
+}
+
+// ⑬保険の支払方法用（.pay-blockではなく.field-groupの親を使う）
+function toggleInsPayDetail(radio) {
+  const wrapper = radio.closest('.field-group');
+  const furikae = wrapper.querySelector('.pay-furikae-detail');
+  const sonota  = wrapper.querySelector('.pay-sonota-detail');
+  furikae.classList.toggle('active', radio.value === '口座振替');
+  sonota.classList.toggle('active',  radio.value === 'その他');
+  if(radio.value !== '口座振替') {
+    wrapper.querySelector('.pay-holder-other')?.classList.remove('active');
+  }
+  if(radio.value !== 'その他') {
+    wrapper.querySelector('.pay-sonota-free')?.classList.remove('active');
   }
 }
 function togglePaySonota(detailEl) {
