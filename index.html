@@ -1481,6 +1481,45 @@
               <div class="field-group"><label class="field-label">証券番号</label><input type="text" name="ins_policy_no[]" placeholder="例：12-3456789"></div>
             </div>
             <div class="field-group"><label class="field-label">解約返戻金</label><div class="radio-group"><label class="radio-item"><input type="radio" name="ins_refund_yn_1" value="有"> 有</label><label class="radio-item"><input type="radio" name="ins_refund_yn_1" value="無"> 無</label></div><div class="inline-unit" style="margin-top:6px;"><input type="number" name="ins_refund[]" placeholder="（有の場合）"><span>円</span></div></div>
+            <div class="field-group" style="margin-top:10px;">
+              <label class="field-label">保険料の支払方法</label>
+              <div class="radio-group" style="margin-bottom:8px;" onchange="togglePayDetail(this.querySelector(':checked'))">
+                <label class="radio-item"><input type="radio" name="pay_ins1" value="口座振替" onchange="togglePayDetail(this)"> 口座振替</label>
+                <label class="radio-item"><input type="radio" name="pay_ins1" value="現金払い" onchange="togglePayDetail(this)"> 現金払い</label>
+                <label class="radio-item"><input type="radio" name="pay_ins1" value="その他" onchange="togglePayDetail(this)"> その他</label>
+              </div>
+              <div class="pay-furikae-detail cond-panel">
+                <div class="field-row">
+                  <div class="field-group">
+                    <label class="field-label">引き落とし先口座（銀行名・支店名）</label>
+                    <input type="text" name="pay_ins1_bank" placeholder="例：〇〇銀行 △△支店">
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">口座名義人</label>
+                    <div class="radio-group" style="flex-wrap:wrap;gap:8px;" onchange="togglePayHolder(this.closest('.pay-furikae-detail'))">
+                      <label class="radio-item"><input type="radio" name="pay_ins1_holder" value="本人"> 本人</label>
+                      <label class="radio-item"><input type="radio" name="pay_ins1_holder" value="配偶者"> 配偶者</label>
+                      <label class="radio-item"><input type="radio" name="pay_ins1_holder" value="親"> 親</label>
+                      <label class="radio-item"><input type="radio" name="pay_ins1_holder" value="その他"> その他（同居人含む）</label>
+                    </div>
+                    <div class="pay-holder-other cond-panel" style="margin-top:8px;">
+                      <input type="text" name="pay_ins1_holder_other" placeholder="氏名・続柄を入力">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="pay-sonota-detail cond-panel">
+                <label class="field-label" style="margin-bottom:8px;">その他の内容を選択してください</label>
+                <div class="radio-group" style="flex-wrap:wrap;gap:10px;" onchange="togglePaySonota(this.closest('.pay-sonota-detail'))">
+                  <label class="radio-item"><input type="radio" name="pay_ins1_sonota" value="給料天引き"> 給料天引き</label>
+                  <label class="radio-item"><input type="radio" name="pay_ins1_sonota" value="会社負担（社宅等）"> 会社負担（社宅等）</label>
+                  <label class="radio-item"><input type="radio" name="pay_ins1_sonota" value="その他"> それ以外</label>
+                </div>
+                <div class="pay-sonota-free cond-panel" style="margin-top:8px;">
+                  <input type="text" name="pay_ins1_sonota_free" placeholder="詳細をご記入ください">
+                </div>
+              </div>
+            </div>
           </div>
         </div><!-- /#insurance-list -->
         <button type="button" class="add-btn" onclick="addInsurance()">＋ 保険を追加</button>
@@ -1529,7 +1568,7 @@
     <div class="section" data-section="15">
       <div class="section-header">
         <div class="section-num">15</div>
-        <div class="section-title">家賃・光熱費・保険料の支払方法<span class="req">※必須</span></div>
+        <div class="section-title">家賃・光熱費の支払方法<span class="req">※必須</span></div>
       </div>
       <div class="section-body">
         <div class="section-note">それぞれ該当するものを選択してください。口座振替の場合は引き落とし先口座と口座名義人もご入力ください。</div>
@@ -1699,50 +1738,7 @@
             </div>
           </div>
         </div>
-        <div id="insurance-pay-list">
-          <div class="repeat-block pay-block" style="margin-bottom:14px;">
-            <div class="field-group" style="margin-bottom:8px;"><span style="font-weight:500;font-size:14px;">保険料①</span></div>
-            <div class="radio-group" style="margin-bottom:8px;">
-              <label class="radio-item"><input type="radio" name="pay_ins1" value="口座振替" onchange="togglePayDetail(this)"> 口座振替</label>
-              <label class="radio-item"><input type="radio" name="pay_ins1" value="現金払い" onchange="togglePayDetail(this)"> 現金払い</label>
-              <label class="radio-item"><input type="radio" name="pay_ins1" value="その他" onchange="togglePayDetail(this)"> その他</label>
-            </div>
-            <!-- 口座振替 詳細 -->
-            <div class="pay-furikae-detail cond-panel">
-              <div class="field-row">
-                <div class="field-group">
-                  <label class="field-label">引き落とし先口座（銀行名・支店名）</label>
-                  <input type="text" name="pay_ins1_bank" placeholder="例：〇〇銀行 △△支店">
-                </div>
-                <div class="field-group">
-                  <label class="field-label">口座名義人</label>
-                  <div class="radio-group" style="flex-wrap:wrap;gap:8px;" onchange="togglePayHolder(this.closest('.pay-furikae-detail'))">
-                    <label class="radio-item"><input type="radio" name="pay_ins1_holder" value="本人"> 本人</label>
-                    <label class="radio-item"><input type="radio" name="pay_ins1_holder" value="配偶者"> 配偶者</label>
-                    <label class="radio-item"><input type="radio" name="pay_ins1_holder" value="親"> 親</label>
-                    <label class="radio-item"><input type="radio" name="pay_ins1_holder" value="その他"> その他（同居人含む）</label>
-                  </div>
-                  <div class="pay-holder-other cond-panel" style="margin-top:8px;">
-                    <input type="text" name="pay_ins1_holder_other" placeholder="氏名・続柄を入力">
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- その他 詳細 -->
-            <div class="pay-sonota-detail cond-panel">
-              <label class="field-label" style="margin-bottom:8px;">その他の内容を選択してください</label>
-              <div class="radio-group" style="flex-wrap:wrap;gap:10px;" onchange="togglePaySonota(this.closest('.pay-sonota-detail'))">
-                <label class="radio-item"><input type="radio" name="pay_ins1_sonota" value="給料天引き"> 給料天引き</label>
-                <label class="radio-item"><input type="radio" name="pay_ins1_sonota" value="会社負担（社宅等）"> 会社負担（社宅等）</label>
-                <label class="radio-item"><input type="radio" name="pay_ins1_sonota" value="その他"> それ以外</label>
-              </div>
-              <div class="pay-sonota-free cond-panel" style="margin-top:8px;">
-                <input type="text" name="pay_ins1_sonota_free" placeholder="詳細をご記入ください">
-              </div>
-            </div>
-          </div>
-        </div>
-        <button type="button" class="add-btn" onclick="addInsurancePay()">＋ 保険料を追加</button>
+
       </div>
     </div>
 
@@ -2956,6 +2952,7 @@ function dataToReadableText(data) {
   ];
 
   // ── ①職歴 ───────────────────────────────────────────────────
+  if(data.career_exists) lines.push('▼ 職歴：'+data.career_exists);
   const careerCos   = toArr(data.career_company);
   const careerJobs  = toArr(data.career_job);
   const careerIncs  = toArr(data.career_income);
@@ -3004,6 +3001,7 @@ function dataToReadableText(data) {
   }
 
   // ── ②家族関係 ──────────────────────────────────────────────
+  if(data.family_exists) lines.push('▼ 家族：'+data.family_exists);
   const hasFamilyData = data.family_name_father || data.family_name_mother || data.family_name_spouse;
   if(hasFamilyData || data.parents_status) {
     lines.push(...sec('②家族関係'));
@@ -3059,6 +3057,22 @@ function dataToReadableText(data) {
       if(childJobs[i])    lines.push('　職業：'+childJobs[i]);
       if(childIncomes[i]) lines.push('　月収：'+childIncomes[i]+'万円');
       if(childLives[i])   lines.push('　同居/別居：'+childLives[i]);
+    });
+
+    // 同居人
+    const roommateNames   = toArr(data.roommate_name);
+    const roommateRels    = toArr(data.roommate_rel);
+    const roommateJobs    = toArr(data.roommate_job);
+    const roommateIncomes = toArr(data.roommate_income);
+    const roommateDobs    = toArr(data.roommate_dob);
+    roommateNames.forEach((name, i) => {
+      if(!name) return;
+      lines.push('');
+      lines.push('▼ 同居人'+(i+1)+'：'+name);
+      if(roommateRels[i])    lines.push('　続柄：'+roommateRels[i]);
+      if(roommateDobs[i])    lines.push('　生年月日：'+roommateDobs[i]);
+      if(roommateJobs[i])    lines.push('　職業：'+roommateJobs[i]);
+      if(roommateIncomes[i]) lines.push('　月収：'+roommateIncomes[i]+'万円');
     });
 
     if(data.marry_status) {
@@ -3333,7 +3347,6 @@ function dataToReadableText(data) {
     ['電気代','pay_elec','pay_elec_bank','pay_elec_holder','pay_elec_holder_other','pay_elec_sonota','pay_elec_sonota_free'],
     ['ガス代','pay_gas','pay_gas_bank','pay_gas_holder','pay_gas_holder_other','pay_gas_sonota','pay_gas_sonota_free'],
     ['水道代','pay_water','pay_water_bank','pay_water_holder','pay_water_holder_other','pay_water_sonota','pay_water_sonota_free'],
-    ['保険料','pay_ins1','pay_ins1_bank','pay_ins1_holder','pay_ins1_holder_other','pay_ins1_sonota','pay_ins1_sonota_free'],
   ];
   const hasPayData = payItems.some(([,k]) => data[k]);
   if(hasPayData) {
@@ -3940,7 +3953,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
         <tr><td>口座種類</td><td><span class="choice">○普通　○定期　○当座</span></td></tr>
         <tr><td>口座番号</td><td><div class="writeline-lg"></div></td></tr>
         <tr><td>残高</td><td><div class="writeline-md"></div>円</td></tr>
-        <tr><td>直近の記帳日</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月</div></td></tr>
+        <tr><td>直近の記帳日</td><td><div class="inline-row"><span class="writeline-sm"></span>年<span class="writeline-sm"></span>月<span class="writeline-sm"></span>日</div></td></tr>
       </table>
     </div>`).join('')}
   </div>
