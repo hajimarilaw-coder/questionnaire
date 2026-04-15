@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家計全体の状況　入力フォーム</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --navy: #1a2744;
+    --navy-light: #2a3a60;
+    --gold: #c8a84b;
+    --gold-light: #e8d08b;
+    --bg: #f4f6fb;
+    --white: #ffffff;
+    --border: #d0d6e8;
+    --text: #1a2744;
+    --text-muted: #6b7a99;
+    --red: #c0392b;
+    --green: #1a7a4a;
+    --income-bg: #eaf4ee;
+    --expense-bg: #fef6ee;
+    --income-header: #1a7a4a;
+    --expense-header: #b35400;
+    --total-bg: #e8edf8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* ===== ヘッダー ===== */
+  .page-header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    color: white;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  }
+  .page-header .logo { font-size: 11px; opacity: 0.7; letter-spacing: 0.1em; }
+  .page-header h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.05em; }
+  .page-header .gold-bar { width: 3px; height: 36px; background: var(--gold); border-radius: 2px; }
+
+  /* ===== セットアップ画面 ===== */
+  #setup-screen {
+    max-width: 660px;
+    margin: 40px auto;
+    padding: 0 16px;
+  }
+  .setup-card {
+    background: white;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(26,39,68,0.10);
+    border: 1.5px solid var(--border);
+  }
+  .setup-badge {
+    display: inline-block;
+    background: var(--navy);
+    color: var(--gold-light);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 14px;
+  }
+  .setup-card h2 { font-size: 20px; color: var(--navy); margin-bottom: 6px; }
+  .setup-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6; }
+  .setup-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .setup-field { flex: 1; min-width: 180px; }
+  .setup-field label { display: block; font-size: 12px; font-weight: 700; color: var(--navy); margin-bottom: 6px; letter-spacing: 0.04em; }
+  .setup-field input, .setup-field select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--text);
+    background: white;
+    transition: border-color 0.2s;
+  }
+  .setup-field input:focus, .setup-field select:focus {
+    outline: none;
+    border-color: var(--navy);
+  }
+  .month-row { display: flex; gap: 8px; align-items: center; }
+  .month-row input { width: 80px; }
+  .month-row span { font-size: 13px; color: var(--text-muted); }
+  .setup-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    margin-top: 8px;
+    transition: transform 0.1s, box-shadow 0.2s;
+  }
+  .setup-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(26,39,68,0.25); }
+
+  /* ===== フォーム本体 ===== */
+  #form-screen { display: none; max-width: 900px; margin: 0 auto; padding: 20px 16px 60px; }
+
+  .form-header-bar {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(26,39,68,0.06);
+  }
+  .form-header-bar .client-name { font-size: 17px; font-weight: 700; color: var(--navy); }
+  .form-header-bar .form-note { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+  /* タブ */
+  .month-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .month-tab {
+    flex: 1;
+    padding: 12px;
+    text-align: center;
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.2s;
+  }
+  .month-tab.active {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: white;
+  }
+  .month-panel { display: none; }
+  .month-panel.active { display: block; }
+
+  /* 月ヘッダー */
+  .month-heading {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .month-subheading {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  /* 収支テーブル */
+  .budget-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 640px) {
+    .budget-grid { grid-template-columns: 1fr; }
+  }
+
+  .budget-section {
+    background: white;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(26,39,68,0.05);
+  }
+  .budget-section-header {
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: white;
+  }
+  .budget-section-header.income { background: var(--income-header); }
+  .budget-section-header.expense { background: var(--expense-header); }
+
+  .budget-table { width: 100%; border-collapse: collapse; }
+  .budget-table tr { border-bottom: 1px solid #eef0f6; }
+  .budget-table tr:last-child { border-bottom: none; }
+  .budget-table td { padding: 0; }
+  .budget-table td:first-child {
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--text);
+    width: 55%;
+    background: white;
+    vertical-align: middle;
+  }
+  .budget-table td.sub-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    padding-top: 3px;
+    padding-bottom: 3px;
+  }
+  .budget-table td:last-child {
+    padding: 5px 8px 5px 4px;
+    vertical-align: middle;
+  }
+  .amount-input {
+    width: 100%;
+    padding: 7px 8px;
+    border: 1.5px solid var(--border);
+    border-radius: 5px;
+    font-size: 14px;
+    text-align: right;
+    color: var(--text);
+    background: white;
+    transition: border-color 0.2s;
+    -moz-appearance: textfield;
+  }
+  .amount-input::-webkit-outer-spin-button,
+  .amount-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .amount-input:focus { outline: none; border-color: var(--navy); background: #f0f3ff; }
+  .amount-input.readonly {
+    background: #f0f3f8;
+    color: var(--navy);
+    font-weight: 700;
+    cursor: default;
+    border-color: #c8d0e8;
+  }
+  .note-input {
+    width: 100%;
+    padding: 5px 8px;
+    border: 1.5px solid var(--border);
+    border-radius: 5px;
+    font-size: 12px;
+    color: var(--text);
+    margin-top: 3px;
+  }
+  .note-input:focus { outline: none; border-color: var(--navy); }
+
+  /* 合計行 */
+  .budget-table tr.total-row { background: var(--total-bg); }
+  .budget-table tr.total-row td:first-child {
+    font-weight: 700;
+    font-size: 13px;
+    background: var(--total-bg);
+    color: var(--navy);
+  }
+  .budget-table tr.total-row .amount-input.readonly {
+    background: #dce3f5;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  /* 繰越金ボックス */
+  .carry-over-box {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 8px rgba(26,39,68,0.05);
+  }
+  .carry-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 180px;
+  }
+  .carry-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    white-space: nowrap;
+  }
+  .carry-amount {
+    flex: 1;
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: right;
+    color: var(--navy);
+    background: #f0f3f8;
+    min-width: 120px;
+    -moz-appearance: textfield;
+  }
+  .carry-amount::-webkit-outer-spin-button,
+  .carry-amount::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .carry-amount.editable {
+    background: white;
+    cursor: text;
+  }
+  .carry-amount.editable:focus { outline: none; border-color: var(--navy); background: #f0f3ff; }
+  .carry-arrow { font-size: 20px; color: var(--text-muted); }
+  .balance-summary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .balance-summary.positive { background: #eaf4ee; color: var(--green); }
+  .balance-summary.negative { background: #fdecea; color: var(--red); }
+  .balance-summary.zero { background: var(--total-bg); color: var(--navy); }
+
+  /* 対象期間 */
+  .period-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .period-row label { font-size: 13px; font-weight: 700; color: var(--navy); white-space: nowrap; }
+  .period-row input {
+    padding: 8px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    width: 140px;
+  }
+  .period-row input:focus { outline: none; border-color: var(--navy); }
+  .period-row span { font-size: 13px; color: var(--text-muted); }
+
+  /* 送信ボタン */
+  .submit-area { text-align: center; margin-top: 24px; }
+  .submit-btn {
+    padding: 16px 48px;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    box-shadow: 0 4px 16px rgba(26,39,68,0.25);
+    transition: transform 0.1s, box-shadow 0.2s;
+  }
+  .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,39,68,0.30); }
+  .submit-note { font-size: 12px; color: var(--text-muted); margin-top: 10px; }
+
+  /* 完了画面 */
+  #done-screen {
+    display: none;
+    max-width: 480px;
+    margin: 60px auto;
+    padding: 0 16px;
+    text-align: center;
+  }
+  .done-card {
+    background: white;
+    border-radius: 12px;
+    padding: 40px 32px;
+    box-shadow: 0 4px 20px rgba(26,39,68,0.10);
+    border: 1.5px solid var(--border);
+  }
+  .done-icon { font-size: 48px; margin-bottom: 16px; }
+  .done-card h2 { font-size: 22px; color: var(--navy); margin-bottom: 12px; }
+  .done-card p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+  .sending-indicator { font-size: 13px; color: var(--text-muted); margin-top: 12px; }
+
+  /* 注意書き */
+  .form-notes {
+    background: #fffbea;
+    border: 1px solid #f0d060;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: #6b5800;
+    line-height: 1.7;
+  }
+  .form-notes strong { color: #8b4500; }
+
+  /* ローディング */
+  .spinner {
+    display: inline-block;
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="gold-bar"></div>
+  <div>
+    <div class="logo">HAJIMARI LAW OFFICE</div>
+    <h1>家計全体の状況　入力フォーム</h1>
+  </div>
+</div>
+
+<!-- ===== セットアップ画面（弁護士用） ===== -->
+<div id="setup-screen">
+  <div class="setup-card">
+    <div class="setup-badge">弁護士記入欄</div>
+    <h2>フォーム送付前の準備</h2>
+    <p>依頼者に送付する前に、依頼者名と対象月を入力してください。<br>生成されたURLを依頼者に送ってください。</p>
+
+    <div class="setup-row">
+      <div class="setup-field">
+        <label>依頼者氏名</label>
+        <input type="text" id="setup-name" placeholder="例：山田 太郎">
+      </div>
+    </div>
+
+    <div class="setup-row">
+      <div class="setup-field">
+        <label>1ヶ月目</label>
+        <div class="month-row">
+          <input type="number" id="m1-year" placeholder="年" min="2020" max="2030">
+          <span>年</span>
+          <input type="number" id="m1-month" placeholder="月" min="1" max="12" style="width:60px">
+          <span>月分</span>
+        </div>
+      </div>
+      <div class="setup-field">
+        <label>2ヶ月目</label>
+        <div class="month-row">
+          <input type="number" id="m2-year" placeholder="年" min="2020" max="2030">
+          <span>年</span>
+          <input type="number" id="m2-month" placeholder="月" min="1" max="12" style="width:60px">
+          <span>月分</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="setup-btn" onclick="setupApply()">依頼者用URLを生成する　→</button>
+
+    <div id="setup-result" style="display:none;margin-top:20px;">
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">依頼者に送るURL：</div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="setup-url" readonly style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;background:#f8f9ff;">
+        <button onclick="copyUrl()" style="padding:9px 16px;background:var(--navy);color:white;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;">コピー</button>
+      </div>
+      <div id="copy-ok" style="display:none;font-size:12px;color:var(--green);margin-top:4px;">✓ コピーしました</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== フォーム本体 ===== -->
+<div id="form-screen">
+  <div class="form-header-bar">
+    <div>
+      <div class="client-name" id="disp-name"></div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">家計全体の状況　入力フォーム</div>
+    </div>
+    <div class="form-note">
+      ※ 金額は円単位で入力してください<br>
+      ※ 支出の「交際費」「娯楽費」は内容を記入してください<br>
+      ※ 「保険料」は保険契約者名を記入してください
+    </div>
+  </div>
+
+  <!-- タブ -->
+  <div class="month-tabs">
+    <div class="month-tab active" id="tab-1" onclick="switchTab(1)"><span id="tab-label-1">1ヶ月目</span></div>
+    <div class="month-tab" id="tab-2" onclick="switchTab(2)"><span id="tab-label-2">2ヶ月目</span></div>
+  </div>
+
+  <!-- 月ごとのパネル -->
+  <div id="panel-1" class="month-panel active"></div>
+  <div id="panel-2" class="month-panel"></div>
+
+  <div class="submit-area">
+    <button class="submit-btn" id="submit-btn" onclick="submitForm()">入力内容を送信する</button>
+    <div class="submit-note">送信後、弁護士がExcelデータを確認します</div>
+  </div>
+</div>
+
+<!-- ===== 完了画面 ===== -->
+<div id="done-screen">
+  <div class="done-card">
+    <div class="done-icon">✅</div>
+    <h2>送信が完了しました</h2>
+    <p>家計表の入力内容が送信されました。<br>弁護士が内容を確認いたします。<br><br>ご不明な点は事務所までお問い合わせください。</p>
+  </div>
+</div>
+
+<script>
+// ===== GAS設定 =====
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxFw1W0fpI1udo_rf00-NIMFsduhoUdJWq8Hwz33m7WUaLi0c_1v9oH8sUNr2XPu_fymw/exec';
+
+// ===== 費目定義 =====
+const INCOME_ITEMS = [
+  { key: 'income_salary_self',    label: '給与（申立人）' },
+  { key: 'income_bonus_self',     label: '賞与（申立人）' },
+  { key: 'income_salary_spouse',  label: '給与（配偶者）' },
+  { key: 'income_bonus_spouse',   label: '賞与（配偶者）' },
+  { key: 'income_self_employ_self',  label: '自営収入（申立人）' },
+  { key: 'income_self_employ_spouse',label: '自営収入（配偶者）' },
+  { key: 'income_self_employ_other', label: '自営収入（その他）', note: true, notePlaceholder: '氏名' },
+  { key: 'income_salary_other',   label: '給与（その他）', note: true, notePlaceholder: '氏名' },
+  { key: 'income_pension_self',   label: '年金（申立人）' },
+  { key: 'income_pension_spouse', label: '年金（配偶者）' },
+  { key: 'income_pension_other1', label: '年金（その他①）', note: true, notePlaceholder: '氏名' },
+  { key: 'income_pension_other2', label: '年金（その他②）', note: true, notePlaceholder: '氏名' },
+  { key: 'income_welfare',        label: '生活保護' },
+  { key: 'income_child_allowance',label: '児童手当' },
+  { key: 'income_support',        label: '他からの援助', note: true, notePlaceholder: '援助者氏名' },
+  { key: 'income_borrowing',      label: '借入金' },
+  { key: 'income_other',          label: 'その他', note: true, notePlaceholder: '内容' },
+];
+
+const EXPENSE_ITEMS = [
+  { key: 'exp_rent',              label: '家賃（管理費を含む）' },
+  { key: 'exp_mgmt_fee',          label: '管理費・修繕積立金' },
+  { key: 'exp_housing_loan',      label: '住宅ローン' },
+  { key: 'exp_land_rent',         label: '地代' },
+  { key: 'exp_food',              label: '食費' },
+  { key: 'exp_electric',          label: '電気代' },
+  { key: 'exp_gas',               label: 'ガス代' },
+  { key: 'exp_water',             label: '水道代' },
+  { key: 'exp_daily',             label: '日用品' },
+  { key: 'exp_phone',             label: '電話代' },
+  { key: 'exp_newspaper',         label: '新聞代・書籍代' },
+  { key: 'exp_insurance1',        label: '保険料①', note: true, notePlaceholder: '保険の契約者名' },
+  { key: 'exp_insurance2',        label: '保険料②', note: true, notePlaceholder: '保険の契約者名' },
+  { key: 'exp_parking',           label: '駐車場代' },
+  { key: 'exp_gas_car',           label: 'ガソリン代', note: true, notePlaceholder: '車の名義人' },
+  { key: 'exp_medical',           label: '医療費' },
+  { key: 'exp_education',         label: '教育費' },
+  { key: 'exp_transport',         label: '交通費' },
+  { key: 'exp_clothing',          label: '被服費' },
+  { key: 'exp_social',            label: '交際費', note: true, notePlaceholder: '内容' },
+  { key: 'exp_entertainment',     label: '娯楽費', note: true, notePlaceholder: '内容' },
+  { key: 'exp_license_fee',       label: '受信料（NHK等）' },
+  { key: 'exp_repay_creditor',    label: '返済（対業者）' },
+  { key: 'exp_repay_personal',    label: '返済（対親戚・知人）' },
+  { key: 'exp_other1',            label: 'その他①', note: true, notePlaceholder: '内容' },
+  { key: 'exp_other2',            label: 'その他②', note: true, notePlaceholder: '内容' },
+  { key: 'exp_other3',            label: 'その他③', note: true, notePlaceholder: '内容' },
+];
+
+// ===== パネル生成 =====
+function buildPanel(monthIdx) {
+  const mLabel = monthIdx === 1 ? '1ヶ月目' : '2ヶ月目';
+  const prefix = `m${monthIdx}`;
+
+  let html = `
+    <div class="period-row">
+      <label>対象期間：</label>
+      <input type="date" id="${prefix}-period-start" class="calc-trigger">
+      <span>〜</span>
+      <input type="date" id="${prefix}-period-end" class="calc-trigger">
+    </div>
+    <div class="form-notes">
+      <strong>記入にあたって：</strong><br>
+      ・収入額・光熱水費・電話代等、具体的金額が分かるものは正確な金額を入力してください。<br>
+      ・支出の「交際費」「娯楽費」は内容欄に具体的内容を記入してください。<br>
+      ・「保険料」は保険契約者名を、「駐車場代」「ガソリン代」は車の名義人を記入してください。<br>
+      ・発生しなかった費目は「0」のままで構いません。
+    </div>
+    <div class="carry-over-box">
+      <div class="carry-item">
+        <div class="carry-label">前月繰越金</div>
+        <input type="number" class="carry-amount ${monthIdx === 1 ? 'editable' : ''}"
+          id="${prefix}-carry-prev"
+          ${monthIdx === 1 ? '' : 'readonly'}
+          value="0" oninput="recalc(${monthIdx})">
+        <div style="font-size:12px;color:var(--text-muted)">円</div>
+      </div>
+      <div class="carry-arrow">→</div>
+      <div class="carry-item">
+        <div class="carry-label">収入合計</div>
+        <input type="number" class="carry-amount" id="${prefix}-income-total" readonly value="0">
+        <div style="font-size:12px;color:var(--text-muted)">円</div>
+      </div>
+      <div class="carry-arrow">−</div>
+      <div class="carry-item">
+        <div class="carry-label">支出合計</div>
+        <input type="number" class="carry-amount" id="${prefix}-expense-total" readonly value="0">
+        <div style="font-size:12px;color:var(--text-muted)">円</div>
+      </div>
+      <div class="carry-arrow">=</div>
+      <div class="carry-item">
+        <div class="carry-label" style="color:var(--navy);font-size:14px;">次月繰越金</div>
+        <input type="number" class="carry-amount" id="${prefix}-carry-next" readonly value="0"
+          style="font-size:17px;border-color:var(--navy);">
+        <div style="font-size:12px;color:var(--text-muted)">円</div>
+      </div>
+    </div>
+    <div class="budget-grid">
+      <div class="budget-section">
+        <div class="budget-section-header income">収　　　入</div>
+        <table class="budget-table">`;
+
+  for (const item of INCOME_ITEMS) {
+    html += `<tr>
+      <td>${item.label}${item.note ? `<br><input type="text" class="note-input" id="${prefix}-${item.key}-note" placeholder="${item.notePlaceholder}">` : ''}</td>
+      <td><input type="number" class="amount-input" id="${prefix}-${item.key}" value="0" min="0" oninput="recalc(${monthIdx})"></td>
+    </tr>`;
+  }
+
+  html += `<tr class="total-row">
+      <td>収入合計</td>
+      <td><input type="number" class="amount-input readonly" id="${prefix}-income-sum" readonly value="0"></td>
+    </tr>
+  </table>
+</div>
+<div class="budget-section">
+  <div class="budget-section-header expense">支　　　出</div>
+  <table class="budget-table">`;
+
+  for (const item of EXPENSE_ITEMS) {
+    html += `<tr>
+      <td>${item.label}${item.note ? `<br><input type="text" class="note-input" id="${prefix}-${item.key}-note" placeholder="${item.notePlaceholder}">` : ''}</td>
+      <td><input type="number" class="amount-input" id="${prefix}-${item.key}" value="0" min="0" oninput="recalc(${monthIdx})"></td>
+    </tr>`;
+  }
+
+  html += `<tr class="total-row">
+      <td>支出合計</td>
+      <td><input type="number" class="amount-input readonly" id="${prefix}-expense-sum" readonly value="0"></td>
+    </tr>
+  </table>
+</div>
+</div>`;
+
+  return html;
+}
+
+// ===== 集計計算 =====
+function getVal(id) {
+  const el = document.getElementById(id);
+  return el ? (parseInt(el.value) || 0) : 0;
+}
+function setVal(id, v) {
+  const el = document.getElementById(id);
+  if (el) el.value = v;
+}
+
+function recalc(monthIdx) {
+  const p = `m${monthIdx}`;
+  let incomeSum = 0;
+  for (const item of INCOME_ITEMS) {
+    incomeSum += getVal(`${p}-${item.key}`);
+  }
+  let expenseSum = 0;
+  for (const item of EXPENSE_ITEMS) {
+    expenseSum += getVal(`${p}-${item.key}`);
+  }
+  const carryPrev = getVal(`${p}-carry-prev`);
+  const carryNext = carryPrev + incomeSum - expenseSum;
+
+  setVal(`${p}-income-sum`, incomeSum);
+  setVal(`${p}-expense-sum`, expenseSum);
+  setVal(`${p}-income-total`, incomeSum);
+  setVal(`${p}-expense-total`, expenseSum);
+  setVal(`${p}-carry-next`, carryNext);
+
+  // 2ヶ月目の前月繰越金に自動連動
+  if (monthIdx === 1) {
+    setVal('m2-carry-prev', carryNext);
+    recalc(2);
+  }
+
+  // 次月繰越金の色
+  const nextEl = document.getElementById(`${p}-carry-next`);
+  if (nextEl) {
+    nextEl.style.color = carryNext < 0 ? 'var(--red)' : 'var(--navy)';
+  }
+}
+
+// ===== タブ切り替え =====
+function switchTab(n) {
+  document.querySelectorAll('.month-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.month-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`tab-${n}`).classList.add('active');
+  document.getElementById(`panel-${n}`).classList.add('active');
+}
+
+// ===== セットアップ =====
+function setupApply() {
+  const name  = document.getElementById('setup-name').value.trim();
+  const m1y   = document.getElementById('m1-year').value;
+  const m1m   = document.getElementById('m1-month').value;
+  const m2y   = document.getElementById('m2-year').value;
+  const m2m   = document.getElementById('m2-month').value;
+  if (!name || !m1y || !m1m || !m2y || !m2m) {
+    alert('依頼者氏名と2ヶ月分の年月を入力してください。');
+    return;
+  }
+  const data = { n: name, m1y, m1m, m2y, m2m };
+  const encoded = encodeURIComponent(JSON.stringify(data));
+  const url = location.href.split('?')[0] + '?d=' + encoded;
+  document.getElementById('setup-url').value = url;
+  document.getElementById('setup-result').style.display = 'block';
+}
+
+function copyUrl() {
+  const url = document.getElementById('setup-url').value;
+  navigator.clipboard.writeText(url).then(() => {
+    const ok = document.getElementById('copy-ok');
+    ok.style.display = 'block';
+    setTimeout(() => ok.style.display = 'none', 2000);
+  });
+}
+
+// ===== URL初期化 =====
+function initFromUrl() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const d = urlParams.get('d');
+  if (!d) return;
+
+  let data;
+  try { data = JSON.parse(decodeURIComponent(d)); } catch(e) { return; }
+
+  const { n, m1y, m1m, m2y, m2m } = data;
+
+  // ラベル設定
+  const m1Label = `${m1y}年${m1m}月分`;
+  const m2Label = `${m2y}年${m2m}月分`;
+  document.getElementById('tab-label-1').textContent = m1Label;
+  document.getElementById('tab-label-2').textContent = m2Label;
+  document.getElementById('disp-name').textContent = n + ' 様';
+
+  // パネル生成
+  document.getElementById('panel-1').innerHTML = buildPanel(1);
+  document.getElementById('panel-2').innerHTML = buildPanel(2);
+
+  // 月ヘッダーのラベルは period-row で代替
+  recalc(1);
+
+  // セットアップ非表示、フォーム表示
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('form-screen').style.display = 'block';
+}
+
+// ===== フォームデータ収集 =====
+function collectData() {
+  const urlParams = new URLSearchParams(window.location.search);
+  let meta = {};
+  try { meta = JSON.parse(decodeURIComponent(urlParams.get('d'))); } catch(e) {}
+
+  const months = [];
+  for (let mi = 1; mi <= 2; mi++) {
+    const p = `m${mi}`;
+    const monthData = {
+      label: mi === 1 ? `${meta.m1y}年${meta.m1m}月分` : `${meta.m2y}年${meta.m2m}月分`,
+      periodStart: document.getElementById(`${p}-period-start`)?.value || '',
+      periodEnd:   document.getElementById(`${p}-period-end`)?.value || '',
+      carryPrev:   getVal(`${p}-carry-prev`),
+      incomeSum:   getVal(`${p}-income-sum`),
+      expenseSum:  getVal(`${p}-expense-sum`),
+      carryNext:   getVal(`${p}-carry-next`),
+      incomeItems: {},
+      expenseItems: {},
+    };
+    for (const item of INCOME_ITEMS) {
+      monthData.incomeItems[item.key] = {
+        label: item.label,
+        amount: getVal(`${p}-${item.key}`),
+        note: item.note ? (document.getElementById(`${p}-${item.key}-note`)?.value || '') : '',
+      };
+    }
+    for (const item of EXPENSE_ITEMS) {
+      monthData.expenseItems[item.key] = {
+        label: item.label,
+        amount: getVal(`${p}-${item.key}`),
+        note: item.note ? (document.getElementById(`${p}-${item.key}-note`)?.value || '') : '',
+      };
+    }
+    months.push(monthData);
+  }
+  return { clientName: meta.n || '', submittedAt: new Date().toLocaleString('ja-JP'), months };
+}
+
+// ===== Excel生成 =====
+function buildExcel(data) {
+  const wb = XLSX.utils.book_new();
+
+  for (const month of data.months) {
+    const rows = [];
+    rows.push([month.label + '　家計全体の状況']);
+    rows.push(['依頼者：' + data.clientName, '', '送信日時：' + data.submittedAt]);
+    rows.push(['対象期間：' + (month.periodStart || '　　　　') + ' ～ ' + (month.periodEnd || '　　　　')]);
+    rows.push([]);
+    rows.push(['費目', '金額（円）', '備考', '', '費目', '金額（円）', '備考']);
+
+    const incArr = INCOME_ITEMS;
+    const expArr = EXPENSE_ITEMS;
+    const maxLen = Math.max(incArr.length, expArr.length);
+
+    for (let i = 0; i < maxLen; i++) {
+      const inc = incArr[i];
+      const exp = expArr[i];
+      const incData = inc ? month.incomeItems[inc.key] : null;
+      const expData = exp ? month.expenseItems[exp.key] : null;
+
+      rows.push([
+        incData ? incData.label : '',
+        incData ? incData.amount : '',
+        incData?.note || '',
+        '',
+        expData ? expData.label : '',
+        expData ? expData.amount : '',
+        expData?.note || '',
+      ]);
+    }
+
+    rows.push([]);
+    rows.push(['前月繰越金', month.carryPrev, '', '', '前月繰越金', month.carryPrev]);
+    rows.push(['収入合計', month.incomeSum, '', '', '支出合計', month.expenseSum]);
+    rows.push([]);
+    rows.push(['次月繰越金（前月繰越 ＋ 収入合計 − 支出合計）', '', '', '', '', month.carryNext]);
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+
+    // 列幅
+    ws['!cols'] = [
+      { wch: 28 }, { wch: 14 }, { wch: 22 }, { wch: 2 },
+      { wch: 28 }, { wch: 14 }, { wch: 22 },
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, month.label.replace('分', ''));
+  }
+
+  // サマリーシート
+  const sumRows = [
+    ['家計収支　サマリー'],
+    ['依頼者：' + data.clientName],
+    [],
+    ['', ...data.months.map(m => m.label)],
+    ['前月繰越金', ...data.months.map(m => m.carryPrev)],
+    ['収入合計',   ...data.months.map(m => m.incomeSum)],
+    ['支出合計',   ...data.months.map(m => m.expenseSum)],
+    ['次月繰越金', ...data.months.map(m => m.carryNext)],
+  ];
+  const wsSum = XLSX.utils.aoa_to_sheet(sumRows);
+  wsSum['!cols'] = [{ wch: 18 }, { wch: 16 }, { wch: 16 }];
+  XLSX.utils.book_append_sheet(wb, wsSum, 'サマリー');
+
+  return wb;
+}
+
+// ===== 送信 =====
+async function submitForm() {
+  const btn = document.getElementById('submit-btn');
+  btn.innerHTML = '<span class="spinner"></span>送信中...';
+  btn.disabled = true;
+
+  const data = collectData();
+  const wb = buildExcel(data);
+
+  // ExcelをBase64に変換
+  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+  const fileName = `家計表_${data.clientName}_${new Date().toISOString().slice(0,10)}.xlsx`;
+
+  // GASに送信
+  try {
+    const payload = JSON.stringify({
+      type: 'kakeibo',
+      clientName: data.clientName,
+      submittedAt: data.submittedAt,
+      fileName,
+      excelBase64: wbout,
+      summary: data.months.map(m => ({
+        label: m.label,
+        incomeSum: m.incomeSum,
+        expenseSum: m.expenseSum,
+        carryNext: m.carryNext,
+      })),
+    });
+
+    await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'data=' + encodeURIComponent(payload),
+    });
+  } catch(e) {
+    // no-corsのため成功判定不可 → 5秒後に完了表示
+  }
+
+  setTimeout(() => {
+    document.getElementById('form-screen').style.display = 'none';
+    document.getElementById('done-screen').style.display = 'block';
+  }, 3000);
+}
+
+// ===== 初期化 =====
+window.addEventListener('DOMContentLoaded', initFromUrl);
+</script>
+</body>
+</html>
