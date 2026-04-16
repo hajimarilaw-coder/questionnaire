@@ -661,22 +661,34 @@ function setVal(id, v) {
 
 function recalc(monthIdx) {
   const p = `m${monthIdx}`;
-  let incomeSum = 0;
-  for (const item of INCOME_ITEMS) {
-    incomeSum += getVal(`${p}-${item.key}`);
-  }
-  let expenseSum = 0;
-  for (const item of EXPENSE_ITEMS) {
-    expenseSum += getVal(`${p}-${item.key}`);
-  }
-  const carryPrev = getVal(`${p}-carry-prev`);
-  const carryNext = carryPrev + incomeSum - expenseSum;
 
-  setVal(`${p}-income-sum`, incomeSum);
-  setVal(`${p}-expense-sum`, expenseSum);
-  setVal(`${p}-income-total`, incomeSum);
-  setVal(`${p}-expense-total`, expenseSum);
-  setVal(`${p}-carry-next`, carryNext);
+  // 収入項目の小計
+  let incomeItemSum = 0;
+  for (const item of INCOME_ITEMS) {
+    incomeItemSum += getVal(`${p}-${item.key}`);
+  }
+  // 支出項目の小計
+  let expenseItemSum = 0;
+  for (const item of EXPENSE_ITEMS) {
+    expenseItemSum += getVal(`${p}-${item.key}`);
+  }
+
+  const carryPrev = getVal(`${p}-carry-prev`);
+
+  // 収入合計 = 前月繰越金 ＋ 収入項目合計
+  const incomeTotal = carryPrev + incomeItemSum;
+
+  // 次月繰越金 = 収入合計 − 支出項目合計
+  const carryNext = incomeTotal - expenseItemSum;
+
+  // 支出合計 = 支出項目合計 ＋ 次月繰越金（= 収入合計と同額）
+  const expenseTotal = expenseItemSum + carryNext;
+
+  setVal(`${p}-income-sum`,    incomeTotal);
+  setVal(`${p}-expense-sum`,   expenseTotal);
+  setVal(`${p}-income-total`,  incomeTotal);
+  setVal(`${p}-expense-total`, expenseTotal);
+  setVal(`${p}-carry-next`,    carryNext);
 
   // 2ヶ月目の前月繰越金に自動連動
   if (monthIdx === 1) {
@@ -830,9 +842,9 @@ function buildExcel(data) {
 
     rows.push([]);
     rows.push(['前月繰越金', month.carryPrev, '', '', '前月繰越金', month.carryPrev]);
-    rows.push(['収入合計', month.incomeSum, '', '', '支出合計', month.expenseSum]);
+    rows.push(['収入合計（前月繰越含む）', month.incomeSum, '', '', '支出合計（次月繰越含む）', month.expenseSum]);
     rows.push([]);
-    rows.push(['次月繰越金（前月繰越 ＋ 収入合計 − 支出合計）', '', '', '', '', month.carryNext]);
+    rows.push(['次月繰越金', '', '', '', '', month.carryNext]);
 
     const ws = XLSX.utils.aoa_to_sheet(rows);
 
@@ -852,8 +864,8 @@ function buildExcel(data) {
     [],
     ['', ...data.months.map(m => m.label)],
     ['前月繰越金', ...data.months.map(m => m.carryPrev)],
-    ['収入合計',   ...data.months.map(m => m.incomeSum)],
-    ['支出合計',   ...data.months.map(m => m.expenseSum)],
+    ['収入合計（前月繰越含む）', ...data.months.map(m => m.incomeSum)],
+    ['支出合計（次月繰越含む）', ...data.months.map(m => m.expenseSum)],
     ['次月繰越金', ...data.months.map(m => m.carryNext)],
   ];
   const wsSum = XLSX.utils.aoa_to_sheet(sumRows);
