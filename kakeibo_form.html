@@ -882,25 +882,30 @@ async function submitForm() {
   btn.disabled = true;
 
   const data = collectData();
-  const wb = buildExcel(data);
 
-  // ExcelをBase64に変換
-  const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
-  const fileName = `家計表_${data.clientName}_${new Date().toISOString().slice(0,10)}.xlsx`;
-
-  // GASに送信
+  // GASに数値データのみ送信（Excel生成はGAS側で行う）
   try {
     const payload = JSON.stringify({
       type: 'kakeibo',
       clientName: data.clientName,
       submittedAt: data.submittedAt,
-      fileName,
-      excelBase64: wbout,
       summary: data.months.map(m => ({
         label: m.label,
+        carryPrev: m.carryPrev,
         incomeSum: m.incomeSum,
         expenseSum: m.expenseSum,
         carryNext: m.carryNext,
+      })),
+      months: data.months.map(m => ({
+        label: m.label,
+        periodStart: m.periodStart,
+        periodEnd: m.periodEnd,
+        carryPrev: m.carryPrev,
+        incomeSum: m.incomeSum,
+        expenseSum: m.expenseSum,
+        carryNext: m.carryNext,
+        incomeItems: m.incomeItems,
+        expenseItems: m.expenseItems,
       })),
     });
 
@@ -911,7 +916,7 @@ async function submitForm() {
       body: payload,
     });
   } catch(e) {
-    // no-corsのため成功判定不可 → 5秒後に完了表示
+    // no-corsのため成功判定不可
   }
 
   setTimeout(() => {
