@@ -3334,6 +3334,15 @@ function dataToReadableText(data) {
       if(iPolicies[i])   lines.push('　証券番号：'+iPolicies[i]);
       if(iRefundYns[i])  lines.push('　解約返戻金の有無：'+iRefundYns[i]);
       if(iRefunds[i])    lines.push('　解約返戻金額：'+iRefunds[i]+'円');
+      // 保険料の支払方法（⑬に移動済み、最初の保険にのみ適用）
+      if(i===0) {
+        if(data.pay_ins1)              lines.push('　保険料の支払方法：'+data.pay_ins1);
+        if(data.pay_ins1_bank)         lines.push('　引落口座：'+data.pay_ins1_bank);
+        if(data.pay_ins1_holder)       lines.push('　名義人：'+data.pay_ins1_holder);
+        if(data.pay_ins1_holder_other) lines.push('　名義人（その他）：'+data.pay_ins1_holder_other);
+        if(data.pay_ins1_sonota)       lines.push('　支払方法詳細：'+data.pay_ins1_sonota);
+        if(data.pay_ins1_sonota_free)  lines.push('　詳細：'+data.pay_ins1_sonota_free);
+      }
     }
     lines.push('');
     lines.push('─────────────────────────');
