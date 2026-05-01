@@ -3611,8 +3611,10 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
     <div class="question">
       <div class="q-label">ご両親の状況</div>
       <div class="choices">
-        <span class="choice">○両親とも健在</span><span class="choice">○父のみ健在</span>
-        <span class="choice">○母のみ健在</span><span class="choice">○両親とも他界</span>
+        <span class="choice">○両親とも健在</span>
+        <span class="choice">○父が亡くなっている</span>
+        <span class="choice">○母が亡くなっている</span>
+        <span class="choice">○両親とも亡くなっている</span>
       </div>
     </div>
     ${['父','母','配偶者'].map(r => `
@@ -3767,9 +3769,25 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
   </div>
 </div>
 
-<!-- ⑨ 訴訟 -->
+<!-- ⑨ 毎月の約定返済額 -->
 <div class="section">
-  <div class="section-header">⑨ 訴訟・支払督促・差押えの有無</div>
+  <div class="section-header">⑨ ご相談前の毎月の約定返済額</div>
+  <div class="section-body">
+    <div class="question">
+      <div class="q-label">当事務所にご相談前に毎月業者等に返済していた合計額</div>
+      <table class="field-table" style="margin-top:6px;">
+        <tr>
+          <td>月々の約定返済額（全社合計）</td>
+          <td><div class="inline-row"><span class="writeline-md" style="display:inline-block;"></span>万円</div></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ⑩ 訴訟 -->
+<div class="section">
+  <div class="section-header">⑩ 訴訟・支払督促・差押えの有無</div>
   <div class="section-body">
     <div class="choices"><span class="choice">○起こされていない</span><span class="choice">○起こされている</span></div>
     <div class="question" style="margin-top:8px;">
@@ -3789,7 +3807,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
 
 <!-- ⑩ 過去破産 -->
 <div class="section">
-  <div class="section-header">⑩ 過去の破産手続き</div>
+  <div class="section-header">⑪ 過去の破産手続き</div>
   <div class="section-body">
     <div class="choices"><span class="choice">○無い</span><span class="choice">○有り</span></div>
     <div class="question" style="margin-top:8px;">
@@ -3806,7 +3824,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
 
 <!-- ⑪ 生活状況 -->
 <div class="section">
-  <div class="section-header">⑪ 過去の生活状況（借入当時〜現在）</div>
+  <div class="section-header">⑫ 過去の生活状況（借入当時〜現在）</div>
   <div class="section-body">
 
     <div class="question">
@@ -3897,7 +3915,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
 
 <!-- ⑫ 財産売却・取得 -->
 <div class="section">
-  <div class="section-header">⑫ 過去2年以内の財産売却・取得</div>
+  <div class="section-header">⑬ 過去2年以内の財産売却・取得</div>
   <div class="section-body">
     <div class="question">
       <div class="q-label">（1）過去2年以内に10万円以上で売却した財産（貴金属・車・株等）</div>
@@ -3932,7 +3950,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
 
 <!-- ⑬ 保険 -->
 <div class="section">
-  <div class="section-header">⑬ 加入している保険</div>
+  <div class="section-header">⑭ 加入している保険</div>
   <div class="section-body">
     <div class="question">
       <div class="q-label">加入している保険はありますか？</div>
@@ -3972,7 +3990,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
 
 <!-- ⑭ 銀行口座 -->
 <div class="section">
-  <div class="section-header">⑭ 銀行口座・信用金庫の口座</div>
+  <div class="section-header">⑮ 銀行口座・信用金庫の口座</div>
   <div class="section-body">
     ${[1,2,3,4,5].map(n => `
     <div class="repeat-block">
@@ -3991,7 +4009,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
 
 <!-- ⑮ 支払方法 -->
 <div class="section">
-  <div class="section-header">⑮ 家賃・光熱費の支払方法</div>
+  <div class="section-header">⑯ 家賃・光熱費の支払方法</div>
   <div class="section-body">
 
     <!-- 家賃 -->
@@ -4118,7 +4136,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
 
 <!-- ⑯ 不動産・車等 -->
 <div class="section">
-  <div class="section-header">⑯ 現在お持ちの不動産・自動車・バイク等</div>
+  <div class="section-header">⑰ 現在お持ちの不動産・自動車・バイク等</div>
   <div class="section-body">
     <div class="question">
       <div class="q-label">不動産・自動車・バイク等（10万円以上の価値のあるもの）をお持ちですか？</div>
@@ -4143,7 +4161,7 @@ ${clientName ? '<div class="client-name">氏名：' + clientName + ' 様</div>' 
 
 <!-- ⑰ 借入経緯（借入先ごと） -->
 <div class="section">
-  <div class="section-header">⑰ 負債が増えた経緯（借入先ごとに記入）</div>
+  <div class="section-header">⑱ 負債が増えた経緯（借入先ごとに記入）</div>
   <div class="section-body">
     <div class="q-note">※ 各借入先について、いつ・なぜ借りたか、当時の収入や生活状況を詳しく記入してください</div>
     ${creditors.length > 0 ? creditors.map(c => `
